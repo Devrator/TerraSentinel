@@ -12,38 +12,42 @@ export const KpiCards: React.FC<KpiCardsProps> = ({ summary, loading }) => {
     {
       title: 'TOTAL NODES',
       value: summary?.total_nodes ?? 0,
-      subtext: `${summary?.offline_nodes ?? 0} standby/offline`,
+      subtext: `${summary?.offline_nodes ?? 0} offline`,
       icon: Cpu,
-      color: 'text-cyan-400',
-      border: 'border-cyan-500/20 hover:border-cyan-500/40',
-      bg: 'bg-cyan-500/10',
+      color: 'text-slate-900',
+      iconColor: 'text-blue-600',
+      iconBg: 'bg-blue-50',
+      border: 'border-slate-200 hover:border-blue-200',
     },
     {
       title: 'ONLINE NODES',
       value: summary?.online_nodes ?? 0,
       subtext: summary?.total_nodes ? `${Math.round(((summary.online_nodes) / summary.total_nodes) * 100)}% active fleet` : '0%',
       icon: Wifi,
-      color: 'text-emerald-400',
-      border: 'border-emerald-500/20 hover:border-emerald-500/40',
-      bg: 'bg-emerald-500/10',
+      color: 'text-slate-900',
+      iconColor: 'text-emerald-600',
+      iconBg: 'bg-emerald-50',
+      border: 'border-slate-200 hover:border-emerald-200',
     },
     {
       title: 'ACTIVE ALERTS',
       value: summary?.active_alerts ?? 0,
-      subtext: 'Pending triage',
+      subtext: summary && summary.active_alerts > 0 ? 'Action needed' : 'All clear',
       icon: AlertTriangle,
-      color: summary && summary.active_alerts > 0 ? 'text-amber-400' : 'text-slate-400',
-      border: summary && summary.active_alerts > 0 ? 'border-amber-500/30' : 'border-dark-700',
-      bg: summary && summary.active_alerts > 0 ? 'bg-amber-500/10' : 'bg-dark-800',
+      color: summary && summary.active_alerts > 0 ? 'text-amber-600' : 'text-slate-900',
+      iconColor: 'text-amber-600',
+      iconBg: 'bg-amber-50',
+      border: summary && summary.active_alerts > 0 ? 'border-amber-200 bg-amber-50/20' : 'border-slate-200',
     },
     {
       title: 'CRITICAL HAZARDS',
       value: summary?.critical_alerts ?? 0,
       subtext: summary?.critical_alerts ? 'Immediate action required' : 'No critical anomalies',
       icon: Flame,
-      color: summary && summary.critical_alerts > 0 ? 'text-rose-400' : 'text-slate-400',
-      border: summary && summary.critical_alerts > 0 ? 'border-rose-500/40 animate-pulse' : 'border-dark-700',
-      bg: summary && summary.critical_alerts > 0 ? 'bg-rose-500/15' : 'bg-dark-800',
+      color: summary && summary.critical_alerts > 0 ? 'text-rose-600' : 'text-slate-900',
+      iconColor: 'text-rose-600',
+      iconBg: 'bg-rose-50',
+      border: summary && summary.critical_alerts > 0 ? 'border-rose-300 bg-rose-50/30' : 'border-slate-200',
     },
   ];
 
@@ -54,14 +58,14 @@ export const KpiCards: React.FC<KpiCardsProps> = ({ summary, loading }) => {
         return (
           <div
             key={idx}
-            className={`relative overflow-hidden rounded-xl bg-dark-900/80 backdrop-blur-sm border ${card.border} p-4 transition-all duration-300 shadow-md group`}
+            className={`rounded-xl bg-white border ${card.border} p-4 transition-all duration-200 shadow-xs hover:shadow-sm`}
           >
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-bold tracking-wider text-slate-400 font-mono">
+              <span className="text-[11px] font-bold tracking-wider text-slate-500 font-mono">
                 {card.title}
               </span>
-              <div className={`p-2 rounded-lg ${card.bg}`}>
-                <Icon className={`w-4 h-4 ${card.color}`} />
+              <div className={`p-2 rounded-lg ${card.iconBg}`}>
+                <Icon className={`w-4 h-4 ${card.iconColor}`} />
               </div>
             </div>
 
@@ -71,7 +75,7 @@ export const KpiCards: React.FC<KpiCardsProps> = ({ summary, loading }) => {
               </span>
             </div>
 
-            <div className="mt-1 text-xs text-slate-400">
+            <div className="mt-1 text-xs text-slate-500">
               {card.subtext}
             </div>
           </div>

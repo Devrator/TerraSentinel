@@ -48,7 +48,6 @@ export function App() {
     }
   }, [selectedNodeId]);
 
-  // Initial load
   useEffect(() => {
     loadDashboardData();
   }, []);
@@ -73,7 +72,6 @@ export function App() {
       })
     );
 
-    // If new alerts were generated in this telemetry packet, prepend them
     if (data.new_alerts && data.new_alerts.length > 0) {
       setAlerts((prevAlerts) => {
         const newIds = new Set(data.new_alerts.map((a) => a.id));
@@ -82,7 +80,6 @@ export function App() {
       });
     }
 
-    // Refresh KPI summary counters
     api.getDashboardSummary().then(setSummary).catch(console.error);
   }, []);
 
@@ -115,7 +112,6 @@ export function App() {
       setAlerts((prev) =>
         prev.map((a) => (a.id === alertId ? { ...a, acknowledged: true } : a))
       );
-      // Refresh summary
       api.getDashboardSummary().then(setSummary).catch(console.error);
     } catch (err) {
       console.error('Failed to acknowledge alert:', err);
@@ -125,7 +121,7 @@ export function App() {
   const selectedNode = nodes.find((n) => n.node_id === selectedNodeId) || nodes[0] || null;
 
   return (
-    <div className="min-h-screen bg-dark-950 text-slate-100 flex flex-col font-sans">
+    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans">
       {/* Top Header */}
       <Header
         summary={summary}
@@ -135,35 +131,35 @@ export function App() {
         isLoading={isLoading}
       />
 
-      {/* Main Command Center Canvas */}
-      <main className="flex-1 max-w-[1600px] w-full mx-auto p-4 lg:p-6 space-y-6">
+      {/* Main Container */}
+      <main className="flex-1 max-w-[1600px] w-full mx-auto p-4 lg:p-6 space-y-5">
         
-        {/* Backend Connectivity Alert Banner */}
+        {/* Connection Error Banner */}
         {backendError && (
-          <div className="rounded-xl bg-rose-500/10 border border-rose-500/30 p-4 flex items-center justify-between gap-4 text-rose-300 animate-fadeIn">
+          <div className="rounded-xl bg-rose-50 border border-rose-200 p-4 flex items-center justify-between gap-4 text-rose-800 shadow-2xs">
             <div className="flex items-center gap-3">
-              <WifiOff className="w-5 h-5 text-rose-400 shrink-0" />
+              <WifiOff className="w-5 h-5 text-rose-600 shrink-0" />
               <div>
                 <div className="font-bold text-sm">Backend Communication Offline</div>
-                <div className="text-xs text-rose-400/80">
-                  {backendError}. Ensure FastAPI is running at <code className="bg-dark-900 px-1.5 py-0.5 rounded font-mono">http://localhost:8000</code>.
+                <div className="text-xs text-rose-600">
+                  {backendError}. Ensure FastAPI is running at <code className="bg-rose-100 px-1.5 py-0.5 rounded font-mono text-rose-900">http://localhost:8000</code>.
                 </div>
               </div>
             </div>
             <button
               onClick={loadDashboardData}
-              className="px-3 py-1.5 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-rose-200 border border-rose-500/40 text-xs font-bold transition-all flex items-center gap-1.5"
+              className="px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
             >
-              <RefreshCw className="w-3.5 h-3.5" /> Reconnect
+              <RefreshCw className="w-3.5 h-3.5" /> Retry
             </button>
           </div>
         )}
 
-        {/* 1. Fleet-Wide KPI Ribbon */}
+        {/* 1. Fleet KPI Ribbon */}
         <KpiCards summary={summary} loading={isLoading} />
 
         {/* 2. Geospatial Map & Real-Time Alert Feed */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
           <div className="lg:col-span-7">
             <LiveMap
               nodes={nodes}
@@ -179,7 +175,7 @@ export function App() {
           </div>
         </div>
 
-        {/* 3. AI Environmental Risk Assessment Engine */}
+        {/* 3. AI Environmental Risk Assessment Section */}
         <RiskPanel
           selectedNode={selectedNode}
           nodes={nodes}
@@ -187,17 +183,17 @@ export function App() {
           demoMode={summary?.demo_mode ?? true}
         />
 
-        {/* 4. Live Sensor Overview Metrics */}
+        {/* 4. Live Sensor Metrics Overview Cards */}
         <SensorOverview
           selectedNode={selectedNode}
           nodes={nodes}
           onSelectNode={setSelectedNodeId}
         />
 
-        {/* 5. Historical Analysis Area Chart */}
+        {/* 5. Historical Telemetry Analysis */}
         <HistoricalCharts selectedNodeId={selectedNodeId} />
 
-        {/* 6. Complete Fleet Management Registry */}
+        {/* 6. Fleet Registry Table */}
         <FleetTable
           nodes={nodes}
           onSelectNode={setSelectedNodeId}
@@ -215,17 +211,17 @@ export function App() {
       )}
 
       {/* Footer */}
-      <footer className="bg-dark-900 border-t border-dark-700/80 py-4 px-6 text-center text-xs text-slate-500">
+      <footer className="bg-white border-t border-slate-200 py-3.5 px-6 text-center text-xs text-slate-500">
         <div className="flex flex-col sm:flex-row items-center justify-between max-w-[1600px] mx-auto gap-2">
-          <div className="font-mono">
-            SIH26178 — Distributed IoT Environmental Hazard Network
+          <div className="font-semibold text-slate-700">
+            SIH26178 — AI Environmental Monitoring Network
           </div>
-          <div className="flex items-center gap-4 text-[11px]">
-            <span>FastAPI Backend Contract Active</span>
+          <div className="flex items-center gap-3 text-[11px] text-slate-500">
+            <span>FastAPI Backend Active</span>
             <span>•</span>
-            <span>Zero-Hardware Phase-1 Compatible</span>
+            <span>WebSocket Live Hub</span>
             <span>•</span>
-            <span className="text-emerald-400">ESP32 Ready</span>
+            <span className="text-emerald-700 font-semibold">ESP32 Ready</span>
           </div>
         </div>
       </footer>

@@ -27,29 +27,29 @@ export const LiveMap: React.FC<LiveMapProps> = ({ nodes, onSelectNode }) => {
     const overallRisk = node.latest_risk?.overall_risk ?? 0;
     const category = node.latest_risk?.overall_category ?? 'LOW';
 
-    let color = '#64748b'; // slate offline
-    let ringColor = 'rgba(100, 116, 139, 0.4)';
+    let color = '#94a3b8'; // slate offline
+    let ringColor = 'rgba(148, 163, 184, 0.4)';
 
     if (isOnline) {
       if (category === 'CRITICAL' || overallRisk > 75) {
         color = '#ef4444'; // red
-        ringColor = 'rgba(239, 68, 68, 0.6)';
+        ringColor = 'rgba(239, 68, 68, 0.4)';
       } else if (category === 'HIGH' || overallRisk > 50) {
         color = '#f97316'; // orange
-        ringColor = 'rgba(249, 115, 22, 0.6)';
+        ringColor = 'rgba(249, 115, 22, 0.4)';
       } else if (category === 'MODERATE' || overallRisk > 25) {
         color = '#f59e0b'; // amber
-        ringColor = 'rgba(245, 158, 11, 0.6)';
+        ringColor = 'rgba(245, 158, 11, 0.4)';
       } else {
         color = '#10b981'; // emerald normal
-        ringColor = 'rgba(16, 185, 129, 0.6)';
+        ringColor = 'rgba(16, 185, 129, 0.4)';
       }
     }
 
     const html = `
       <div class="node-pulse-marker" style="position: relative; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">
         ${isOnline ? `<div class="pulse-ring" style="background-color: ${ringColor};"></div>` : ''}
-        <div class="node-pulse-dot" style="background-color: ${color}; width: 16px; height: 16px; border: 2px solid #ffffff; box-shadow: 0 0 10px ${color};"></div>
+        <div class="node-pulse-dot" style="background-color: ${color}; width: 16px; height: 16px; border: 2.5px solid #ffffff; box-shadow: 0 2px 6px rgba(0,0,0,0.25);"></div>
       </div>
     `;
 
@@ -63,17 +63,17 @@ export const LiveMap: React.FC<LiveMapProps> = ({ nodes, onSelectNode }) => {
   };
 
   return (
-    <div className="rounded-xl overflow-hidden border border-dark-700 bg-dark-900 shadow-xl flex flex-col h-[480px]">
-      <div className="px-4 py-3 bg-dark-850 border-b border-dark-700/80 flex items-center justify-between">
+    <div className="rounded-xl overflow-hidden border border-slate-200 bg-white shadow-xs flex flex-col h-[480px]">
+      <div className="px-4 py-3 bg-slate-50/70 border-b border-slate-200 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <MapPin className="w-4 h-4 text-emerald-400" />
-          <h2 className="text-xs font-bold uppercase tracking-wider text-slate-200">
-            Live Geospatial Fleet Telemetry
+          <MapPin className="w-4 h-4 text-emerald-600" />
+          <h2 className="text-xs font-bold uppercase tracking-wider text-slate-700">
+            Geospatial Fleet Map
           </h2>
         </div>
-        <div className="flex items-center gap-3 text-[11px] text-slate-400">
+        <div className="flex items-center gap-3 text-[11px] text-slate-500">
           <span className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block" /> Low (Normal)
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block" /> Low
           </span>
           <span className="flex items-center gap-1.5">
             <span className="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block" /> Moderate
@@ -109,67 +109,69 @@ export const LiveMap: React.FC<LiveMapProps> = ({ nodes, onSelectNode }) => {
               }}
             >
               <Popup>
-                <div className="p-1 min-w-[240px] text-slate-100 font-sans">
+                <div className="p-1 min-w-[240px] text-slate-800 font-sans">
                   {/* Header */}
-                  <div className="flex items-center justify-between border-b border-dark-700 pb-2 mb-2">
+                  <div className="flex items-center justify-between border-b border-slate-200 pb-2 mb-2">
                     <div>
-                      <div className="text-xs font-mono font-bold text-emerald-400">{node.node_id}</div>
-                      <div className="text-[11px] text-slate-400 truncate max-w-[150px]">{node.name}</div>
+                      <div className="text-xs font-mono font-bold text-emerald-700">{node.node_id}</div>
+                      <div className="text-[11px] text-slate-500 truncate max-w-[150px]">{node.name}</div>
                     </div>
-                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${node.status === 'ONLINE' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-slate-700 text-slate-400'}`}>
+                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                      node.status === 'ONLINE' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-slate-100 text-slate-500 border border-slate-200'
+                    }`}>
                       {node.status}
                     </span>
                   </div>
 
                   {/* Telemetry Grid */}
                   <div className="grid grid-cols-2 gap-2 text-[11px] py-1">
-                    <div className="flex items-center gap-1.5 text-slate-300">
-                      <Thermometer className="w-3.5 h-3.5 text-amber-400" />
+                    <div className="flex items-center gap-1.5 text-slate-700">
+                      <Thermometer className="w-3.5 h-3.5 text-amber-600" />
                       <span>{node.latest_reading?.temperature.toFixed(1) ?? '--'} °C</span>
                     </div>
-                    <div className="flex items-center gap-1.5 text-slate-300">
-                      <Droplets className="w-3.5 h-3.5 text-cyan-400" />
+                    <div className="flex items-center gap-1.5 text-slate-700">
+                      <Droplets className="w-3.5 h-3.5 text-cyan-600" />
                       <span>{node.latest_reading?.humidity.toFixed(1) ?? '--'} %</span>
                     </div>
-                    <div className="flex items-center gap-1.5 text-slate-300">
-                      <Gauge className="w-3.5 h-3.5 text-purple-400" />
+                    <div className="flex items-center gap-1.5 text-slate-700">
+                      <Gauge className="w-3.5 h-3.5 text-purple-600" />
                       <span>{node.latest_reading?.pressure.toFixed(1) ?? '--'} hPa</span>
                     </div>
-                    <div className="flex items-center gap-1.5 text-slate-300">
-                      <CloudRain className="w-3.5 h-3.5 text-blue-400" />
+                    <div className="flex items-center gap-1.5 text-slate-700">
+                      <CloudRain className="w-3.5 h-3.5 text-blue-600" />
                       <span>{node.latest_reading?.rain_value.toFixed(1) ?? '--'}</span>
                     </div>
-                    <div className="flex items-center gap-1.5 text-slate-300">
-                      <Wind className="w-3.5 h-3.5 text-emerald-400" />
+                    <div className="flex items-center gap-1.5 text-slate-700">
+                      <Wind className="w-3.5 h-3.5 text-emerald-600" />
                       <span>AQI: {node.latest_reading?.air_quality.toFixed(0) ?? '--'}</span>
                     </div>
-                    <div className="flex items-center gap-1.5 text-slate-300">
-                      <Battery className="w-3.5 h-3.5 text-emerald-400" />
+                    <div className="flex items-center gap-1.5 text-slate-700">
+                      <Battery className="w-3.5 h-3.5 text-emerald-600" />
                       <span>{node.battery_percentage.toFixed(0)}%</span>
                     </div>
                   </div>
 
                   {/* Risk Scores */}
-                  <div className="mt-2 pt-2 border-t border-dark-700 bg-dark-900/60 p-2 rounded-lg">
+                  <div className="mt-2 pt-2 border-t border-slate-200 bg-slate-50 p-2 rounded-lg">
                     <div className="flex items-center justify-between text-[11px] font-bold">
-                      <span className="text-slate-300">Overall Hazard Risk:</span>
+                      <span className="text-slate-600">Hazard Score:</span>
                       <span className={`font-mono ${
-                        (node.latest_risk?.overall_risk ?? 0) > 75 ? 'text-rose-400' :
-                        (node.latest_risk?.overall_risk ?? 0) > 50 ? 'text-orange-400' :
-                        (node.latest_risk?.overall_risk ?? 0) > 25 ? 'text-amber-400' : 'text-emerald-400'
+                        (node.latest_risk?.overall_risk ?? 0) > 75 ? 'text-rose-600' :
+                        (node.latest_risk?.overall_risk ?? 0) > 50 ? 'text-orange-600' :
+                        (node.latest_risk?.overall_risk ?? 0) > 25 ? 'text-amber-600' : 'text-emerald-700'
                       }`}>
                         {node.latest_risk?.overall_risk.toFixed(1) ?? '0.0'}% ({node.latest_risk?.overall_category ?? 'LOW'})
                       </span>
                     </div>
-                    <div className="grid grid-cols-3 gap-1 text-[10px] text-slate-400 mt-1">
-                      <div>Fire: <span className="text-slate-200 font-mono">{node.latest_risk?.fire_risk.toFixed(0) ?? 0}%</span></div>
-                      <div>Flood: <span className="text-slate-200 font-mono">{node.latest_risk?.flood_risk.toFixed(0) ?? 0}%</span></div>
-                      <div>Poll: <span className="text-slate-200 font-mono">{node.latest_risk?.pollution_risk.toFixed(0) ?? 0}%</span></div>
+                    <div className="grid grid-cols-3 gap-1 text-[10px] text-slate-500 mt-1">
+                      <div>Fire: <span className="text-slate-800 font-mono font-medium">{node.latest_risk?.fire_risk.toFixed(0) ?? 0}%</span></div>
+                      <div>Flood: <span className="text-slate-800 font-mono font-medium">{node.latest_risk?.flood_risk.toFixed(0) ?? 0}%</span></div>
+                      <div>Poll: <span className="text-slate-800 font-mono font-medium">{node.latest_risk?.pollution_risk.toFixed(0) ?? 0}%</span></div>
                     </div>
                   </div>
 
-                  <div className="mt-2 text-[10px] text-slate-500 text-right">
-                    {node.last_seen ? `Last seen: ${new Date(node.last_seen).toLocaleTimeString()}` : 'No recent sync'}
+                  <div className="mt-2 text-[10px] text-slate-400 text-right font-mono">
+                    {node.last_seen ? `Sync: ${new Date(node.last_seen).toLocaleTimeString()}` : 'No sync'}
                   </div>
                 </div>
               </Popup>

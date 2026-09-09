@@ -25,7 +25,6 @@ export const HistoricalCharts: React.FC<HistoricalChartsProps> = ({ selectedNode
   const [timeFilter, setTimeFilter] = useState<TimeFilter>('5m');
   const [loading, setLoading] = useState<boolean>(false);
 
-  // Fetch readings when node or time filter changes
   useEffect(() => {
     let limit = 20;
     if (timeFilter === '5m') limit = 30;
@@ -37,7 +36,6 @@ export const HistoricalCharts: React.FC<HistoricalChartsProps> = ({ selectedNode
       setLoading(true);
       try {
         const data = await api.getHistoricalReadings(selectedNodeId, limit);
-        // Reverse array so time flows left-to-right (oldest -> newest)
         setReadings([...data].reverse());
       } catch (err) {
         console.error('Error fetching historical readings:', err);
@@ -47,7 +45,7 @@ export const HistoricalCharts: React.FC<HistoricalChartsProps> = ({ selectedNode
     };
 
     fetchHistory();
-    const interval = setInterval(fetchHistory, 10000); // Polling sync
+    const interval = setInterval(fetchHistory, 10000);
     return () => clearInterval(interval);
   }, [selectedNodeId, timeFilter]);
 
@@ -55,40 +53,40 @@ export const HistoricalCharts: React.FC<HistoricalChartsProps> = ({ selectedNode
     temperature: {
       label: 'Temperature',
       unit: '°C',
-      color: '#f59e0b',
-      fill: 'url(#tempGradient)',
+      color: '#d97706',
+      fill: 'url(#tempLightGradient)',
       icon: Thermometer,
       domain: ['dataMin - 2', 'dataMax + 2'],
     },
     humidity: {
       label: 'Humidity',
       unit: '%',
-      color: '#06b6d4',
-      fill: 'url(#humGradient)',
+      color: '#0891b2',
+      fill: 'url(#humLightGradient)',
       icon: Droplets,
       domain: [0, 100],
     },
     pressure: {
       label: 'Pressure',
       unit: 'hPa',
-      color: '#a855f7',
-      fill: 'url(#pressGradient)',
+      color: '#9333ea',
+      fill: 'url(#pressLightGradient)',
       icon: Gauge,
       domain: ['dataMin - 5', 'dataMax + 5'],
     },
     rain_value: {
-      label: 'Rainfall / Moisture',
+      label: 'Rainfall',
       unit: 'analog',
-      color: '#3b82f6',
-      fill: 'url(#rainGradient)',
+      color: '#2563eb',
+      fill: 'url(#rainLightGradient)',
       icon: CloudRain,
       domain: [0, 'dataMax + 100'],
     },
     air_quality: {
-      label: 'Air Quality / Gas',
+      label: 'Air Quality',
       unit: 'AQI',
-      color: '#10b981',
-      fill: 'url(#aqiGradient)',
+      color: '#059669',
+      fill: 'url(#aqiLightGradient)',
       icon: Wind,
       domain: [0, 'dataMax + 50'],
     },
@@ -96,7 +94,6 @@ export const HistoricalCharts: React.FC<HistoricalChartsProps> = ({ selectedNode
 
   const currentConfig = metricConfig[activeMetric];
 
-  // Format data for chart
   const chartData = readings.map((r) => ({
     time: new Date(r.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
     value: r[activeMetric],
@@ -104,26 +101,26 @@ export const HistoricalCharts: React.FC<HistoricalChartsProps> = ({ selectedNode
   }));
 
   return (
-    <div className="rounded-xl border border-dark-700 bg-dark-900 p-4 shadow-xl">
-      {/* Chart Top Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-4 mb-4 border-b border-dark-700/80">
+    <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-xs">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 mb-4 border-b border-slate-100">
         <div className="flex items-center gap-2">
-          <ChartIcon className="w-4 h-4 text-emerald-400" />
-          <h2 className="text-xs font-bold uppercase tracking-wider text-slate-200">
-            Historical Environmental Telemetry Analysis ({selectedNodeId})
+          <ChartIcon className="w-4 h-4 text-emerald-600" />
+          <h2 className="text-xs font-bold uppercase tracking-wider text-slate-700">
+            Historical Telemetry Analysis ({selectedNodeId})
           </h2>
         </div>
 
-        {/* Time Filter Buttons */}
-        <div className="flex items-center gap-1 bg-dark-850 p-1 rounded-lg border border-dark-700">
+        {/* Time Filters */}
+        <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-lg border border-slate-200">
           {(['5m', '30m', '1h', '24h'] as TimeFilter[]).map((tf) => (
             <button
               key={tf}
               onClick={() => setTimeFilter(tf)}
-              className={`px-2.5 py-1 text-xs font-semibold rounded-md transition-all ${
+              className={`px-2.5 py-1 text-xs font-semibold rounded-md transition-all cursor-pointer ${
                 timeFilter === tf
-                  ? 'bg-emerald-500 text-dark-950 shadow-sm'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-dark-700'
+                  ? 'bg-white text-slate-900 shadow-xs'
+                  : 'text-slate-500 hover:text-slate-900'
               }`}
             >
               {tf}
@@ -142,13 +139,13 @@ export const HistoricalCharts: React.FC<HistoricalChartsProps> = ({ selectedNode
             <button
               key={m}
               onClick={() => setActiveMetric(m)}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${
                 isActive
-                  ? 'bg-dark-800 border-emerald-500/50 text-white shadow-md'
-                  : 'bg-dark-850/60 border-dark-700 text-slate-400 hover:bg-dark-800 hover:text-slate-200'
+                  ? 'bg-slate-900 text-white border-slate-900 shadow-xs'
+                  : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900'
               }`}
             >
-              <Icon className="w-3.5 h-3.5" style={{ color: cfg.color }} />
+              <Icon className="w-3.5 h-3.5" style={{ color: isActive ? '#ffffff' : cfg.color }} />
               <span>{cfg.label}</span>
             </button>
           );
@@ -158,44 +155,44 @@ export const HistoricalCharts: React.FC<HistoricalChartsProps> = ({ selectedNode
       {/* Recharts Area Container */}
       <div className="h-[280px] w-full pt-2">
         {chartData.length === 0 ? (
-          <div className="h-full flex items-center justify-center text-slate-500 text-xs">
-            {loading ? 'Fetching historical readings...' : 'Awaiting sensor telemetry for historical charts...'}
+          <div className="h-full flex items-center justify-center text-slate-400 text-xs font-medium">
+            {loading ? 'Fetching historical readings...' : 'Awaiting sensor telemetry...'}
           </div>
         ) : (
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
               <defs>
-                <linearGradient id="tempGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.4} />
-                  <stop offset="95%" stopColor="#f59e0b" stopOpacity={0.0} />
+                <linearGradient id="tempLightGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#d97706" stopOpacity={0.25} />
+                  <stop offset="95%" stopColor="#d97706" stopOpacity={0.0} />
                 </linearGradient>
-                <linearGradient id="humGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.4} />
-                  <stop offset="95%" stopColor="#06b6d4" stopOpacity={0.0} />
+                <linearGradient id="humLightGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#0891b2" stopOpacity={0.25} />
+                  <stop offset="95%" stopColor="#0891b2" stopOpacity={0.0} />
                 </linearGradient>
-                <linearGradient id="pressGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#a855f7" stopOpacity={0.4} />
-                  <stop offset="95%" stopColor="#a855f7" stopOpacity={0.0} />
+                <linearGradient id="pressLightGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#9333ea" stopOpacity={0.25} />
+                  <stop offset="95%" stopColor="#9333ea" stopOpacity={0.0} />
                 </linearGradient>
-                <linearGradient id="rainGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.4} />
-                  <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.0} />
+                <linearGradient id="rainLightGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#2563eb" stopOpacity={0.25} />
+                  <stop offset="95%" stopColor="#2563eb" stopOpacity={0.0} />
                 </linearGradient>
-                <linearGradient id="aqiGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#10b981" stopOpacity={0.4} />
-                  <stop offset="95%" stopColor="#10b981" stopOpacity={0.0} />
+                <linearGradient id="aqiLightGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#059669" stopOpacity={0.25} />
+                  <stop offset="95%" stopColor="#059669" stopOpacity={0.0} />
                 </linearGradient>
               </defs>
 
-              <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
+              <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
               <XAxis
                 dataKey="time"
-                stroke="#64748b"
+                stroke="#94a3b8"
                 tick={{ fill: '#64748b', fontSize: 10 }}
                 tickLine={false}
               />
               <YAxis
-                stroke="#64748b"
+                stroke="#94a3b8"
                 tick={{ fill: '#64748b', fontSize: 10 }}
                 tickLine={false}
                 domain={currentConfig.domain as any}
@@ -205,12 +202,12 @@ export const HistoricalCharts: React.FC<HistoricalChartsProps> = ({ selectedNode
                   if (active && payload && payload.length) {
                     const data = payload[0].payload;
                     return (
-                      <div className="bg-dark-900 border border-dark-700 p-2.5 rounded-lg shadow-xl text-xs">
-                        <div className="text-slate-400 text-[10px] mb-1">{data.fullDate}</div>
-                        <div className="flex items-center gap-2 font-bold font-mono text-slate-100">
+                      <div className="bg-white border border-slate-200 p-2.5 rounded-lg shadow-md text-xs">
+                        <div className="text-slate-400 text-[10px] mb-1 font-mono">{data.fullDate}</div>
+                        <div className="flex items-center gap-2 font-bold text-slate-800">
                           <span style={{ color: currentConfig.color }}>●</span>
                           <span>{currentConfig.label}:</span>
-                          <span className="text-emerald-400">{data.value} {currentConfig.unit}</span>
+                          <span className="text-slate-900 font-mono">{data.value} {currentConfig.unit}</span>
                         </div>
                       </div>
                     );
@@ -222,7 +219,7 @@ export const HistoricalCharts: React.FC<HistoricalChartsProps> = ({ selectedNode
                 type="monotone"
                 dataKey="value"
                 stroke={currentConfig.color}
-                strokeWidth={2}
+                strokeWidth={2.5}
                 fill={currentConfig.fill}
                 isAnimationActive={false}
               />
