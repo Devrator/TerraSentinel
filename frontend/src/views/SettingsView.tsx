@@ -7,14 +7,14 @@ export const SettingsView: React.FC = () => {
   return (
     <div className="space-y-5">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-4 rounded-2xl bg-[#101D19] border border-[#1B2D27]">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-4 rounded-2xl bg-white border border-slate-200 shadow-2xs">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center">
-            <Lock className="w-5 h-5 text-emerald-400" />
+          <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center">
+            <Lock className="w-5 h-5 text-emerald-600" />
           </div>
           <div>
-            <h2 className="text-base font-bold text-white tracking-tight">Access Control & Platform Settings</h2>
-            <p className="text-xs text-slate-400">
+            <h2 className="text-base font-bold text-slate-900 tracking-tight">Access Control & Platform Settings</h2>
+            <p className="text-xs text-slate-500">
               Role-based authorization architecture (RBAC), ingestion API credentials, and platform security
             </p>
           </div>
@@ -22,8 +22,8 @@ export const SettingsView: React.FC = () => {
       </div>
 
       {/* Role-Based Access Architecture */}
-      <div className="p-5 rounded-2xl bg-[#101D19] border border-[#1B2D27] space-y-4">
-        <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-slate-400">
+      <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-2xs space-y-4">
+        <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-slate-500">
           Role-Based Access Control (RBAC) Architecture
         </h3>
 
@@ -56,20 +56,20 @@ export const SettingsView: React.FC = () => {
                 onClick={() => setSelectedRole(r.role as any)}
                 className={`p-4 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between space-y-3 ${
                   isSelected
-                    ? 'bg-emerald-500/15 border-emerald-500/40 text-white shadow-xs'
-                    : 'bg-[#07110F] border-[#1B2D27] text-slate-400 hover:text-slate-200'
+                    ? 'bg-emerald-50/70 border-emerald-400 text-slate-900 shadow-xs'
+                    : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100 hover:border-slate-300'
                 }`}
               >
                 <div>
                   <div className="flex items-center justify-between mb-1">
-                    <span className="font-bold text-sm text-white">{r.title}</span>
-                    {isSelected && <CheckCircle2 className="w-4 h-4 text-emerald-400" />}
+                    <span className="font-bold text-sm text-slate-900">{r.title}</span>
+                    {isSelected && <CheckCircle2 className="w-4 h-4 text-emerald-600" />}
                   </div>
-                  <p className="text-xs text-slate-400 leading-relaxed">{r.desc}</p>
+                  <p className="text-xs text-slate-600 leading-relaxed">{r.desc}</p>
                 </div>
 
                 <span className={`text-[10px] font-mono px-2 py-0.5 rounded font-bold self-start ${
-                  isSelected ? 'bg-emerald-500/20 text-emerald-300' : 'bg-[#101D19] text-slate-500'
+                  isSelected ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-600'
                 }`}>
                   {r.badge}
                 </span>
@@ -80,12 +80,12 @@ export const SettingsView: React.FC = () => {
       </div>
 
       {/* Security & Endpoint Secrets Policy */}
-      <div className="p-5 rounded-2xl bg-[#101D19] border border-[#1B2D27] space-y-3">
-        <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-slate-400">
+      <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-2xs space-y-3">
+        <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-slate-500">
           Zero-Secret Environment Policy
         </h3>
-        <p className="text-xs text-slate-300 leading-relaxed">
-          In accordance with production security standards, all sensitive credentials (database strings, JWT secrets, and IoT master keys) are strictly managed through server-side environment variables (<code>.env</code>) and are never exposed to client-side bundles.
+        <p className="text-xs text-slate-600 leading-relaxed">
+          In accordance with production security standards, all sensitive credentials (database strings, JWT secrets, and IoT master keys) are strictly managed through server-side environment variables (<code className="bg-slate-100 px-1 py-0.5 rounded font-mono text-slate-900 border border-slate-200">.env</code>) and are never exposed to client-side bundles.
         </p>
       </div>
     </div>

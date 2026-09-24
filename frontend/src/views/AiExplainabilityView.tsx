@@ -33,19 +33,19 @@ export const AiExplainabilityView: React.FC<AiExplainabilityViewProps> = ({
   return (
     <div className="space-y-5">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-4 rounded-2xl bg-[#101D19] border border-[#1B2D27]">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-4 rounded-xl bg-white border border-slate-200 shadow-2xs">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center">
-            <BrainCircuit className="w-5 h-5 text-purple-400" />
+          <div className="w-10 h-10 rounded-xl bg-purple-50 border border-purple-200 flex items-center justify-center">
+            <BrainCircuit className="w-5 h-5 text-purple-600" />
           </div>
           <div>
-            <h2 className="text-base font-bold text-white tracking-tight flex items-center gap-2">
+            <h2 className="text-base font-bold text-slate-900 tracking-tight flex items-center gap-2">
               AI Explainability & XAI Center
-              <span className="px-2 py-0.5 rounded-md text-[10px] font-mono bg-purple-500/20 text-purple-300 border border-purple-500/30 uppercase">
+              <span className="px-2 py-0.5 rounded-md text-[10px] font-mono bg-purple-50 text-purple-700 border border-purple-200 uppercase font-bold">
                 XAI SHAP PROXY
               </span>
             </h2>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-slate-500 font-medium">
               Transparent multi-variate feature contributions & reasoning behind AI risk estimates
             </p>
           </div>
@@ -56,7 +56,7 @@ export const AiExplainabilityView: React.FC<AiExplainabilityViewProps> = ({
           <select
             value={selectedNodeId}
             onChange={(e) => onSelectNode(e.target.value)}
-            className="px-3 py-1.5 rounded-xl bg-[#07110F] border border-[#1B2D27] text-xs text-slate-300 font-medium focus:outline-none focus:border-emerald-500 cursor-pointer"
+            className="px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-xs text-slate-700 font-semibold focus:outline-none focus:border-emerald-500 cursor-pointer shadow-2xs"
           >
             {nodes.map((n) => (
               <option key={n.node_id} value={n.node_id}>
@@ -65,22 +65,22 @@ export const AiExplainabilityView: React.FC<AiExplainabilityViewProps> = ({
             ))}
           </select>
 
-          <div className="flex items-center gap-1 p-1 rounded-xl bg-[#07110F] border border-[#1B2D27]">
+          <div className="flex items-center gap-1 p-1 rounded-lg bg-slate-100 border border-slate-200">
             {[
-              { type: 'FIRE', icon: Flame, color: 'text-amber-400' },
-              { type: 'FLOOD', icon: Droplets, color: 'text-blue-400' },
-              { type: 'POLLUTION', icon: Wind, color: 'text-emerald-400' },
+              { type: 'FIRE', icon: Flame, color: 'text-amber-600' },
+              { type: 'FLOOD', icon: Droplets, color: 'text-cyan-600' },
+              { type: 'POLLUTION', icon: Wind, color: 'text-emerald-600' },
             ].map(({ type, icon: Icon, color }) => (
               <button
                 key={type}
                 onClick={() => setRiskType(type)}
-                className={`px-3 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1 cursor-pointer ${
+                className={`px-3 py-1 rounded-md text-xs font-bold transition-all flex items-center gap-1 cursor-pointer ${
                   riskType === type
-                    ? 'bg-purple-500 text-slate-950 shadow-xs'
-                    : 'text-slate-400 hover:text-white hover:bg-[#182B24]'
+                    ? 'bg-purple-600 text-white shadow-2xs'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
                 }`}
               >
-                <Icon className={`w-3.5 h-3.5 ${riskType === type ? 'text-slate-950' : color}`} />
+                <Icon className={`w-3.5 h-3.5 ${riskType === type ? 'text-white' : color}`} />
                 {type}
               </button>
             ))}
@@ -89,14 +89,14 @@ export const AiExplainabilityView: React.FC<AiExplainabilityViewProps> = ({
       </div>
 
       {/* Prototype Contributing Factors Notice */}
-      <div className="p-3.5 rounded-xl bg-purple-500/10 border border-purple-500/25 flex items-center justify-between text-xs text-purple-200">
+      <div className="p-3.5 rounded-xl bg-purple-50/70 border border-purple-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs text-purple-900 shadow-2xs">
         <div className="flex items-center gap-2">
-          <Info className="w-4 h-4 text-purple-400 shrink-0" />
+          <Info className="w-4 h-4 text-purple-600 shrink-0" />
           <span>
             <strong>Transparency Notice:</strong> Values displayed below represent <em>Prototype contributing factors</em> computed from environmental physics heuristics and gradient weights.
           </span>
         </div>
-        <span className="font-mono text-[10px] text-purple-300 bg-purple-500/20 px-2 py-0.5 rounded border border-purple-500/30">
+        <span className="font-mono text-[10px] text-purple-700 font-bold bg-white px-2 py-0.5 rounded border border-purple-200 shadow-2xs shrink-0">
           CONFIDENCE: {data?.model_confidence ?? 92.4}%
         </span>
       </div>
@@ -105,8 +105,8 @@ export const AiExplainabilityView: React.FC<AiExplainabilityViewProps> = ({
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
         
         {/* Left: Factor Breakdown Percentage Bars */}
-        <div className="lg:col-span-8 p-5 rounded-2xl bg-[#101D19] border border-[#1B2D27] space-y-4">
-          <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-slate-400">
+        <div className="lg:col-span-8 p-5 rounded-xl bg-white border border-slate-200 shadow-2xs space-y-4">
+          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700">
             Feature Attribution Breakdown ({riskType} Risk)
           </h3>
 
@@ -114,13 +114,13 @@ export const AiExplainabilityView: React.FC<AiExplainabilityViewProps> = ({
             {data?.factors.map((factor, idx) => (
               <div key={idx} className="space-y-1.5">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="font-semibold text-slate-200">{factor.name}</span>
+                  <span className="font-semibold text-slate-900">{factor.name}</span>
                   <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-mono text-slate-500 uppercase">Impact: {factor.impact}</span>
-                    <span className="font-mono font-bold text-emerald-400">{factor.weight}%</span>
+                    <span className="text-[10px] font-mono text-slate-500 uppercase font-medium">Impact: {factor.impact}</span>
+                    <span className="font-mono font-bold text-emerald-700">{factor.weight}%</span>
                   </div>
                 </div>
-                <div className="h-2.5 w-full bg-[#07110F] rounded-full overflow-hidden border border-[#1B2D27]">
+                <div className="h-2.5 w-full bg-slate-100 rounded-full overflow-hidden border border-slate-200">
                   <div
                     className="h-full bg-gradient-to-r from-emerald-500 via-purple-500 to-amber-500 transition-all duration-500"
                     style={{ width: `${Math.min(factor.weight, 100)}%` }}
@@ -130,56 +130,56 @@ export const AiExplainabilityView: React.FC<AiExplainabilityViewProps> = ({
             ))}
           </div>
 
-          <div className="p-4 rounded-xl bg-[#07110F] border border-[#1B2D27] text-xs text-slate-300 leading-relaxed">
-            <strong className="text-purple-400 block mb-1">AI Inference Rationalization:</strong>
+          <div className="p-4 rounded-lg bg-slate-50 border border-slate-200 text-xs text-slate-700 leading-relaxed font-medium">
+            <strong className="text-purple-700 block mb-1">AI Inference Rationalization:</strong>
             {data?.summary || 'Analyzing real-time sensor streams against localized environmental threshold vectors.'}
           </div>
         </div>
 
         {/* Right: Telemetry Snapshot & Model Parameters */}
         <div className="lg:col-span-4 space-y-4">
-          <div className="p-5 rounded-2xl bg-[#101D19] border border-[#1B2D27] space-y-3">
-            <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-slate-400">
+          <div className="p-5 rounded-xl bg-white border border-slate-200 shadow-2xs space-y-3">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700">
               Input Telemetry Vector
             </h3>
 
             <div className="space-y-2 text-xs">
-              <div className="p-2.5 rounded-xl bg-[#07110F] border border-[#1B2D27] flex justify-between items-center">
-                <span className="text-slate-400">Temperature</span>
-                <span className="font-mono font-bold text-amber-400">{data?.latest_telemetry.temperature.toFixed(1) ?? '--'}°C</span>
+              <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200 flex justify-between items-center">
+                <span className="text-slate-600 font-medium">Temperature</span>
+                <span className="font-mono font-bold text-amber-700">{data?.latest_telemetry.temperature.toFixed(1) ?? '--'}°C</span>
               </div>
-              <div className="p-2.5 rounded-xl bg-[#07110F] border border-[#1B2D27] flex justify-between items-center">
-                <span className="text-slate-400">Atmospheric Humidity</span>
-                <span className="font-mono font-bold text-blue-400">{data?.latest_telemetry.humidity.toFixed(1) ?? '--'}%</span>
+              <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200 flex justify-between items-center">
+                <span className="text-slate-600 font-medium">Atmospheric Humidity</span>
+                <span className="font-mono font-bold text-cyan-700">{data?.latest_telemetry.humidity.toFixed(1) ?? '--'}%</span>
               </div>
-              <div className="p-2.5 rounded-xl bg-[#07110F] border border-[#1B2D27] flex justify-between items-center">
-                <span className="text-slate-400">Barometric Pressure</span>
-                <span className="font-mono font-bold text-slate-200">{data?.latest_telemetry.pressure.toFixed(1) ?? '--'} hPa</span>
+              <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200 flex justify-between items-center">
+                <span className="text-slate-600 font-medium">Barometric Pressure</span>
+                <span className="font-mono font-bold text-slate-800">{data?.latest_telemetry.pressure.toFixed(1) ?? '--'} hPa</span>
               </div>
-              <div className="p-2.5 rounded-xl bg-[#07110F] border border-[#1B2D27] flex justify-between items-center">
-                <span className="text-slate-400">Gas / Particulate AQI</span>
-                <span className="font-mono font-bold text-emerald-400">{data?.latest_telemetry.air_quality.toFixed(0) ?? '--'} AQI</span>
+              <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200 flex justify-between items-center">
+                <span className="text-slate-600 font-medium">Gas / Particulate AQI</span>
+                <span className="font-mono font-bold text-emerald-700">{data?.latest_telemetry.air_quality.toFixed(0) ?? '--'} AQI</span>
               </div>
-              <div className="p-2.5 rounded-xl bg-[#07110F] border border-[#1B2D27] flex justify-between items-center">
-                <span className="text-slate-400">Precipitation Sensor</span>
-                <span className="font-mono font-bold text-blue-300">{data?.latest_telemetry.rain_value.toFixed(1) ?? '--'} mm</span>
+              <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200 flex justify-between items-center">
+                <span className="text-slate-600 font-medium">Precipitation Sensor</span>
+                <span className="font-mono font-bold text-blue-700">{data?.latest_telemetry.rain_value.toFixed(1) ?? '--'} mm</span>
               </div>
             </div>
           </div>
 
-          <div className="p-4 rounded-2xl bg-[#101D19] border border-[#1B2D27] space-y-2 text-xs text-slate-400">
-            <h4 className="font-mono font-bold text-slate-300 uppercase text-[10px]">Model Architecture</h4>
+          <div className="p-4 rounded-xl bg-white border border-slate-200 shadow-2xs space-y-2 text-xs text-slate-600 font-medium">
+            <h4 className="font-bold text-slate-800 uppercase text-[10px]">Model Architecture</h4>
             <div className="flex justify-between">
               <span>Engine Type:</span>
-              <span className="font-mono text-slate-200">Multivariate Decision Forest</span>
+              <span className="font-mono text-slate-900 font-semibold">Multivariate Decision Forest</span>
             </div>
             <div className="flex justify-between">
               <span>Explainability Standard:</span>
-              <span className="font-mono text-purple-400">Shapley Additive ExPlanations</span>
+              <span className="font-mono text-purple-700 font-semibold">Shapley Additive ExPlanations</span>
             </div>
             <div className="flex justify-between">
               <span>Inference Time:</span>
-              <span className="font-mono text-emerald-400">1.8 ms</span>
+              <span className="font-mono text-emerald-700 font-semibold">1.8 ms</span>
             </div>
           </div>
         </div>

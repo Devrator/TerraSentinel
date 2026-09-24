@@ -287,7 +287,7 @@ export function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#07110F] text-slate-100 flex font-sans antialiased">
+    <div className="min-h-screen bg-slate-50 text-slate-900 flex font-sans antialiased">
       {/* Persistent SIH Navigation Sidebar */}
       <Sidebar
         currentTab={currentTab}
@@ -302,7 +302,7 @@ export function App() {
           isSidebarCollapsed ? 'md:ml-16' : 'md:ml-64'
         }`}
       >
-        {/* Top Header (Clean, minimal, exact logo placement) */}
+        {/* Top Header */}
         <Header
           summary={summary}
           isConnected={isConnected}
@@ -317,19 +317,19 @@ export function App() {
         <main className="flex-1 max-w-[1600px] w-full mx-auto p-4 lg:p-6 space-y-5">
           {/* Connection Error Banner */}
           {backendError && (
-            <div className="rounded-2xl bg-rose-500/15 border border-rose-500/30 p-4 flex items-center justify-between gap-4 text-rose-300 shadow-xs">
+            <div className="rounded-2xl bg-rose-50 border border-rose-200 p-4 flex items-center justify-between gap-4 text-rose-800 shadow-2xs">
               <div className="flex items-center gap-3">
-                <WifiOff className="w-5 h-5 text-rose-400 shrink-0" />
+                <WifiOff className="w-5 h-5 text-rose-600 shrink-0" />
                 <div>
-                  <div className="font-bold text-sm text-rose-200">Backend Communication Offline</div>
-                  <div className="text-xs text-rose-400">
-                    {backendError}. Ensure FastAPI is running at <code className="bg-rose-500/20 px-1.5 py-0.5 rounded font-mono text-rose-200">http://localhost:8000</code>.
+                  <div className="font-bold text-sm text-rose-900">Backend Communication Offline</div>
+                  <div className="text-xs text-rose-600">
+                    {backendError}. Ensure FastAPI is running at <code className="bg-rose-100 px-1.5 py-0.5 rounded font-mono text-rose-950">http://localhost:8000</code>.
                   </div>
                 </div>
               </div>
               <button
                 onClick={loadDashboardData}
-                className="px-3 py-1.5 rounded-xl bg-rose-500 hover:bg-rose-600 text-white text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+                className="px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
               >
                 <RefreshCw className="w-3.5 h-3.5" /> Retry
               </button>
@@ -348,18 +348,18 @@ export function App() {
           />
         )}
 
-        {/* Minimal Footer */}
-        <footer className="border-t border-[#1B2D27] py-3.5 px-6 text-xs text-slate-500 bg-[#07110F]">
+        {/* Minimal White Footer */}
+        <footer className="border-t border-slate-200 py-3.5 px-6 text-xs text-slate-500 bg-white shadow-2xs">
           <div className="flex flex-col sm:flex-row items-center justify-between max-w-[1600px] mx-auto gap-2">
-            <div className="font-semibold text-slate-400">
+            <div className="font-semibold text-slate-700">
               SIH26178 — AI Environmental Monitoring Network (TerraSentinel)
             </div>
             <div className="flex items-center gap-3 text-[11px] text-slate-500 font-mono">
-              <span className="text-emerald-400">FastAPI Ingestion Active</span>
+              <span className="text-emerald-700 font-semibold">FastAPI Ingestion Active</span>
               <span>•</span>
               <span>WebSocket Hub Live</span>
               <span>•</span>
-              <span className="text-emerald-400">ESP32 Ready</span>
+              <span className="text-emerald-700 font-semibold">ESP32 Ready</span>
             </div>
           </div>
         </footer>

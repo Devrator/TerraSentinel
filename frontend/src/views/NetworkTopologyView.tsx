@@ -26,14 +26,14 @@ export const NetworkTopologyView: React.FC = () => {
   return (
     <div className="space-y-5">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-4 rounded-2xl bg-[#101D19] border border-[#1B2D27]">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-4 rounded-xl bg-white border border-slate-200 shadow-2xs">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center">
-            <Network className="w-5 h-5 text-emerald-400" />
+          <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center">
+            <Network className="w-5 h-5 text-emerald-600" />
           </div>
           <div>
-            <h2 className="text-base font-bold text-white tracking-tight">IoT Network Topology & Infrastructure</h2>
-            <p className="text-xs text-slate-400">
+            <h2 className="text-base font-bold text-slate-900 tracking-tight">IoT Network Topology & Infrastructure</h2>
+            <p className="text-xs text-slate-500 font-medium">
               End-to-end edge-to-cloud architectural topology, gateway latency, and pipeline health
             </p>
           </div>
@@ -41,108 +41,108 @@ export const NetworkTopologyView: React.FC = () => {
 
         <button
           onClick={fetchTopology}
-          className="px-3 py-1.5 rounded-xl bg-[#07110F] hover:bg-[#182B24] text-slate-300 hover:text-white border border-[#1B2D27] text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer"
+          className="px-3 py-1.5 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs"
         >
-          <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-emerald-400' : ''}`} /> Ping Mesh
+          <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-emerald-600' : ''}`} /> Ping Mesh
         </button>
       </div>
 
       {/* Visual Pipeline Graph */}
-      <div className="p-6 rounded-2xl bg-[#101D19] border border-[#1B2D27] space-y-6">
-        <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-slate-400">
+      <div className="p-6 rounded-xl bg-white border border-slate-200 shadow-2xs space-y-6">
+        <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700">
           Hardware-to-Cloud Distributed Data Pipeline
         </h3>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
           
           {/* 1. Edge Nodes */}
-          <div className="p-4 rounded-2xl bg-[#07110F] border border-emerald-500/30 space-y-2 flex flex-col justify-between">
+          <div className="p-4 rounded-xl bg-slate-50 border border-emerald-300 space-y-2 flex flex-col justify-between shadow-2xs">
             <div className="flex items-center justify-between">
-              <Cpu className="w-5 h-5 text-emerald-400" />
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
+              <Cpu className="w-5 h-5 text-emerald-600" />
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
             </div>
             <div>
-              <div className="text-xs font-bold text-white">ESP32 Nodes</div>
-              <div className="text-[10px] text-slate-500">
+              <div className="text-xs font-bold text-slate-900">ESP32 Nodes</div>
+              <div className="text-[10px] text-slate-500 font-medium">
                 {data?.architecture_layers.edge_layer.node_count ?? 5} Nodes Online
               </div>
             </div>
-            <div className="text-[10px] font-mono text-emerald-400 pt-2 border-t border-[#1B2D27]">
+            <div className="text-[10px] font-mono text-emerald-700 font-bold pt-2 border-t border-slate-200">
               WiFi / HTTP Push
             </div>
           </div>
 
           {/* 2. Gateway */}
-          <div className="p-4 rounded-2xl bg-[#07110F] border border-[#1B2D27] space-y-2 flex flex-col justify-between">
+          <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2 flex flex-col justify-between shadow-2xs">
             <div className="flex items-center justify-between">
-              <Network className="w-5 h-5 text-blue-400" />
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
+              <Network className="w-5 h-5 text-blue-600" />
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
             </div>
             <div>
-              <div className="text-xs font-bold text-white">Mesh Gateway</div>
-              <div className="text-[10px] text-slate-500">GW-CENTRAL-01</div>
+              <div className="text-xs font-bold text-slate-900">Mesh Gateway</div>
+              <div className="text-[10px] text-slate-500 font-medium">GW-CENTRAL-01</div>
             </div>
-            <div className="text-[10px] font-mono text-slate-300 pt-2 border-t border-[#1B2D27]">
+            <div className="text-[10px] font-mono text-slate-700 font-semibold pt-2 border-t border-slate-200">
               Latency: 14ms
             </div>
           </div>
 
           {/* 3. Ingestion API */}
-          <div className="p-4 rounded-2xl bg-[#07110F] border border-[#1B2D27] space-y-2 flex flex-col justify-between">
+          <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2 flex flex-col justify-between shadow-2xs">
             <div className="flex items-center justify-between">
-              <Server className="w-5 h-5 text-purple-400" />
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
+              <Server className="w-5 h-5 text-purple-600" />
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
             </div>
             <div>
-              <div className="text-xs font-bold text-white">FastAPI Ingestion</div>
-              <div className="text-[10px] text-slate-500">/api/sensor-data</div>
+              <div className="text-xs font-bold text-slate-900">FastAPI Ingestion</div>
+              <div className="text-[10px] text-slate-500 font-medium">/api/sensor-data</div>
             </div>
-            <div className="text-[10px] font-mono text-purple-300 pt-2 border-t border-[#1B2D27]">
+            <div className="text-[10px] font-mono text-purple-700 font-bold pt-2 border-t border-slate-200">
               42.5 req/s
             </div>
           </div>
 
           {/* 4. AI Risk Engine */}
-          <div className="p-4 rounded-2xl bg-[#07110F] border border-[#1B2D27] space-y-2 flex flex-col justify-between">
+          <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2 flex flex-col justify-between shadow-2xs">
             <div className="flex items-center justify-between">
-              <BrainCircuit className="w-5 h-5 text-amber-400" />
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
+              <BrainCircuit className="w-5 h-5 text-amber-600" />
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
             </div>
             <div>
-              <div className="text-xs font-bold text-white">AI Risk Engine</div>
-              <div className="text-[10px] text-slate-500">XAI & Heuristics</div>
+              <div className="text-xs font-bold text-slate-900">AI Risk Engine</div>
+              <div className="text-[10px] text-slate-500 font-medium">XAI & Heuristics</div>
             </div>
-            <div className="text-[10px] font-mono text-amber-300 pt-2 border-t border-[#1B2D27]">
+            <div className="text-[10px] font-mono text-amber-700 font-bold pt-2 border-t border-slate-200">
               Inference: 1.8ms
             </div>
           </div>
 
           {/* 5. PostgreSQL DB */}
-          <div className="p-4 rounded-2xl bg-[#07110F] border border-[#1B2D27] space-y-2 flex flex-col justify-between">
+          <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2 flex flex-col justify-between shadow-2xs">
             <div className="flex items-center justify-between">
-              <Database className="w-5 h-5 text-cyan-400" />
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
+              <Database className="w-5 h-5 text-cyan-600" />
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
             </div>
             <div>
-              <div className="text-xs font-bold text-white">PostgreSQL DB</div>
-              <div className="text-[10px] text-slate-500">Timeseries + Audit</div>
+              <div className="text-xs font-bold text-slate-900">PostgreSQL DB</div>
+              <div className="text-[10px] text-slate-500 font-medium">Timeseries + Audit</div>
             </div>
-            <div className="text-[10px] font-mono text-cyan-300 pt-2 border-t border-[#1B2D27]">
+            <div className="text-[10px] font-mono text-cyan-700 font-bold pt-2 border-t border-slate-200">
               Query: 3.4ms
             </div>
           </div>
 
           {/* 6. WebSocket Broadcaster */}
-          <div className="p-4 rounded-2xl bg-[#07110F] border border-emerald-500/30 space-y-2 flex flex-col justify-between">
+          <div className="p-4 rounded-xl bg-slate-50 border border-emerald-300 space-y-2 flex flex-col justify-between shadow-2xs">
             <div className="flex items-center justify-between">
-              <Radio className="w-5 h-5 text-emerald-400 animate-pulse" />
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
+              <Radio className="w-5 h-5 text-emerald-600 animate-pulse" />
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
             </div>
             <div>
-              <div className="text-xs font-bold text-white">WebSocket Hub</div>
-              <div className="text-[10px] text-slate-500">/ws/dashboard</div>
+              <div className="text-xs font-bold text-slate-900">WebSocket Hub</div>
+              <div className="text-[10px] text-slate-500 font-medium">/ws/dashboard</div>
             </div>
-            <div className="text-[10px] font-mono text-emerald-400 pt-2 border-t border-[#1B2D27]">
+            <div className="text-[10px] font-mono text-emerald-700 font-bold pt-2 border-t border-slate-200">
               Live Streaming
             </div>
           </div>
@@ -152,22 +152,22 @@ export const NetworkTopologyView: React.FC = () => {
 
       {/* Architecture Scalability Specifications */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="p-4 rounded-2xl bg-[#101D19] border border-[#1B2D27] space-y-1">
-          <div className="text-[10px] font-mono uppercase text-slate-500">Maximum Node Capacity</div>
-          <div className="font-mono text-xl font-bold text-white">5,000+ Edge Nodes</div>
-          <div className="text-[11px] text-slate-400">Horizontal worker scaling</div>
+        <div className="p-4 rounded-xl bg-white border border-slate-200 shadow-2xs space-y-1">
+          <div className="text-[10px] font-mono uppercase text-slate-500 font-bold">Maximum Node Capacity</div>
+          <div className="font-mono text-xl font-bold text-slate-900">5,000+ Edge Nodes</div>
+          <div className="text-[11px] text-slate-500 font-medium">Horizontal worker scaling</div>
         </div>
 
-        <div className="p-4 rounded-2xl bg-[#101D19] border border-[#1B2D27] space-y-1">
-          <div className="text-[10px] font-mono uppercase text-slate-500">Distributed Broker Architecture</div>
-          <div className="font-mono text-xl font-bold text-emerald-400">Redis / RabbitMQ Ready</div>
-          <div className="text-[11px] text-slate-400">Zero-loss asynchronous queuing</div>
+        <div className="p-4 rounded-xl bg-white border border-slate-200 shadow-2xs space-y-1">
+          <div className="text-[10px] font-mono uppercase text-slate-500 font-bold">Distributed Broker Architecture</div>
+          <div className="font-mono text-xl font-bold text-emerald-700">Redis / RabbitMQ Ready</div>
+          <div className="text-[11px] text-slate-500 font-medium">Zero-loss asynchronous queuing</div>
         </div>
 
-        <div className="p-4 rounded-2xl bg-[#101D19] border border-[#1B2D27] space-y-1">
-          <div className="text-[10px] font-mono uppercase text-slate-500">High-Availability Mode</div>
-          <div className="font-mono text-xl font-bold text-blue-400">Active-Active Redundancy</div>
-          <div className="text-[11px] text-slate-400">Automatic failover clustering</div>
+        <div className="p-4 rounded-xl bg-white border border-slate-200 shadow-2xs space-y-1">
+          <div className="text-[10px] font-mono uppercase text-slate-500 font-bold">High-Availability Mode</div>
+          <div className="font-mono text-xl font-bold text-blue-700">Active-Active Redundancy</div>
+          <div className="text-[11px] text-slate-500 font-medium">Automatic failover clustering</div>
         </div>
       </div>
     </div>

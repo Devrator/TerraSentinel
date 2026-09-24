@@ -25,20 +25,20 @@ export const LiveMonitoringView: React.FC<LiveMonitoringViewProps> = ({
   return (
     <div className="space-y-5">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-4 rounded-2xl bg-[#101D19] border border-[#1B2D27]">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-4 rounded-2xl bg-white border border-slate-200 shadow-2xs">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center">
-            <Radio className="w-5 h-5 text-emerald-400 animate-pulse" />
+          <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center">
+            <Radio className="w-5 h-5 text-emerald-600 animate-pulse" />
           </div>
           <div>
-            <h2 className="text-base font-bold text-white tracking-tight">Real-Time Sensor Telemetry Stream</h2>
-            <p className="text-xs text-slate-400">
+            <h2 className="text-base font-bold text-slate-900 tracking-tight">Real-Time Sensor Telemetry Stream</h2>
+            <p className="text-xs text-slate-500">
               High-frequency multi-sensor telemetry monitoring, atmospheric vectors, and composite AI hazard ratings
             </p>
           </div>
         </div>
 
-        <span className="px-3 py-1.5 rounded-xl bg-[#07110F] border border-[#1B2D27] text-xs font-mono text-emerald-400 font-bold">
+        <span className="px-3 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200 text-xs font-mono text-emerald-700 font-bold">
           LIVE WEBSOCKET STREAM
         </span>
       </div>

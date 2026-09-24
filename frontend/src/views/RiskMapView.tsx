@@ -17,31 +17,31 @@ export const RiskMapView: React.FC<RiskMapViewProps> = ({
   const [activeLayer, setActiveLayer] = useState<string>('OVERALL');
 
   const layers = [
-    { id: 'OVERALL', label: 'Overall Hazard Matrix', icon: ShieldAlert, color: 'text-emerald-400' },
-    { id: 'FIRE', label: 'Thermal / Wildfire Zone', icon: Flame, color: 'text-amber-400' },
-    { id: 'FLOOD', label: 'Hydrological Surge', icon: Droplets, color: 'text-blue-400' },
-    { id: 'POLLUTION', label: 'Atmospheric Inversion AQI', icon: Wind, color: 'text-emerald-400' },
-    { id: 'DENSITY', label: 'Sensor Network Density', icon: Radio, color: 'text-purple-400' },
+    { id: 'OVERALL', label: 'Overall Hazard Matrix', icon: ShieldAlert, color: 'text-emerald-600' },
+    { id: 'FIRE', label: 'Thermal / Wildfire Zone', icon: Flame, color: 'text-amber-600' },
+    { id: 'FLOOD', label: 'Hydrological Surge', icon: Droplets, color: 'text-cyan-600' },
+    { id: 'POLLUTION', label: 'Atmospheric Inversion AQI', icon: Wind, color: 'text-emerald-600' },
+    { id: 'DENSITY', label: 'Sensor Network Density', icon: Radio, color: 'text-purple-600' },
   ];
 
   return (
     <div className="space-y-5">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-4 rounded-2xl bg-[#101D19] border border-[#1B2D27]">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-4 rounded-xl bg-white border border-slate-200 shadow-2xs">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center">
-            <Layers className="w-5 h-5 text-amber-400" />
+          <div className="w-10 h-10 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center">
+            <Layers className="w-5 h-5 text-amber-600" />
           </div>
           <div>
-            <h2 className="text-base font-bold text-white tracking-tight">Geographic Risk Intelligence Map</h2>
-            <p className="text-xs text-slate-400">
+            <h2 className="text-base font-bold text-slate-900 tracking-tight">Geographic Risk Intelligence Map</h2>
+            <p className="text-xs text-slate-500 font-medium">
               Multi-layer spatial risk synthesis with GIS cluster aggregation and hotspot perimeter analysis
             </p>
           </div>
         </div>
 
         {/* Layer Selector */}
-        <div className="flex flex-wrap items-center gap-1.5 p-1 rounded-xl bg-[#07110F] border border-[#1B2D27]">
+        <div className="flex flex-wrap items-center gap-1.5 p-1 rounded-lg bg-slate-100 border border-slate-200">
           {layers.map((l) => {
             const Icon = l.icon;
             const isActive = activeLayer === l.id;
@@ -50,13 +50,13 @@ export const RiskMapView: React.FC<RiskMapViewProps> = ({
               <button
                 key={l.id}
                 onClick={() => setActiveLayer(l.id)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
+                className={`px-3 py-1.5 rounded-md text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
                   isActive
-                    ? 'bg-amber-500 text-slate-950 font-bold shadow-xs'
-                    : 'text-slate-400 hover:text-white hover:bg-[#182B24]'
+                    ? 'bg-amber-500 text-white font-bold shadow-2xs'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
                 }`}
               >
-                <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-slate-950' : l.color}`} />
+                <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-white' : l.color}`} />
                 <span>{l.label}</span>
               </button>
             );
@@ -76,35 +76,35 @@ export const RiskMapView: React.FC<RiskMapViewProps> = ({
 
         {/* Legend & Active Hazard Breakdown */}
         <div className="lg:col-span-3 space-y-4">
-          <div className="p-4 rounded-2xl bg-[#101D19] border border-[#1B2D27] space-y-3">
-            <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-slate-400">
+          <div className="p-4 rounded-xl bg-white border border-slate-200 shadow-2xs space-y-3">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700">
               Risk Level Legend
             </h3>
 
-            <div className="space-y-2 text-xs">
-              <div className="p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-between">
-                <span className="font-bold text-rose-400">CRITICAL</span>
-                <span className="font-mono text-rose-300">76 - 100%</span>
+            <div className="space-y-2 text-xs font-medium">
+              <div className="p-2.5 rounded-lg bg-rose-50 border border-rose-200 flex items-center justify-between">
+                <span className="font-bold text-rose-700">CRITICAL</span>
+                <span className="font-mono font-bold text-rose-700">76 - 100%</span>
               </div>
-              <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-between">
-                <span className="font-bold text-amber-400">HIGH</span>
-                <span className="font-mono text-amber-300">51 - 75%</span>
+              <div className="p-2.5 rounded-lg bg-amber-50 border border-amber-200 flex items-center justify-between">
+                <span className="font-bold text-amber-700">HIGH</span>
+                <span className="font-mono font-bold text-amber-700">51 - 75%</span>
               </div>
-              <div className="p-2.5 rounded-xl bg-yellow-500/10 border border-yellow-500/30 flex items-center justify-between">
-                <span className="font-bold text-yellow-400">MODERATE</span>
-                <span className="font-mono text-yellow-300">26 - 50%</span>
+              <div className="p-2.5 rounded-lg bg-yellow-50 border border-yellow-200 flex items-center justify-between">
+                <span className="font-bold text-yellow-700">MODERATE</span>
+                <span className="font-mono font-bold text-yellow-700">26 - 50%</span>
               </div>
-              <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-between">
-                <span className="font-bold text-emerald-400">LOW</span>
-                <span className="font-mono text-emerald-300">0 - 25%</span>
+              <div className="p-2.5 rounded-lg bg-emerald-50 border border-emerald-200 flex items-center justify-between">
+                <span className="font-bold text-emerald-700">LOW</span>
+                <span className="font-mono font-bold text-emerald-700">0 - 25%</span>
               </div>
             </div>
           </div>
 
-          <div className="p-4 rounded-2xl bg-[#101D19] border border-[#1B2D27] space-y-2 text-xs text-slate-400">
-            <h4 className="font-mono font-bold text-slate-300 uppercase text-[10px]">Active Layer Details</h4>
+          <div className="p-4 rounded-xl bg-white border border-slate-200 shadow-2xs space-y-2 text-xs text-slate-600 font-medium">
+            <h4 className="font-bold text-slate-800 uppercase text-[10px]">Active Layer Details</h4>
             <p className="leading-relaxed">
-              Displaying geospatial interpolation for <strong className="text-amber-400">{activeLayer}</strong>. Risk surfaces are calculated from distributed sensor node clusters and topography.
+              Displaying geospatial interpolation for <strong className="text-amber-700 font-bold">{activeLayer}</strong>. Risk surfaces are calculated from distributed sensor node clusters and topography.
             </p>
           </div>
         </div>

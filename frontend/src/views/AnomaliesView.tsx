@@ -32,14 +32,14 @@ export const AnomaliesView: React.FC = () => {
   return (
     <div className="space-y-5">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-4 rounded-2xl bg-[#101D19] border border-[#1B2D27]">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-4 rounded-xl bg-white border border-slate-200 shadow-2xs">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center">
-            <Zap className="w-5 h-5 text-rose-400" />
+          <div className="w-10 h-10 rounded-xl bg-rose-50 border border-rose-200 flex items-center justify-center">
+            <Zap className="w-5 h-5 text-rose-600" />
           </div>
           <div>
-            <h2 className="text-base font-bold text-white tracking-tight">Environmental Anomaly Detection</h2>
-            <p className="text-xs text-slate-400">
+            <h2 className="text-base font-bold text-slate-900 tracking-tight">Environmental Anomaly Detection</h2>
+            <p className="text-xs text-slate-500 font-medium">
               Automated temporal spike identification, sensor flatline detection, and physical boundary validation
             </p>
           </div>
@@ -49,7 +49,7 @@ export const AnomaliesView: React.FC = () => {
           <select
             value={filterSeverity}
             onChange={(e) => setFilterSeverity(e.target.value)}
-            className="px-3 py-1.5 rounded-xl bg-[#07110F] border border-[#1B2D27] text-xs text-slate-300 font-medium focus:outline-none focus:border-emerald-500 cursor-pointer"
+            className="px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-xs text-slate-700 font-semibold focus:outline-none focus:border-emerald-500 cursor-pointer shadow-2xs"
           >
             <option value="ALL">All Severities</option>
             <option value="CRITICAL">Critical</option>
@@ -59,9 +59,9 @@ export const AnomaliesView: React.FC = () => {
 
           <button
             onClick={fetchAnomalies}
-            className="px-3 py-1.5 rounded-xl bg-[#07110F] hover:bg-[#182B24] text-slate-300 hover:text-white border border-[#1B2D27] text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer"
+            className="px-3 py-1.5 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-emerald-400' : ''}`} /> Sync
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-emerald-600' : ''}`} /> Sync
           </button>
         </div>
       </div>
@@ -75,44 +75,44 @@ export const AnomaliesView: React.FC = () => {
             return (
               <div
                 key={anom.id}
-                className={`p-4 rounded-2xl bg-[#101D19] border space-y-3 transition-all ${
-                  isCrit ? 'border-rose-500/30 shadow-xs' : 'border-[#1B2D27]'
+                className={`p-4 rounded-xl bg-white border space-y-3 transition-all shadow-2xs ${
+                  isCrit ? 'border-rose-300 ring-1 ring-rose-200/50' : 'border-slate-200'
                 }`}
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <span className="font-mono text-xs font-bold text-emerald-400">{anom.node_id}</span>
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#07110F] text-slate-300 border border-[#1B2D27] uppercase">
+                    <span className="font-mono text-xs font-bold text-emerald-700">{anom.node_id}</span>
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200 uppercase font-bold">
                       {anom.parameter}
                     </span>
                   </div>
-                  <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold ${
-                    isCrit ? 'bg-rose-500/20 text-rose-300' : 'bg-amber-500/20 text-amber-300'
+                  <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold border ${
+                    isCrit ? 'bg-rose-50 text-rose-700 border-rose-200' : 'bg-amber-50 text-amber-700 border-amber-200'
                   }`}>
                     {anom.severity}
                   </span>
                 </div>
 
-                <div className="p-3 rounded-xl bg-[#07110F] border border-[#1B2D27] flex items-center justify-between">
+                <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-between">
                   <div>
-                    <div className="text-[10px] text-slate-500">Value Shift</div>
-                    <div className="font-mono text-sm font-bold text-white">
+                    <div className="text-[10px] text-slate-500 font-medium">Value Shift</div>
+                    <div className="font-mono text-sm font-bold text-slate-900">
                       {anom.previous_value.toFixed(1)} → {anom.current_value.toFixed(1)}
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="text-[10px] text-slate-500">Delta</div>
-                    <div className="font-mono text-sm font-bold text-rose-400">
+                    <div className="text-[10px] text-slate-500 font-medium">Delta</div>
+                    <div className="font-mono text-sm font-bold text-rose-600">
                       {anom.change_pct > 0 ? `+${anom.change_pct}%` : `${anom.change_pct}%`}
                     </div>
                   </div>
                 </div>
 
-                <p className="text-xs text-slate-300 font-medium line-clamp-2">
+                <p className="text-xs text-slate-700 font-semibold line-clamp-2">
                   {anom.description}
                 </p>
 
-                <div className="flex items-center justify-between text-[10px] font-mono text-slate-500 pt-2 border-t border-[#1B2D27]">
+                <div className="flex items-center justify-between text-[10px] font-mono text-slate-400 pt-2 border-t border-slate-100">
                   <span>Type: {anom.anomaly_type}</span>
                   <span>{new Date(anom.detected_at).toLocaleTimeString()}</span>
                 </div>
@@ -120,10 +120,10 @@ export const AnomaliesView: React.FC = () => {
             );
           })
         ) : (
-          <div className="col-span-3 p-12 text-center rounded-2xl bg-[#101D19] border border-[#1B2D27] space-y-2">
-            <ShieldCheck className="w-8 h-8 text-emerald-400 mx-auto" />
-            <h3 className="text-sm font-bold text-white">No Environmental Anomalies Detected</h3>
-            <p className="text-xs text-slate-400">
+          <div className="col-span-3 p-12 text-center rounded-xl bg-white border border-slate-200 shadow-2xs space-y-2">
+            <ShieldCheck className="w-8 h-8 text-emerald-600 mx-auto" />
+            <h3 className="text-sm font-bold text-slate-900">No Environmental Anomalies Detected</h3>
+            <p className="text-xs text-slate-500 font-medium">
               The sensor network is currently operating within expected physical baseline thresholds.
             </p>
           </div>

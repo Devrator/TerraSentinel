@@ -80,21 +80,21 @@ export const SimulationView: React.FC<SimulationViewProps> = ({ nodes }) => {
   return (
     <div className="space-y-5">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-4 rounded-2xl bg-[#101D19] border border-[#1B2D27]">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-4 rounded-xl bg-white border border-slate-200 shadow-2xs">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center">
-            <FlaskConical className="w-5 h-5 text-purple-400" />
+          <div className="w-10 h-10 rounded-xl bg-purple-50 border border-purple-200 flex items-center justify-center">
+            <FlaskConical className="w-5 h-5 text-purple-600" />
           </div>
           <div>
-            <h2 className="text-base font-bold text-white tracking-tight flex items-center gap-2">
+            <h2 className="text-base font-bold text-slate-900 tracking-tight flex items-center gap-2">
               Digital Simulation & Test Lab
               {isRunning && (
-                <span className="px-2 py-0.5 rounded-md text-[10px] font-mono bg-purple-500/20 text-purple-300 border border-purple-500/30 uppercase animate-pulse">
+                <span className="px-2 py-0.5 rounded-md text-[10px] font-mono bg-purple-50 text-purple-700 border border-purple-200 uppercase font-bold animate-pulse">
                   SIMULATION ACTIVE: {status?.scenario}
                 </span>
               )}
             </h2>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-slate-500 font-medium">
               Deterministic environmental scenario injection engine utilizing the unified ESP32 ingestion pipeline
             </p>
           </div>
@@ -106,7 +106,7 @@ export const SimulationView: React.FC<SimulationViewProps> = ({ nodes }) => {
             <button
               onClick={handleStart}
               disabled={loading}
-              className="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shadow-xs"
+              className="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shadow-2xs"
             >
               <Play className="w-4 h-4 fill-current" /> Start Scenario
             </button>
@@ -115,14 +115,14 @@ export const SimulationView: React.FC<SimulationViewProps> = ({ nodes }) => {
               <button
                 onClick={handlePause}
                 disabled={loading}
-                className="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+                className="px-3.5 py-2 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
               >
                 <Pause className="w-4 h-4 fill-current" /> {isPaused ? 'Resume' : 'Pause'}
               </button>
               <button
                 onClick={handleStop}
                 disabled={loading}
-                className="px-3.5 py-2 rounded-xl bg-rose-500 hover:bg-rose-400 text-white text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+                className="px-3.5 py-2 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
               >
                 <Square className="w-4 h-4 fill-current" /> Stop
               </button>
@@ -135,8 +135,8 @@ export const SimulationView: React.FC<SimulationViewProps> = ({ nodes }) => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
         
         {/* Left: Scenario Selectors */}
-        <div className="lg:col-span-8 p-5 rounded-2xl bg-[#101D19] border border-[#1B2D27] space-y-4">
-          <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-slate-400">
+        <div className="lg:col-span-8 p-5 rounded-xl bg-white border border-slate-200 shadow-2xs space-y-4">
+          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700">
             Select Simulation Scenario
           </h3>
 
@@ -150,33 +150,33 @@ export const SimulationView: React.FC<SimulationViewProps> = ({ nodes }) => {
                   key={sc.id}
                   onClick={() => setSelectedScenario(sc.id)}
                   disabled={isRunning}
-                  className={`p-3.5 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between space-y-2 ${
+                  className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between space-y-2 shadow-2xs ${
                     isSelected
-                      ? 'bg-purple-500/15 border-purple-500/50 text-white shadow-xs'
-                      : 'bg-[#07110F] border-[#1B2D27] text-slate-400 hover:text-slate-200 hover:border-slate-600'
+                      ? 'bg-purple-50 border-purple-300 text-slate-900 ring-1 ring-purple-200'
+                      : 'bg-slate-50 border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'
                   } ${isRunning ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                   <div className="flex items-center justify-between">
-                    <Icon className={`w-5 h-5 ${isSelected ? 'text-purple-400' : 'text-slate-500'}`} />
-                    {isSelected && <span className="w-2 h-2 rounded-full bg-purple-400 animate-ping" />}
+                    <Icon className={`w-5 h-5 ${isSelected ? 'text-purple-600' : 'text-slate-400'}`} />
+                    {isSelected && <span className="w-2 h-2 rounded-full bg-purple-600 animate-ping" />}
                   </div>
                   <div>
-                    <div className="font-bold text-xs text-white">{sc.label}</div>
-                    <div className="text-[10px] text-slate-500 line-clamp-2 mt-0.5">{sc.desc}</div>
+                    <div className="font-bold text-xs text-slate-900">{sc.label}</div>
+                    <div className="text-[10px] text-slate-500 line-clamp-2 mt-0.5 font-medium">{sc.desc}</div>
                   </div>
                 </button>
               );
             })}
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-3 border-t border-[#1B2D27]">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-3 border-t border-slate-100">
             <div>
-              <label className="text-xs text-slate-400 block mb-1 font-medium">Target Sensor Node</label>
+              <label className="text-xs text-slate-700 block mb-1 font-semibold">Target Sensor Node</label>
               <select
                 value={targetNodeId}
                 onChange={(e) => setTargetNodeId(e.target.value)}
                 disabled={isRunning}
-                className="w-full px-3 py-2 rounded-xl bg-[#07110F] border border-[#1B2D27] text-xs text-white focus:outline-none focus:border-purple-500"
+                className="w-full px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 text-xs text-slate-900 focus:outline-none focus:border-purple-500 font-medium"
               >
                 {nodes.map((n) => (
                   <option key={n.node_id} value={n.node_id}>
@@ -187,12 +187,12 @@ export const SimulationView: React.FC<SimulationViewProps> = ({ nodes }) => {
             </div>
 
             <div>
-              <label className="text-xs text-slate-400 block mb-1 font-medium">Scenario Intensity</label>
+              <label className="text-xs text-slate-700 block mb-1 font-semibold">Scenario Intensity</label>
               <select
                 value={intensity}
                 onChange={(e) => setIntensity(e.target.value)}
                 disabled={isRunning}
-                className="w-full px-3 py-2 rounded-xl bg-[#07110F] border border-[#1B2D27] text-xs text-white focus:outline-none focus:border-purple-500"
+                className="w-full px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 text-xs text-slate-900 focus:outline-none focus:border-purple-500 font-medium"
               >
                 <option value="LOW">Low (Moderate Warning)</option>
                 <option value="MEDIUM">Medium (High Warning)</option>
@@ -203,11 +203,11 @@ export const SimulationView: React.FC<SimulationViewProps> = ({ nodes }) => {
         </div>
 
         {/* Right: Live Simulation Timeline */}
-        <div className="lg:col-span-4 p-5 rounded-2xl bg-[#101D19] border border-[#1B2D27] space-y-3 flex flex-col justify-between">
+        <div className="lg:col-span-4 p-5 rounded-xl bg-white border border-slate-200 shadow-2xs space-y-3 flex flex-col justify-between">
           <div>
-            <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-slate-400 mb-3 flex items-center justify-between">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700 mb-3 flex items-center justify-between">
               <span>Simulation Event Log</span>
-              <span className="text-[10px] text-purple-400 font-mono">STEP #{status?.step_index ?? 0}</span>
+              <span className="text-[10px] text-purple-700 font-mono font-bold bg-purple-50 px-2 py-0.5 rounded border border-purple-200">STEP #{status?.step_index ?? 0}</span>
             </h3>
 
             <div className="space-y-2 max-h-72 overflow-y-auto pr-1 scrollbar-thin">
@@ -215,29 +215,29 @@ export const SimulationView: React.FC<SimulationViewProps> = ({ nodes }) => {
                 status.timeline_events.map((evt, idx) => (
                   <div
                     key={idx}
-                    className="p-2.5 rounded-xl bg-[#07110F] border border-[#1B2D27] text-xs space-y-0.5"
+                    className="p-2.5 rounded-lg bg-slate-50 border border-slate-200 text-xs space-y-0.5"
                   >
                     <div className="flex items-center justify-between text-[10px] font-mono">
-                      <span className="text-purple-400 font-bold">{evt.time}</span>
-                      <span className={`px-1.5 py-0.2 rounded font-bold ${
-                        evt.level === 'CRITICAL' ? 'bg-rose-500/20 text-rose-300' : 'bg-emerald-500/20 text-emerald-300'
+                      <span className="text-purple-700 font-bold">{evt.time}</span>
+                      <span className={`px-1.5 py-0.2 rounded font-bold border ${
+                        evt.level === 'CRITICAL' ? 'bg-rose-50 text-rose-700 border-rose-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200'
                       }`}>
                         {evt.level}
                       </span>
                     </div>
-                    <div className="text-slate-200 text-xs">{evt.message}</div>
+                    <div className="text-slate-800 text-xs font-medium">{evt.message}</div>
                   </div>
                 ))
               ) : (
-                <div className="p-8 text-center text-xs text-slate-500">
+                <div className="p-8 text-center text-xs text-slate-400 font-medium">
                   Simulation engine standby. Select a scenario and press Start.
                 </div>
               )}
             </div>
           </div>
 
-          <div className="p-3 rounded-xl bg-[#07110F] border border-[#1B2D27] text-[11px] text-slate-400">
-            <strong>Pipeline Note:</strong> All simulated data packets are passed through <code>SensorService.ingest_sensor_data()</code> exactly as physical ESP32 packets.
+          <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 text-[11px] text-slate-600 font-medium leading-relaxed">
+            <strong>Pipeline Note:</strong> All simulated data packets are passed through <code className="text-purple-700 font-bold">SensorService.ingest_sensor_data()</code> exactly as physical ESP32 packets.
           </div>
         </div>
 

@@ -108,32 +108,33 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   return (
     <aside
-      className={`fixed top-0 left-0 bottom-0 z-40 flex flex-col bg-[#07110F] border-r border-[#1B2D27] text-slate-300 transition-all duration-300 select-none ${isCollapsed ? 'w-16' : 'w-64'
-        }`}
+      className={`fixed top-0 left-0 bottom-0 z-40 flex flex-col bg-white border-r border-slate-200 text-slate-700 transition-all duration-300 select-none shadow-2xs ${
+        isCollapsed ? 'w-16' : 'w-64'
+      }`}
     >
       {/* Sidebar Header Brand with Official Logo */}
-      <div className="h-16 flex items-center justify-between px-3 border-b border-[#1B2D27]">
+      <div className="h-20 flex items-center justify-between px-3.5 border-b border-slate-200 bg-slate-50/50">
         {!isCollapsed ? (
-          <div className="flex items-center gap-2.5 overflow-hidden">
+          <div className="flex items-center gap-2 overflow-hidden py-1">
             <img
               src="/logo.png"
               alt="TerraSentinel Logo"
-              className="h-10 w-auto object-contain shrink-0 transition-transform hover:scale-102"
+              className="h-14 sm:h-15 w-auto object-contain shrink-0 transition-transform hover:scale-102"
             />
           </div>
         ) : (
-          <div className="w-full flex justify-center">
+          <div className="w-full flex justify-center py-1">
             <img
               src="/logo.png"
               alt="TerraSentinel Logo"
-              className="h-8 w-auto object-contain"
+              className="h-10 w-auto object-contain"
             />
           </div>
         )}
 
         <button
           onClick={onToggleCollapse}
-          className="hidden md:flex p-1.5 rounded-lg bg-[#101D19] hover:bg-[#182B24] border border-[#1B2D27] text-slate-400 hover:text-white transition-all cursor-pointer shrink-0 ml-1"
+          className="hidden md:flex p-1.5 rounded-lg bg-white hover:bg-slate-100 border border-slate-200 text-slate-500 hover:text-slate-800 transition-all cursor-pointer shrink-0 ml-1 shadow-2xs"
           title={isCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
         >
           {isCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
@@ -145,7 +146,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {navGroups.map((group) => (
           <div key={group.category} className="space-y-1">
             {!isCollapsed && (
-              <div className="px-2.5 py-1 text-[10px] font-mono font-semibold tracking-wider text-slate-500 uppercase">
+              <div className="px-2.5 py-1 text-[10px] font-mono font-bold tracking-wider text-slate-400 uppercase">
                 {group.category}
               </div>
             )}
@@ -159,21 +160,23 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   key={item.id}
                   onClick={() => onSelectTab(item.id)}
                   title={isCollapsed ? item.label : undefined}
-                  className={`w-full flex items-center gap-3 px-2.5 py-2 rounded-xl text-xs font-medium transition-all cursor-pointer ${isActive
-                      ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 font-semibold shadow-xs'
-                      : 'hover:bg-[#101D19] text-slate-400 hover:text-slate-200 border border-transparent'
-                    } ${isCollapsed ? 'justify-center px-0' : ''}`}
+                  className={`w-full flex items-center gap-3 px-2.5 py-2 rounded-xl text-xs font-medium transition-all cursor-pointer ${
+                    isActive
+                      ? 'bg-emerald-50 text-emerald-800 border border-emerald-200 font-semibold shadow-2xs'
+                      : 'hover:bg-slate-100/80 text-slate-600 hover:text-slate-900 border border-transparent'
+                  } ${isCollapsed ? 'justify-center px-0' : ''}`}
                 >
                   <Icon
-                    className={`w-4 h-4 shrink-0 transition-transform ${isActive ? 'text-emerald-400 scale-105' : 'text-slate-400'
-                      }`}
+                    className={`w-4 h-4 shrink-0 transition-transform ${
+                      isActive ? 'text-emerald-700 scale-105' : 'text-slate-400'
+                    }`}
                   />
 
                   {!isCollapsed && (
                     <div className="flex-1 flex items-center justify-between min-w-0 text-left">
                       <span className="truncate">{item.label}</span>
                       {item.badge && (
-                        <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                        <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
                           {item.badge}
                         </span>
                       )}
@@ -187,18 +190,18 @@ export const Sidebar: React.FC<SidebarProps> = ({
       </div>
 
       {/* Footer Node Summary */}
-      <div className="p-2 border-t border-[#1B2D27] bg-[#0A1613]">
+      <div className="p-2 border-t border-slate-200 bg-slate-50/60">
         {!isCollapsed ? (
-          <div className="p-2 rounded-xl bg-[#101D19] border border-[#1B2D27] flex items-center justify-between text-[11px]">
+          <div className="p-2.5 rounded-xl bg-white border border-slate-200 flex items-center justify-between text-[11px] shadow-2xs">
             <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="text-slate-300 font-medium">Node Telemetry</span>
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="text-slate-700 font-medium">Node Telemetry</span>
             </div>
-            <span className="font-mono text-emerald-400 font-bold">5 ACTIVE</span>
+            <span className="font-mono text-emerald-700 font-bold">5 ACTIVE</span>
           </div>
         ) : (
           <div className="flex justify-center py-1">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" title="System Operational" />
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" title="System Operational" />
           </div>
         )}
       </div>

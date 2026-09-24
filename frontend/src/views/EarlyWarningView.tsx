@@ -51,14 +51,14 @@ export const EarlyWarningView: React.FC<EarlyWarningViewProps> = ({
   return (
     <div className="space-y-5">
       {/* Header Bar */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-4 rounded-2xl bg-[#101D19] border border-[#1B2D27]">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-4 rounded-xl bg-white border border-slate-200 shadow-2xs">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center">
-            <AlertTriangle className="w-5 h-5 text-amber-400" />
+          <div className="w-10 h-10 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center">
+            <AlertTriangle className="w-5 h-5 text-amber-600" />
           </div>
           <div>
-            <h2 className="text-base font-bold text-white tracking-tight">Early Warning Center</h2>
-            <p className="text-xs text-slate-400">
+            <h2 className="text-base font-bold text-slate-900 tracking-tight">Early Warning Center</h2>
+            <p className="text-xs text-slate-500 font-medium">
               Operational early-warning triage & response console with real-time incident escalation
             </p>
           </div>
@@ -69,7 +69,7 @@ export const EarlyWarningView: React.FC<EarlyWarningViewProps> = ({
           <select
             value={filterSeverity}
             onChange={(e) => setFilterSeverity(e.target.value)}
-            className="px-3 py-1.5 rounded-xl bg-[#07110F] border border-[#1B2D27] text-xs text-slate-300 font-medium focus:outline-none focus:border-emerald-500 cursor-pointer"
+            className="px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-xs text-slate-700 font-semibold focus:outline-none focus:border-emerald-500 cursor-pointer shadow-2xs"
           >
             <option value="ALL">All Severities</option>
             <option value="CRITICAL">Critical</option>
@@ -80,7 +80,7 @@ export const EarlyWarningView: React.FC<EarlyWarningViewProps> = ({
           <select
             value={filterType}
             onChange={(e) => setFilterType(e.target.value)}
-            className="px-3 py-1.5 rounded-xl bg-[#07110F] border border-[#1B2D27] text-xs text-slate-300 font-medium focus:outline-none focus:border-emerald-500 cursor-pointer"
+            className="px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-xs text-slate-700 font-semibold focus:outline-none focus:border-emerald-500 cursor-pointer shadow-2xs"
           >
             <option value="ALL">All Hazard Types</option>
             <option value="FIRE">Fire</option>
@@ -101,8 +101,8 @@ export const EarlyWarningView: React.FC<EarlyWarningViewProps> = ({
             return (
               <div
                 key={alert.id}
-                className={`p-4 rounded-2xl bg-[#101D19] border transition-all ${
-                  isCrit ? 'border-rose-500/30 shadow-xs' : 'border-[#1B2D27]'
+                className={`p-4 rounded-xl bg-white border transition-all shadow-2xs ${
+                  isCrit ? 'border-rose-300 ring-1 ring-rose-200/50' : 'border-slate-200'
                 }`}
               >
                 <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
@@ -110,7 +110,7 @@ export const EarlyWarningView: React.FC<EarlyWarningViewProps> = ({
                   {/* Left: Info */}
                   <div className="flex items-start gap-3.5">
                     <div className={`p-2.5 rounded-xl shrink-0 mt-0.5 ${
-                      isCrit ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
+                      isCrit ? 'bg-rose-50 text-rose-600 border border-rose-200' : 'bg-amber-50 text-amber-600 border border-amber-200'
                     }`}>
                       {isCrit ? <ShieldAlert className="w-5 h-5" /> : <AlertTriangle className="w-5 h-5" />}
                     </div>
@@ -118,29 +118,29 @@ export const EarlyWarningView: React.FC<EarlyWarningViewProps> = ({
                     <div className="space-y-1">
                       <div className="flex flex-wrap items-center gap-2">
                         <span className="font-mono font-bold text-xs text-slate-400">ALERT #{alert.id}</span>
-                        <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold ${
-                          isCrit ? 'bg-rose-500/20 text-rose-300' : 'bg-amber-500/20 text-amber-300'
+                        <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold border ${
+                          isCrit ? 'bg-rose-50 text-rose-700 border-rose-200' : 'bg-amber-50 text-amber-700 border-amber-200'
                         }`}>
                           {alert.severity}
                         </span>
-                        <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[#07110F] text-slate-300 border border-[#1B2D27]">
+                        <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-slate-100 text-slate-700 border border-slate-200">
                           {alert.risk_type}
                         </span>
-                        <span className="font-mono text-xs font-bold text-emerald-400">
+                        <span className="font-mono text-xs font-bold text-emerald-700">
                           {alert.node_id}
                         </span>
                       </div>
 
-                      <p className="text-xs font-medium text-slate-200">
+                      <p className="text-xs font-semibold text-slate-900">
                         {alert.message}
                       </p>
 
-                      <div className="flex flex-wrap items-center gap-4 text-[11px] text-slate-500">
+                      <div className="flex flex-wrap items-center gap-4 text-[11px] text-slate-500 font-medium">
                         <span>GPS: {node?.latitude.toFixed(4) ?? '28.6139'}, {node?.longitude.toFixed(4) ?? '77.2090'}</span>
                         <span>•</span>
-                        <span>Score: <strong className="text-rose-400 font-mono">{alert.risk_score.toFixed(1)}%</strong></span>
+                        <span>Score: <strong className="text-rose-600 font-mono">{alert.risk_score.toFixed(1)}%</strong></span>
                         <span>•</span>
-                        <span>Confidence: <strong className="text-emerald-400 font-mono">92.4%</strong></span>
+                        <span>Confidence: <strong className="text-emerald-700 font-mono">92.4%</strong></span>
                         <span>•</span>
                         <span>Triggered: {new Date(alert.timestamp).toLocaleTimeString()}</span>
                       </div>
@@ -152,20 +152,20 @@ export const EarlyWarningView: React.FC<EarlyWarningViewProps> = ({
                     {!alert.acknowledged ? (
                       <button
                         onClick={() => onAcknowledgeAlert(alert.id)}
-                        className="px-3 py-1.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+                        className="px-3 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-300 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
                       >
                         <Check className="w-3.5 h-3.5" /> Acknowledge
                       </button>
                     ) : (
-                      <span className="px-3 py-1.5 rounded-xl bg-[#07110F] text-slate-500 border border-[#1B2D27] text-xs font-mono font-semibold flex items-center gap-1">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> Acknowledged
+                      <span className="px-3 py-1.5 rounded-lg bg-slate-100 text-slate-600 border border-slate-200 text-xs font-mono font-semibold flex items-center gap-1">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> Acknowledged
                       </span>
                     )}
 
                     <button
                       onClick={() => handleAction(alert, 'INVESTIGATE')}
                       disabled={actionLoadingId === alert.id}
-                      className="px-3 py-1.5 rounded-xl bg-[#07110F] hover:bg-[#182B24] text-slate-300 hover:text-white border border-[#1B2D27] text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5"
+                      className="px-3 py-1.5 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs"
                     >
                       <Search className="w-3.5 h-3.5" /> Investigate
                     </button>
@@ -173,7 +173,7 @@ export const EarlyWarningView: React.FC<EarlyWarningViewProps> = ({
                     <button
                       onClick={() => handleAction(alert, 'ESCALATE')}
                       disabled={actionLoadingId === alert.id}
-                      className="px-3 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5"
+                      className="px-3 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-300 text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs"
                     >
                       <ArrowUpRight className="w-3.5 h-3.5" /> Escalate
                     </button>
@@ -184,10 +184,10 @@ export const EarlyWarningView: React.FC<EarlyWarningViewProps> = ({
             );
           })
         ) : (
-          <div className="p-12 text-center rounded-2xl bg-[#101D19] border border-[#1B2D27] space-y-2">
-            <ShieldCheck className="w-8 h-8 text-emerald-400 mx-auto" />
-            <h3 className="text-sm font-bold text-white">No Active Early Warnings</h3>
-            <p className="text-xs text-slate-400">
+          <div className="p-12 text-center rounded-xl bg-white border border-slate-200 shadow-2xs space-y-2">
+            <ShieldCheck className="w-8 h-8 text-emerald-600 mx-auto" />
+            <h3 className="text-sm font-bold text-slate-900">No Active Early Warnings</h3>
+            <p className="text-xs text-slate-500 font-medium">
               All sensor nodes are currently operating within baseline environmental safety thresholds.
             </p>
           </div>

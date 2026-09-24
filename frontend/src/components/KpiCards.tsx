@@ -14,40 +14,40 @@ export const KpiCards: React.FC<KpiCardsProps> = ({ summary, loading }) => {
       value: summary?.total_nodes ?? 0,
       subtext: `${summary?.offline_nodes ?? 0} offline nodes`,
       icon: Cpu,
-      color: 'text-white',
-      iconColor: 'text-blue-400',
-      iconBg: 'bg-blue-500/10 border border-blue-500/20',
-      border: 'border-[#1B2D27] hover:border-blue-500/30',
+      color: 'text-slate-900',
+      iconColor: 'text-blue-600',
+      iconBg: 'bg-blue-50 border border-blue-100',
+      border: 'border-slate-200 hover:border-blue-300',
     },
     {
       title: 'ONLINE NODES',
       value: summary?.online_nodes ?? 0,
       subtext: summary?.total_nodes ? `${Math.round(((summary.online_nodes) / summary.total_nodes) * 100)}% active fleet` : '0%',
       icon: Wifi,
-      color: 'text-emerald-400',
-      iconColor: 'text-emerald-400',
-      iconBg: 'bg-emerald-500/10 border border-emerald-500/20',
-      border: 'border-[#1B2D27] hover:border-emerald-500/30',
+      color: 'text-emerald-700',
+      iconColor: 'text-emerald-600',
+      iconBg: 'bg-emerald-50 border border-emerald-100',
+      border: 'border-slate-200 hover:border-emerald-300',
     },
     {
       title: 'ACTIVE ALERTS',
       value: summary?.active_alerts ?? 0,
       subtext: summary && summary.active_alerts > 0 ? 'Action required' : 'All clear',
       icon: AlertTriangle,
-      color: summary && summary.active_alerts > 0 ? 'text-amber-400' : 'text-slate-200',
-      iconColor: 'text-amber-400',
-      iconBg: 'bg-amber-500/10 border border-amber-500/20',
-      border: summary && summary.active_alerts > 0 ? 'border-amber-500/40 bg-amber-500/5' : 'border-[#1B2D27]',
+      color: summary && summary.active_alerts > 0 ? 'text-amber-700' : 'text-slate-900',
+      iconColor: 'text-amber-600',
+      iconBg: 'bg-amber-50 border border-amber-100',
+      border: summary && summary.active_alerts > 0 ? 'border-amber-300 bg-amber-50/30' : 'border-slate-200',
     },
     {
       title: 'CRITICAL HAZARDS',
       value: summary?.critical_alerts ?? 0,
       subtext: summary?.critical_alerts ? 'Immediate dispatch' : 'Zero hazard spikes',
       icon: Flame,
-      color: summary && summary.critical_alerts > 0 ? 'text-rose-400' : 'text-slate-200',
-      iconColor: 'text-rose-400',
-      iconBg: 'bg-rose-500/10 border border-rose-500/20',
-      border: summary && summary.critical_alerts > 0 ? 'border-rose-500/40 bg-rose-500/10 shadow-xs' : 'border-[#1B2D27]',
+      color: summary && summary.critical_alerts > 0 ? 'text-rose-700' : 'text-slate-900',
+      iconColor: 'text-rose-600',
+      iconBg: 'bg-rose-50 border border-rose-100',
+      border: summary && summary.critical_alerts > 0 ? 'border-rose-300 bg-rose-50/40 shadow-2xs' : 'border-slate-200',
     },
   ];
 
@@ -58,10 +58,10 @@ export const KpiCards: React.FC<KpiCardsProps> = ({ summary, loading }) => {
         return (
           <div
             key={idx}
-            className={`rounded-2xl bg-[#101D19] border ${card.border} p-4 transition-all duration-200 shadow-xs hover:border-[#2A453C]`}
+            className={`rounded-2xl bg-white border ${card.border} p-4 transition-all duration-200 shadow-2xs hover:shadow-xs`}
           >
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-bold tracking-wider text-slate-400 font-mono uppercase">
+              <span className="text-[11px] font-bold tracking-wider text-slate-500 font-mono uppercase">
                 {card.title}
               </span>
               <div className={`p-2 rounded-xl ${card.iconBg}`}>
@@ -75,7 +75,7 @@ export const KpiCards: React.FC<KpiCardsProps> = ({ summary, loading }) => {
               </span>
             </div>
 
-            <div className="mt-1 text-xs text-slate-400">
+            <div className="mt-1 text-xs text-slate-500">
               {card.subtext}
             </div>
           </div>
