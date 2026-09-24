@@ -63,11 +63,10 @@ export const AlertPanel: React.FC<AlertPanelProps> = ({ alerts, onAcknowledge })
             <button
               key={type}
               onClick={() => setFilterType(type)}
-              className={`px-2 py-0.5 rounded-md text-[11px] font-semibold transition-all cursor-pointer ${
-                filterType === type
+              className={`px-2 py-0.5 rounded-md text-[11px] font-semibold transition-all cursor-pointer ${filterType === type
                   ? 'bg-white text-slate-900 shadow-xs'
                   : 'text-slate-500 hover:text-slate-900'
-              }`}
+                }`}
             >
               {type}
             </button>
@@ -86,13 +85,12 @@ export const AlertPanel: React.FC<AlertPanelProps> = ({ alerts, onAcknowledge })
           filteredAlerts.map((alert) => (
             <div
               key={alert.id}
-              className={`p-3 rounded-xl border transition-all ${
-                alert.acknowledged
+              className={`p-3 rounded-xl border transition-all ${alert.acknowledged
                   ? 'bg-slate-50/60 border-slate-200 opacity-60'
                   : alert.severity === 'CRITICAL'
-                  ? 'bg-rose-50/40 border-rose-200 shadow-2xs'
-                  : 'bg-white border-slate-200 hover:border-slate-300'
-              }`}
+                    ? 'bg-rose-50/40 border-rose-200 shadow-2xs'
+                    : 'bg-white border-slate-200 hover:border-slate-300'
+                }`}
             >
               <div className="flex items-start justify-between gap-2">
                 <div className="flex items-center gap-2">

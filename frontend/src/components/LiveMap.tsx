@@ -116,9 +116,8 @@ export const LiveMap: React.FC<LiveMapProps> = ({ nodes, onSelectNode }) => {
                       <div className="text-xs font-mono font-bold text-emerald-700">{node.node_id}</div>
                       <div className="text-[11px] text-slate-500 truncate max-w-[150px]">{node.name}</div>
                     </div>
-                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                      node.status === 'ONLINE' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-slate-100 text-slate-500 border border-slate-200'
-                    }`}>
+                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${node.status === 'ONLINE' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-slate-100 text-slate-500 border border-slate-200'
+                      }`}>
                       {node.status}
                     </span>
                   </div>
@@ -155,11 +154,10 @@ export const LiveMap: React.FC<LiveMapProps> = ({ nodes, onSelectNode }) => {
                   <div className="mt-2 pt-2 border-t border-slate-200 bg-slate-50 p-2 rounded-lg">
                     <div className="flex items-center justify-between text-[11px] font-bold">
                       <span className="text-slate-600">Hazard Score:</span>
-                      <span className={`font-mono ${
-                        (node.latest_risk?.overall_risk ?? 0) > 75 ? 'text-rose-600' :
-                        (node.latest_risk?.overall_risk ?? 0) > 50 ? 'text-orange-600' :
-                        (node.latest_risk?.overall_risk ?? 0) > 25 ? 'text-amber-600' : 'text-emerald-700'
-                      }`}>
+                      <span className={`font-mono ${(node.latest_risk?.overall_risk ?? 0) > 75 ? 'text-rose-600' :
+                          (node.latest_risk?.overall_risk ?? 0) > 50 ? 'text-orange-600' :
+                            (node.latest_risk?.overall_risk ?? 0) > 25 ? 'text-amber-600' : 'text-emerald-700'
+                        }`}>
                         {node.latest_risk?.overall_risk.toFixed(1) ?? '0.0'}% ({node.latest_risk?.overall_category ?? 'LOW'})
                       </span>
                     </div>

@@ -16,6 +16,19 @@ from backend.routes import (
     alerts_router,
     dashboard_router,
     websocket_router,
+    incidents_router,
+    anomalies_router,
+    data_quality_router,
+    situation_room_router,
+    digital_twin_router,
+    response_router,
+    network_topology_router,
+    audit_router,
+    simulation_router,
+    system_router,
+    configuration_router,
+    analytics_router,
+    explainability_router,
 )
 
 # Logging configuration
@@ -123,6 +136,19 @@ app.include_router(risks_router)
 app.include_router(alerts_router)
 app.include_router(dashboard_router)
 app.include_router(websocket_router)
+app.include_router(incidents_router)
+app.include_router(anomalies_router)
+app.include_router(data_quality_router)
+app.include_router(situation_room_router)
+app.include_router(digital_twin_router)
+app.include_router(response_router)
+app.include_router(network_topology_router)
+app.include_router(audit_router)
+app.include_router(simulation_router)
+app.include_router(system_router)
+app.include_router(configuration_router)
+app.include_router(analytics_router)
+app.include_router(explainability_router)
 
 @app.get("/", tags=["Health"])
 def root_status():

@@ -12,42 +12,42 @@ export const KpiCards: React.FC<KpiCardsProps> = ({ summary, loading }) => {
     {
       title: 'TOTAL NODES',
       value: summary?.total_nodes ?? 0,
-      subtext: `${summary?.offline_nodes ?? 0} offline`,
+      subtext: `${summary?.offline_nodes ?? 0} offline nodes`,
       icon: Cpu,
-      color: 'text-slate-900',
-      iconColor: 'text-blue-600',
-      iconBg: 'bg-blue-50',
-      border: 'border-slate-200 hover:border-blue-200',
+      color: 'text-white',
+      iconColor: 'text-blue-400',
+      iconBg: 'bg-blue-500/10 border border-blue-500/20',
+      border: 'border-[#1B2D27] hover:border-blue-500/30',
     },
     {
       title: 'ONLINE NODES',
       value: summary?.online_nodes ?? 0,
       subtext: summary?.total_nodes ? `${Math.round(((summary.online_nodes) / summary.total_nodes) * 100)}% active fleet` : '0%',
       icon: Wifi,
-      color: 'text-slate-900',
-      iconColor: 'text-emerald-600',
-      iconBg: 'bg-emerald-50',
-      border: 'border-slate-200 hover:border-emerald-200',
+      color: 'text-emerald-400',
+      iconColor: 'text-emerald-400',
+      iconBg: 'bg-emerald-500/10 border border-emerald-500/20',
+      border: 'border-[#1B2D27] hover:border-emerald-500/30',
     },
     {
       title: 'ACTIVE ALERTS',
       value: summary?.active_alerts ?? 0,
-      subtext: summary && summary.active_alerts > 0 ? 'Action needed' : 'All clear',
+      subtext: summary && summary.active_alerts > 0 ? 'Action required' : 'All clear',
       icon: AlertTriangle,
-      color: summary && summary.active_alerts > 0 ? 'text-amber-600' : 'text-slate-900',
-      iconColor: 'text-amber-600',
-      iconBg: 'bg-amber-50',
-      border: summary && summary.active_alerts > 0 ? 'border-amber-200 bg-amber-50/20' : 'border-slate-200',
+      color: summary && summary.active_alerts > 0 ? 'text-amber-400' : 'text-slate-200',
+      iconColor: 'text-amber-400',
+      iconBg: 'bg-amber-500/10 border border-amber-500/20',
+      border: summary && summary.active_alerts > 0 ? 'border-amber-500/40 bg-amber-500/5' : 'border-[#1B2D27]',
     },
     {
       title: 'CRITICAL HAZARDS',
       value: summary?.critical_alerts ?? 0,
-      subtext: summary?.critical_alerts ? 'Immediate action required' : 'No critical anomalies',
+      subtext: summary?.critical_alerts ? 'Immediate dispatch' : 'Zero hazard spikes',
       icon: Flame,
-      color: summary && summary.critical_alerts > 0 ? 'text-rose-600' : 'text-slate-900',
-      iconColor: 'text-rose-600',
-      iconBg: 'bg-rose-50',
-      border: summary && summary.critical_alerts > 0 ? 'border-rose-300 bg-rose-50/30' : 'border-slate-200',
+      color: summary && summary.critical_alerts > 0 ? 'text-rose-400' : 'text-slate-200',
+      iconColor: 'text-rose-400',
+      iconBg: 'bg-rose-500/10 border border-rose-500/20',
+      border: summary && summary.critical_alerts > 0 ? 'border-rose-500/40 bg-rose-500/10 shadow-xs' : 'border-[#1B2D27]',
     },
   ];
 
@@ -58,24 +58,24 @@ export const KpiCards: React.FC<KpiCardsProps> = ({ summary, loading }) => {
         return (
           <div
             key={idx}
-            className={`rounded-xl bg-white border ${card.border} p-4 transition-all duration-200 shadow-xs hover:shadow-sm`}
+            className={`rounded-2xl bg-[#101D19] border ${card.border} p-4 transition-all duration-200 shadow-xs hover:border-[#2A453C]`}
           >
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-bold tracking-wider text-slate-500 font-mono">
+              <span className="text-[10px] font-bold tracking-wider text-slate-400 font-mono uppercase">
                 {card.title}
               </span>
-              <div className={`p-2 rounded-lg ${card.iconBg}`}>
+              <div className={`p-2 rounded-xl ${card.iconBg}`}>
                 <Icon className={`w-4 h-4 ${card.iconColor}`} />
               </div>
             </div>
 
             <div className="mt-2 flex items-baseline gap-2">
-              <span className={`text-2xl lg:text-3xl font-extrabold tracking-tight ${card.color}`}>
+              <span className={`text-2xl lg:text-3xl font-extrabold font-mono tracking-tight ${card.color}`}>
                 {loading ? '--' : card.value}
               </span>
             </div>
 
-            <div className="mt-1 text-xs text-slate-500">
+            <div className="mt-1 text-xs text-slate-400">
               {card.subtext}
             </div>
           </div>

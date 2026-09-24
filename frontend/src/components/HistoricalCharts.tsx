@@ -117,11 +117,10 @@ export const HistoricalCharts: React.FC<HistoricalChartsProps> = ({ selectedNode
             <button
               key={tf}
               onClick={() => setTimeFilter(tf)}
-              className={`px-2.5 py-1 text-xs font-semibold rounded-md transition-all cursor-pointer ${
-                timeFilter === tf
+              className={`px-2.5 py-1 text-xs font-semibold rounded-md transition-all cursor-pointer ${timeFilter === tf
                   ? 'bg-white text-slate-900 shadow-xs'
                   : 'text-slate-500 hover:text-slate-900'
-              }`}
+                }`}
             >
               {tf}
             </button>
@@ -139,11 +138,10 @@ export const HistoricalCharts: React.FC<HistoricalChartsProps> = ({ selectedNode
             <button
               key={m}
               onClick={() => setActiveMetric(m)}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${
-                isActive
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${isActive
                   ? 'bg-slate-900 text-white border-slate-900 shadow-xs'
                   : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-              }`}
+                }`}
             >
               <Icon className="w-3.5 h-3.5" style={{ color: isActive ? '#ffffff' : cfg.color }} />
               <span>{cfg.label}</span>

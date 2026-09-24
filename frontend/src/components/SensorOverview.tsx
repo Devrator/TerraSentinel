@@ -103,11 +103,10 @@ export const SensorOverview: React.FC<SensorOverviewProps> = ({
               <button
                 key={n.node_id}
                 onClick={() => onSelectNode(n.node_id)}
-                className={`px-3 py-1 rounded-lg text-xs font-mono font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
-                  isSelected
+                className={`px-3 py-1 rounded-lg text-xs font-mono font-bold transition-all flex items-center gap-1.5 cursor-pointer ${isSelected
                     ? 'bg-emerald-600 text-white shadow-xs'
                     : 'bg-slate-100 text-slate-600 hover:text-slate-900 hover:bg-slate-200/80'
-                }`}
+                  }`}
               >
                 <span className={`w-1.5 h-1.5 rounded-full ${n.status === 'ONLINE' ? (isSelected ? 'bg-white' : 'bg-emerald-500') : 'bg-slate-400'}`} />
                 {n.node_id}

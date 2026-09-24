@@ -111,7 +111,34 @@ class SensorService:
         db.commit()
         db.refresh(prediction)
 
-        # 6. Evaluate & Store Alerts
+        # 6. Check for Anomaly Events
+        from backend.models.anomaly import AnomalyEvent
+        prev_reading_dict = recent_dicts[-2] if len(recent_dicts) >= 2 else None
+        current_dict = {
+            "temperature": payload.temperature,
+            "humidity": payload.humidity,
+            "pressure": payload.pressure,
+            "rain_value": payload.rain_value,
+            "air_quality": payload.air_quality,
+        }
+        detected_anom = RiskEngine.detect_anomaly(current_dict, prev_reading_dict)
+        if detected_anom:
+            anom_entry = AnomalyEvent(
+                node_id=payload.node_id,
+                parameter=detected_anom["parameter"],
+                previous_value=detected_anom["previous_value"],
+                current_value=detected_anom["current_value"],
+                change_pct=detected_anom["change_pct"],
+                severity=detected_anom["severity"],
+                anomaly_type=detected_anom["anomaly_type"],
+                description=detected_anom["description"],
+                detected_at=now,
+                resolved=False
+            )
+            db.add(anom_entry)
+            db.commit()
+
+        # 7. Evaluate & Store Alerts + Incident Correlation
         created_alerts = AlertService.process_node_risks(
             db=db,
             node_id=payload.node_id,
@@ -121,7 +148,20 @@ class SensorService:
             battery_percentage=payload.battery_percentage
         )
 
-        # 7. Broadcast update via WebSocket to connected dashboard clients
+        # 8. Auto-create/correlate incidents for High/Critical risks
+        from backend.services.incident_service import IncidentService
+        for alert in created_alerts:
+            if alert.severity in ["HIGH", "CRITICAL"]:
+                IncidentService.create_or_update_incident(
+                    db=db,
+                    node_id=payload.node_id,
+                    risk_type=alert.risk_type,
+                    severity=alert.severity,
+                    risk_score=alert.risk_score,
+                    evidence_snapshot=f"T:{payload.temperature}°C, H:{payload.humidity}%, AQI:{payload.air_quality}"
+                )
+
+        # 9. Broadcast update via WebSocket to connected dashboard clients
         ws_payload = {
             "type": "SENSOR_UPDATE",
             "node_id": payload.node_id,
