@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: terrasentinel-backend
+    runtime: python
+    plan: free
+    region: oregon
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn backend.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.8
+      - key: NODE_OFFLINE_THRESHOLD_SECONDS
+        value: "45"
+      - key: ALERT_COOLDOWN_SECONDS
+        value: "30"
+      - key: DEMO_MODE
+        value: "true"
+      # Optional: Connect to Render PostgreSQL or leave empty for auto SQLite fallback
+      # - key: DATABASE_URL
+      #   fromDatabase:
+      #     name: terrasentinel-db
+      #     property: connectionString
