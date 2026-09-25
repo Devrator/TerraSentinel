@@ -264,14 +264,7 @@ This repository includes a native **Render Blueprint** (`render.yaml`) and Docke
    - **Start Command**: `uvicorn backend.main:app --host 0.0.0.0 --port $PORT`
    - **Plan**: `Free`
 
-### Connecting Frontend to Render Cloud:
-In `frontend/.env`:
-```env
-VITE_API_URL=https://terrasentinel-backend-svj3.onrender.com
-VITE_WS_URL=wss://terrasentinel-backend-svj3.onrender.com/ws/dashboard
-```
 
----
 
 ## 📡 REST API Reference
 
