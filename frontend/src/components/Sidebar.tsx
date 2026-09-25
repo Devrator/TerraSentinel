@@ -112,37 +112,38 @@ export const Sidebar: React.FC<SidebarProps> = ({
         isCollapsed ? 'w-16' : 'w-64'
       }`}
     >
+      {/* Floating Center-Border Collapse / Expand Button */}
+      <button
+        onClick={onToggleCollapse}
+        className="hidden md:flex absolute top-1/2 -right-3 -translate-y-1/2 z-50 w-6 h-6 rounded-full bg-white border border-slate-300 text-slate-600 hover:text-slate-900 hover:bg-slate-100 shadow-md items-center justify-center transition-all hover:scale-110 cursor-pointer"
+        title={isCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
+      >
+        {isCollapsed ? <ChevronRight className="w-3.5 h-3.5" /> : <ChevronLeft className="w-3.5 h-3.5" />}
+      </button>
+
       {/* Sidebar Header Brand with Official Logo */}
-      <div className="h-20 flex items-center justify-between px-3.5 border-b border-slate-200 bg-slate-50/50">
+      <div className="h-20 border-b border-slate-200 bg-slate-50/50 flex items-center justify-center px-2">
         {!isCollapsed ? (
-          <div className="flex items-center gap-2 overflow-hidden py-1">
+          <div className="flex items-center justify-center overflow-hidden py-1 w-full">
             <img
               src="/logo.png"
               alt="TerraSentinel Logo"
-              className="h-14 sm:h-15 w-auto object-contain shrink-0 transition-transform hover:scale-102"
+              className="h-14 sm:h-15 w-auto object-contain transition-transform hover:scale-102"
             />
           </div>
         ) : (
-          <div className="w-full flex justify-center py-1">
+          <div className="flex items-center justify-center w-full py-1">
             <img
-              src="/logo.png"
+              src="/logo-collapsed.png"
               alt="TerraSentinel Logo"
-              className="h-10 w-auto object-contain"
+              className="h-10 w-10 object-contain transition-transform hover:scale-105"
             />
           </div>
         )}
-
-        <button
-          onClick={onToggleCollapse}
-          className="hidden md:flex p-1.5 rounded-lg bg-white hover:bg-slate-100 border border-slate-200 text-slate-500 hover:text-slate-800 transition-all cursor-pointer shrink-0 ml-1 shadow-2xs"
-          title={isCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
-        >
-          {isCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
-        </button>
       </div>
 
-      {/* Navigation Group Items */}
-      <div className="flex-1 overflow-y-auto overflow-x-hidden py-3 px-2 space-y-4 scrollbar-thin">
+      {/* Navigation Group Items (Scrollbar Hidden) */}
+      <div className="flex-1 overflow-y-auto overflow-x-hidden py-3 px-2 space-y-4 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
         {navGroups.map((group) => (
           <div key={group.category} className="space-y-1">
             {!isCollapsed && (

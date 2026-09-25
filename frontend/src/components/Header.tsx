@@ -1,13 +1,13 @@
 import React from 'react';
-import { Radio, RefreshCw, Cpu, AlertTriangle, ShieldCheck, Sparkles } from 'lucide-react';
+import { Cpu, AlertTriangle, ShieldCheck, Sparkles } from 'lucide-react';
 import type { DashboardSummary } from '../types';
 
 interface HeaderProps {
   summary: DashboardSummary | null;
   isConnected: boolean;
-  lastUpdateTime: Date | null;
-  onRefresh: () => void;
-  isLoading: boolean;
+  lastUpdateTime?: Date | null;
+  onRefresh?: () => void;
+  isLoading?: boolean;
   onTriggerDemo?: () => void;
   isDemoRunning?: boolean;
 }
@@ -15,9 +15,6 @@ interface HeaderProps {
 export const Header: React.FC<HeaderProps> = ({
   summary,
   isConnected,
-  lastUpdateTime,
-  onRefresh,
-  isLoading,
   onTriggerDemo,
   isDemoRunning,
 }) => {
@@ -69,11 +66,10 @@ export const Header: React.FC<HeaderProps> = ({
             {onTriggerDemo && (
               <button
                 onClick={onTriggerDemo}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
-                  isDemoRunning
-                    ? 'bg-purple-600 text-white shadow-2xs animate-pulse'
-                    : 'bg-purple-50 text-purple-700 hover:bg-purple-100 border border-purple-200'
-                }`}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${isDemoRunning
+                  ? 'bg-purple-600 text-white shadow-2xs animate-pulse'
+                  : 'bg-purple-50 text-purple-700 hover:bg-purple-100 border border-purple-200'
+                  }`}
                 title="Trigger automated 3-minute hackathon demonstration"
               >
                 <Sparkles className="w-3.5 h-3.5" />
@@ -91,30 +87,12 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
 
             {/* Live Stream Capsule */}
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs">
-              <Radio className={`w-3.5 h-3.5 ${isConnected ? 'text-emerald-600 animate-pulse' : 'text-slate-400'}`} />
-              <span className={`font-semibold ${isConnected ? 'text-emerald-700' : 'text-slate-500'}`}>
-                {isConnected ? 'Live Telemetry' : 'Offline'}
-              </span>
-            </div>
+
 
             {/* Health Status Pill */}
             {getStatusBadge()}
 
-            {/* Sync Timestamp & Action Button */}
-            <div className="flex items-center gap-1.5 pl-2 border-l border-slate-200">
-              <span className="text-[11px] text-slate-400 font-mono hidden xl:inline-block">
-                {lastUpdateTime ? lastUpdateTime.toLocaleTimeString() : ''}
-              </span>
-              <button
-                onClick={onRefresh}
-                disabled={isLoading}
-                className="p-2 rounded-xl bg-slate-100/80 hover:bg-slate-200 text-slate-600 hover:text-slate-900 border border-slate-200 transition-all disabled:opacity-50 cursor-pointer active:scale-95"
-                title="Sync Live Data"
-              >
-                <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin text-emerald-600' : ''}`} />
-              </button>
-            </div>
+
 
           </div>
         </div>

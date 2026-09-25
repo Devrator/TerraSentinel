@@ -38,9 +38,7 @@ export const LiveMonitoringView: React.FC<LiveMonitoringViewProps> = ({
           </div>
         </div>
 
-        <span className="px-3 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200 text-xs font-mono text-emerald-700 font-bold">
-          LIVE WEBSOCKET STREAM
-        </span>
+
       </div>
 
       {/* Sensor Overview */}

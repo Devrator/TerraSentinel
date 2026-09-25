@@ -1,22 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../services/api';
 import type { Anomaly } from '../types';
-import { Zap, ShieldCheck, RefreshCw } from 'lucide-react';
+import { Zap, ShieldCheck } from 'lucide-react';
 
 export const AnomaliesView: React.FC = () => {
   const [anomalies, setAnomalies] = useState<Anomaly[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
   const [filterSeverity, setFilterSeverity] = useState<string>('ALL');
 
   const fetchAnomalies = async () => {
     try {
-      setLoading(true);
       const res = await api.getAnomalies(50);
       setAnomalies(res);
     } catch (err) {
       console.error('Failed to load anomalies:', err);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -57,12 +53,7 @@ export const AnomaliesView: React.FC = () => {
             <option value="MODERATE">Moderate</option>
           </select>
 
-          <button
-            onClick={fetchAnomalies}
-            className="px-3 py-1.5 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs"
-          >
-            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-emerald-600' : ''}`} /> Sync
-          </button>
+
         </div>
       </div>
 
@@ -75,9 +66,8 @@ export const AnomaliesView: React.FC = () => {
             return (
               <div
                 key={anom.id}
-                className={`p-4 rounded-xl bg-white border space-y-3 transition-all shadow-2xs ${
-                  isCrit ? 'border-rose-300 ring-1 ring-rose-200/50' : 'border-slate-200'
-                }`}
+                className={`p-4 rounded-xl bg-white border space-y-3 transition-all shadow-2xs ${isCrit ? 'border-rose-300 ring-1 ring-rose-200/50' : 'border-slate-200'
+                  }`}
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
@@ -86,9 +76,8 @@ export const AnomaliesView: React.FC = () => {
                       {anom.parameter}
                     </span>
                   </div>
-                  <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold border ${
-                    isCrit ? 'bg-rose-50 text-rose-700 border-rose-200' : 'bg-amber-50 text-amber-700 border-amber-200'
-                  }`}>
+                  <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold border ${isCrit ? 'bg-rose-50 text-rose-700 border-rose-200' : 'bg-amber-50 text-amber-700 border-amber-200'
+                    }`}>
                     {anom.severity}
                   </span>
                 </div>

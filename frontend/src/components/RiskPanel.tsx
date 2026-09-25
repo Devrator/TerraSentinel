@@ -11,7 +11,7 @@ interface RiskPanelProps {
 
 export const RiskPanel: React.FC<RiskPanelProps> = ({
   selectedNode,
-  demoMode = true,
+  demoMode: _demoMode = true,
 }) => {
   const risk = selectedNode?.latest_risk;
 
@@ -96,11 +96,7 @@ export const RiskPanel: React.FC<RiskPanelProps> = ({
               <h2 className="text-sm font-bold uppercase tracking-wider text-slate-900">
                 AI Environmental Risk Assessment
               </h2>
-              {demoMode && (
-                <span className="px-2 py-0.5 rounded text-[10px] font-mono font-semibold bg-amber-50 text-amber-700 border border-amber-200">
-                  Prototype Risk Engine
-                </span>
-              )}
+
             </div>
             <p className="text-xs text-slate-500 font-medium">
               Multi-variate predictive hazard scoring for <span className="font-mono text-emerald-700 font-bold">{selectedNode?.node_id ?? 'None'}</span>

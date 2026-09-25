@@ -155,8 +155,8 @@ export const LiveMap: React.FC<LiveMapProps> = ({ nodes, onSelectNode }) => {
                     <div className="flex items-center justify-between text-[11px] font-bold">
                       <span className="text-slate-600">Hazard Score:</span>
                       <span className={`font-mono ${(node.latest_risk?.overall_risk ?? 0) > 75 ? 'text-rose-600' :
-                          (node.latest_risk?.overall_risk ?? 0) > 50 ? 'text-orange-600' :
-                            (node.latest_risk?.overall_risk ?? 0) > 25 ? 'text-amber-600' : 'text-emerald-700'
+                        (node.latest_risk?.overall_risk ?? 0) > 50 ? 'text-orange-600' :
+                          (node.latest_risk?.overall_risk ?? 0) > 25 ? 'text-amber-600' : 'text-emerald-700'
                         }`}>
                         {node.latest_risk?.overall_risk.toFixed(1) ?? '0.0'}% ({node.latest_risk?.overall_category ?? 'LOW'})
                       </span>
