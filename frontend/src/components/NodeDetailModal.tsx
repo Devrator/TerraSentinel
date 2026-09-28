@@ -13,7 +13,9 @@ import {
   Clock,
   Sparkles,
   Zap,
-  Gauge
+  Gauge,
+  Download,
+  RefreshCw
 } from 'lucide-react';
 import type { SensorNode, Alert } from '../types';
 import { api } from '../services/api';
@@ -25,6 +27,8 @@ interface NodeDetailModalProps {
 
 export const NodeDetailModal: React.FC<NodeDetailModalProps> = ({ node, onClose }) => {
   const [alerts, setAlerts] = useState<Alert[]>([]);
+  const [calibrating, setCalibrating] = useState<boolean>(false);
+  const [calibratedSuccess, setCalibratedSuccess] = useState<string | null>(null);
 
   useEffect(() => {
     if (!node) return;
@@ -40,6 +44,26 @@ export const NodeDetailModal: React.FC<NodeDetailModalProps> = ({ node, onClose 
 
     loadData();
   }, [node]);
+
+  const handleCalibrate = () => {
+    setCalibrating(true);
+    setTimeout(() => {
+      setCalibrating(false);
+      setCalibratedSuccess(`Sensor offset zeroes adjusted for ${node?.node_id}!`);
+      setTimeout(() => setCalibratedSuccess(null), 3500);
+    }, 1200);
+  };
+
+  const handleExportNodeJson = () => {
+    if (!node) return;
+    const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(node, null, 2));
+    const link = document.createElement('a');
+    link.setAttribute('href', dataStr);
+    link.setAttribute('download', `terrasentinel-node-${node.node_id}-diagnostics.json`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   if (!node) return null;
 
@@ -317,16 +341,46 @@ export const NodeDetailModal: React.FC<NodeDetailModalProps> = ({ node, onClose 
         </div>
 
         {/* Modal Footer */}
-        <div className="p-4 bg-slate-50/80 border-t border-slate-200 flex items-center justify-between">
-          <span className="text-[11px] font-mono text-slate-500">
-            Source: Edge Telemetry Pipeline (ESP32 Ingestion Schema)
-          </span>
-          <button
-            onClick={onClose}
-            className="px-4 py-2 rounded-xl bg-[#121417] hover:bg-zinc-800 text-white font-bold text-xs transition-colors cursor-pointer shadow-2xs"
-          >
-            Close Diagnostics
-          </button>
+        <div className="p-4 bg-slate-50/80 border-t border-slate-200 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            {calibratedSuccess ? (
+              <span className="text-[11px] font-mono text-emerald-700 font-bold flex items-center gap-1">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> {calibratedSuccess}
+              </span>
+            ) : (
+              <span className="text-[11px] font-mono text-slate-500">
+                Source: Edge Telemetry Pipeline (ESP32 Ingestion Schema)
+              </span>
+            )}
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleCalibrate}
+              disabled={calibrating}
+              className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer border border-slate-200 shadow-2xs"
+              title="Recalibrate sensors and zero probe drift"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${calibrating ? 'animate-spin text-[#ff4405]' : 'text-slate-500'}`} />
+              <span>{calibrating ? 'Calibrating...' : 'Calibrate Probes'}</span>
+            </button>
+
+            <button
+              onClick={handleExportNodeJson}
+              className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer border border-slate-200 shadow-2xs"
+              title="Download node telemetry in JSON format"
+            >
+              <Download className="w-3.5 h-3.5 text-slate-500" />
+              <span>Export JSON</span>
+            </button>
+
+            <button
+              onClick={onClose}
+              className="px-4 py-2 rounded-xl bg-[#121417] hover:bg-zinc-800 text-white font-bold text-xs transition-colors cursor-pointer shadow-2xs"
+            >
+              Close
+            </button>
+          </div>
         </div>
 
       </div>

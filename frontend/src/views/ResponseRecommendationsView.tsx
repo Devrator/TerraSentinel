@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../services/api';
 import type { ResponseRecommendation } from '../types';
-import { CheckSquare, ShieldCheck, RefreshCw, Sparkles, CheckCircle2 } from 'lucide-react';
+import { CheckSquare, ShieldCheck, RefreshCw, Sparkles, CheckCircle2, Download, Send } from 'lucide-react';
 
 export const ResponseRecommendationsView: React.FC = () => {
   const [recommendations, setRecommendations] = useState<ResponseRecommendation[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [checkedTasks, setCheckedTasks] = useState<Record<string, boolean>>({});
+  const [dispatchSuccess, setDispatchSuccess] = useState<string | null>(null);
+  const [dispatchingId, setDispatchingId] = useState<number | null>(null);
 
   const fetchRecommendations = async () => {
     try {
@@ -22,6 +25,65 @@ export const ResponseRecommendationsView: React.FC = () => {
   useEffect(() => {
     fetchRecommendations();
   }, []);
+
+  const toggleTask = (alertId: number, step: number) => {
+    const key = `${alertId}_${step}`;
+    setCheckedTasks((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const handleDispatchIncident = async (rec: ResponseRecommendation) => {
+    try {
+      setDispatchingId(rec.alert_id);
+      const incident = await api.createIncident({
+        origin_node_id: rec.node_id,
+        risk_type: rec.risk_type,
+        severity: rec.severity,
+        current_risk: 85.0,
+        notes: `Emergency response protocol initiated for Alert #${rec.alert_id}. Directives: ${rec.recommended_actions.map((a) => `${a.step}. ${a.task}`).join(' | ')}`
+      });
+
+      const dispatchRes = await api.dispatchIncident(incident.id, {
+        agency: rec.risk_type === 'FIRE' ? 'FIRE_RESCUE' : rec.risk_type === 'FLOOD' ? 'SDMA' : 'POLICE',
+        operator_name: 'Command Duty Officer',
+        priority: rec.severity,
+      });
+
+      setDispatchSuccess(`Incident ${incident.incident_number} logged! Dispatched to ${dispatchRes.agency_name} (ETA: ${dispatchRes.estimated_eta_minutes} mins)`);
+      setTimeout(() => setDispatchSuccess(null), 5000);
+    } catch (err: any) {
+      console.error('Failed to dispatch incident:', err);
+    } finally {
+      setDispatchingId(null);
+    }
+  };
+
+  const handleExportDirectives = () => {
+    if (recommendations.length === 0) return;
+    let content = `# TerraSentinel Operational Standard Operating Procedures (SOP)\n`;
+    content += `Generated: ${new Date().toLocaleString()}\n\n`;
+
+    recommendations.forEach((rec) => {
+      content += `## Alert #${rec.alert_id} — ${rec.severity} ${rec.risk_type} RISK\n`;
+      content += `- **Target Node / Sector:** ${rec.node_id}\n`;
+      content += `- **Trigger Timestamp:** ${rec.triggered_at}\n`;
+      content += `- **Anomaly Description:** ${rec.message}\n`;
+      content += `- **Corroborating Evidence:** ${rec.evidence}\n\n`;
+      content += `### Standard Operating Checklist:\n`;
+      rec.recommended_actions.forEach((act) => {
+        const isDone = checkedTasks[`${rec.alert_id}_${act.step}`] ? '[x]' : '[ ]';
+        content += `- ${isDone} **Step ${act.step}:** ${act.task}\n`;
+      });
+      content += `\n*${rec.disclaimer}*\n\n---\n\n`;
+    });
+
+    const dataStr = 'data:text/markdown;charset=utf-8,' + encodeURIComponent(content);
+    const link = document.createElement('a');
+    link.setAttribute('href', dataStr);
+    link.setAttribute('download', `terrasentinel-sop-directives.md`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   return (
     <div className="space-y-5">
@@ -46,13 +108,33 @@ export const ResponseRecommendationsView: React.FC = () => {
           </div>
         </div>
 
-        <button
-          onClick={fetchRecommendations}
-          className="px-4 py-2 rounded-xl bg-[#121417] hover:bg-zinc-800 text-white text-xs font-bold flex items-center gap-2 transition-all cursor-pointer shadow-2xs"
-        >
-          <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-[#ff4405]' : 'text-slate-400'}`} /> Refresh Protocols
-        </button>
+        <div className="flex flex-wrap items-center gap-2">
+          {recommendations.length > 0 && (
+            <button
+              onClick={handleExportDirectives}
+              className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer border border-slate-200 shadow-2xs"
+              title="Download full SOP directives in Markdown"
+            >
+              <Download className="w-3.5 h-3.5 text-slate-600" /> Export SOP (.md)
+            </button>
+          )}
+
+          <button
+            onClick={fetchRecommendations}
+            className="px-4 py-2 rounded-xl bg-[#121417] hover:bg-zinc-800 text-white text-xs font-bold flex items-center gap-2 transition-all cursor-pointer shadow-2xs"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-[#ff4405]' : 'text-slate-400'}`} /> Refresh Protocols
+          </button>
+        </div>
       </div>
+
+      {/* Dispatch Success Alert */}
+      {dispatchSuccess && (
+        <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs font-semibold flex items-center gap-3 shadow-2xs animate-fadeIn">
+          <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+          <span>{dispatchSuccess}</span>
+        </div>
+      )}
 
       {/* Protocols List */}
       <div className="space-y-4">
@@ -75,8 +157,18 @@ export const ResponseRecommendationsView: React.FC = () => {
                   </span>
                 </div>
 
-                <div className="text-xs text-slate-400 font-mono">
-                  Triggered: {new Date(rec.triggered_at).toLocaleTimeString()}
+                <div className="flex items-center gap-3">
+                  <div className="text-xs text-slate-400 font-mono">
+                    Triggered: {new Date(rec.triggered_at).toLocaleTimeString()}
+                  </div>
+                  <button
+                    onClick={() => handleDispatchIncident(rec)}
+                    disabled={dispatchingId === rec.alert_id}
+                    className="px-3.5 py-1.5 rounded-xl bg-[#ff4405] hover:bg-[#e03b00] text-white text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                  >
+                    <Send className="w-3.5 h-3.5" />
+                    <span>{dispatchingId === rec.alert_id ? 'Dispatching...' : 'Dispatch Unit'}</span>
+                  </button>
                 </div>
               </div>
 
@@ -99,25 +191,41 @@ export const ResponseRecommendationsView: React.FC = () => {
 
               {/* Checklist */}
               <div className="space-y-2.5">
-                <h4 className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-500">
-                  Standard Operating Procedures (Action Checklist)
-                </h4>
+                <div className="flex items-center justify-between">
+                  <h4 className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-500">
+                    Standard Operating Procedures (Action Checklist)
+                  </h4>
+                  <span className="text-[10px] font-mono text-slate-400">
+                    Click items to mark completed
+                  </span>
+                </div>
 
                 <div className="space-y-2">
-                  {rec.recommended_actions.map((act) => (
-                    <div
-                      key={act.step}
-                      className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 flex items-start gap-3 text-xs font-medium hover:bg-slate-100/70 transition-colors"
-                    >
-                      <div className="w-6 h-6 rounded-lg bg-[#121417] text-white flex items-center justify-center font-mono font-bold text-[11px] shrink-0 mt-0.5 shadow-2xs">
-                        {act.step}
-                      </div>
-                      <div className="flex-1 text-slate-800 leading-relaxed font-semibold">
-                        {act.task}
-                      </div>
-                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                    </div>
-                  ))}
+                  {rec.recommended_actions.map((act) => {
+                    const isCompleted = !!checkedTasks[`${rec.alert_id}_${act.step}`];
+                    return (
+                      <button
+                        key={act.step}
+                        type="button"
+                        onClick={() => toggleTask(rec.alert_id, act.step)}
+                        className={`w-full text-left p-3.5 rounded-xl border flex items-start gap-3 text-xs transition-all cursor-pointer ${
+                          isCompleted
+                            ? 'bg-emerald-50/70 border-emerald-300 text-emerald-950 shadow-2xs'
+                            : 'bg-slate-50 border-slate-200/80 hover:bg-slate-100 text-slate-800'
+                        }`}
+                      >
+                        <div className={`w-6 h-6 rounded-lg flex items-center justify-center font-mono font-bold text-[11px] shrink-0 mt-0.5 shadow-2xs ${
+                          isCompleted ? 'bg-emerald-600 text-white' : 'bg-[#121417] text-white'
+                        }`}>
+                          {act.step}
+                        </div>
+                        <div className={`flex-1 leading-relaxed font-semibold ${isCompleted ? 'line-through opacity-75' : ''}`}>
+                          {act.task}
+                        </div>
+                        <CheckCircle2 className={`w-4 h-4 shrink-0 mt-0.5 ${isCompleted ? 'text-emerald-600' : 'text-slate-300'}`} />
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 

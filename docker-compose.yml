@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: terrasentinel-backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - PORT=8000
+      - DATABASE_URL=sqlite:///./environment_monitoring.db
+      - ENVIRONMENT=production
+      - CORS_ORIGINS=*
+    volumes:
+      - terrasentinel-data:/app
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/observability/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - terrasentinel-net
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: terrasentinel-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "3000:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - terrasentinel-net
+
+networks:
+  terrasentinel-net:
+    driver: bridge
+
+volumes:
+  terrasentinel-data:
+    driver: local

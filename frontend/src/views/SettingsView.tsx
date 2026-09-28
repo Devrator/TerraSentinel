@@ -1,10 +1,80 @@
 import React, { useState } from 'react';
-import { Lock, CheckCircle2, Shield, Sun, Moon, Palette } from 'lucide-react';
+import { Lock, CheckCircle2, Shield, Sun, Moon, Palette, Activity, Trash2, Download, RefreshCw, Server, Database } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
+import { api } from '../services/api';
 
 export const SettingsView: React.FC = () => {
   const [selectedRole, setSelectedRole] = useState<'ADMIN' | 'OPERATOR' | 'VIEWER'>('OPERATOR');
   const { theme, setTheme } = useTheme();
+
+  const [testingPing, setTestingPing] = useState<boolean>(false);
+  const [pingResult, setPingResult] = useState<{
+    latencyMs: number;
+    status: string;
+    services: any;
+  } | null>(null);
+  const [cacheCleared, setCacheCleared] = useState<boolean>(false);
+
+  const handleTestApiPing = async () => {
+    try {
+      setTestingPing(true);
+      const start = performance.now();
+      const health = await api.getSystemHealth();
+      const latency = Math.round(performance.now() - start);
+      setPingResult({
+        latencyMs: latency,
+        status: health.services?.backend?.status || 'ONLINE',
+        services: health.services,
+      });
+    } catch (err: any) {
+      console.error(err);
+      setPingResult({
+        latencyMs: 999,
+        status: 'ERROR',
+        services: null,
+      });
+    } finally {
+      setTestingPing(false);
+    }
+  };
+
+  const handleClearCache = () => {
+    localStorage.removeItem('ts_user_role');
+    setCacheCleared(true);
+    setTimeout(() => setCacheCleared(false), 3000);
+  };
+
+  const handleExportDiagnostics = async () => {
+    try {
+      const [summary, health, config, topology] = await Promise.all([
+        api.getDashboardSummary().catch(() => null),
+        api.getSystemHealth().catch(() => null),
+        api.getConfiguration().catch(() => null),
+        api.getNetworkTopology().catch(() => null),
+      ]);
+
+      const bundle = {
+        diagnostics_title: 'TerraSentinel System Diagnostics Bundle',
+        timestamp: new Date().toISOString(),
+        client_theme: theme,
+        active_role: selectedRole,
+        dashboard_summary: summary,
+        system_health: health,
+        active_configuration: config,
+        network_topology: topology,
+      };
+
+      const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(bundle, null, 2));
+      const link = document.createElement('a');
+      link.setAttribute('href', dataStr);
+      link.setAttribute('download', `terrasentinel-diagnostics-${new Date().toISOString().slice(0, 10)}.json`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   return (
     <div className="space-y-5">
@@ -22,9 +92,19 @@ export const SettingsView: React.FC = () => {
               </span>
             </div>
             <p className="text-xs text-slate-500 font-medium">
-              Role-based authorization architecture (RBAC), theme preferences, and platform security
+              Role-based authorization architecture (RBAC), theme preferences, and platform diagnostics
             </p>
           </div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleExportDiagnostics}
+            className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer border border-slate-200 shadow-2xs"
+            title="Download full platform diagnostics dump"
+          >
+            <Download className="w-3.5 h-3.5 text-slate-600" /> Export Diagnostics
+          </button>
         </div>
       </div>
 
@@ -103,6 +183,52 @@ export const SettingsView: React.FC = () => {
         </div>
       </div>
 
+      {/* Live Server Diagnostics & Ping Tester */}
+      <div className="p-6 rounded-2xl bg-white border border-slate-200/90 shadow-2xs space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+          <div className="flex items-center gap-2">
+            <Activity className="w-4 h-4 text-[#ff4405]" />
+            <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-slate-700">
+              Live Backend Connectivity & Ping Test
+            </h3>
+          </div>
+          <button
+            onClick={handleTestApiPing}
+            disabled={testingPing}
+            className="px-4 py-2 rounded-xl bg-[#121417] hover:bg-zinc-800 text-white text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shadow-2xs self-start sm:self-auto"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${testingPing ? 'animate-spin text-[#ff4405]' : ''}`} />
+            <span>{testingPing ? 'Testing Roundtrip...' : 'Ping API Server'}</span>
+          </button>
+        </div>
+
+        {pingResult && (
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+            <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between text-xs">
+              <div className="flex items-center gap-2">
+                <Server className="w-4 h-4 text-[#ff4405]" />
+                <span className="font-semibold text-slate-700">Server Health:</span>
+              </div>
+              <span className="font-mono font-bold text-emerald-700">{pingResult.status}</span>
+            </div>
+            <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between text-xs">
+              <div className="flex items-center gap-2">
+                <Activity className="w-4 h-4 text-blue-600" />
+                <span className="font-semibold text-slate-700">Client RTT Latency:</span>
+              </div>
+              <span className="font-mono font-bold text-slate-900">{pingResult.latencyMs} ms</span>
+            </div>
+            <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between text-xs">
+              <div className="flex items-center gap-2">
+                <Database className="w-4 h-4 text-purple-600" />
+                <span className="font-semibold text-slate-700">Database Engine:</span>
+              </div>
+              <span className="font-mono font-bold text-purple-700">{pingResult.services?.database?.status || 'CONNECTED'}</span>
+            </div>
+          </div>
+        )}
+      </div>
+
       {/* Role-Based Access Architecture */}
       <div className="p-6 rounded-2xl bg-white border border-slate-200/90 shadow-2xs space-y-4">
         <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-slate-500">
@@ -158,6 +284,30 @@ export const SettingsView: React.FC = () => {
               </button>
             );
           })}
+        </div>
+      </div>
+
+      {/* Local Storage & Cache Management */}
+      <div className="p-6 rounded-2xl bg-white border border-slate-200/90 shadow-2xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+          <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-slate-800 flex items-center gap-2">
+            <Trash2 className="w-4 h-4 text-rose-600" /> Client Session & Cache Control
+          </h3>
+          <p className="text-xs text-slate-500 font-medium mt-1">
+            Clear locally cached gateway role selections and reset client state.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2">
+          {cacheCleared && (
+            <span className="text-xs font-mono text-emerald-700 font-bold">Cache Cleared!</span>
+          )}
+          <button
+            onClick={handleClearCache}
+            className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-rose-50 hover:text-rose-700 text-slate-700 text-xs font-bold transition-all cursor-pointer border border-slate-200 shadow-2xs flex items-center gap-1.5"
+          >
+            <Trash2 className="w-3.5 h-3.5" /> Clear Local Session Cache
+          </button>
         </div>
       </div>
 

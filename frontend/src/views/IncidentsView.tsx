@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../services/api';
 import type { Incident, SensorNode, IncidentDispatchResult } from '../types';
-import { FileSpreadsheet, RefreshCw, Send, AlertTriangle, UserCheck } from 'lucide-react';
+import { FileSpreadsheet, RefreshCw, Send, AlertTriangle, UserCheck, Plus, Download, X } from 'lucide-react';
 
 interface IncidentsViewProps {
   nodes?: SensorNode[];
 }
 
-export const IncidentsView: React.FC<IncidentsViewProps> = () => {
+export const IncidentsView: React.FC<IncidentsViewProps> = ({ nodes = [] }) => {
   const [incidents, setIncidents] = useState<Incident[]>([]);
   const [selectedIncident, setSelectedIncident] = useState<Incident | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -15,6 +15,14 @@ export const IncidentsView: React.FC<IncidentsViewProps> = () => {
   const [operatorInput, setOperatorInput] = useState<string>('');
   const [dispatchLoading, setDispatchLoading] = useState<boolean>(false);
   const [lastDispatch, setLastDispatch] = useState<IncidentDispatchResult | null>(null);
+
+  // New incident modal state
+  const [showCreateModal, setShowCreateModal] = useState<boolean>(false);
+  const [newOriginNode, setNewOriginNode] = useState<string>('ENV-001');
+  const [newRiskType, setNewRiskType] = useState<string>('FIRE');
+  const [newSeverity, setNewSeverity] = useState<string>('HIGH');
+  const [newNotes, setNewNotes] = useState<string>('');
+  const [creatingIncident, setCreatingIncident] = useState<boolean>(false);
 
   const fetchIncidents = async () => {
     try {
@@ -37,6 +45,54 @@ export const IncidentsView: React.FC<IncidentsViewProps> = () => {
   useEffect(() => {
     fetchIncidents();
   }, []);
+
+  const handleExportCsv = () => {
+    if (incidents.length === 0) return;
+    const headers = ['ID', 'Incident_Number', 'Title', 'Origin_Node', 'Risk_Type', 'Severity', 'Status', 'Current_Risk_Pct', 'Assigned_Operator', 'Created_At'];
+    const rows = incidents.map((i) => [
+      i.id,
+      i.incident_number,
+      `"${i.title.replace(/"/g, '""')}"`,
+      i.origin_node_id,
+      i.risk_type,
+      i.severity,
+      i.status,
+      i.current_risk,
+      `"${(i.assigned_operator || '').replace(/"/g, '""')}"`,
+      new Date(i.detected_at).toISOString(),
+    ]);
+
+    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `terrasentinel-incidents-registry-${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleCreateIncident = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      setCreatingIncident(true);
+      const created = await api.createIncident({
+        origin_node_id: newOriginNode,
+        risk_type: newRiskType,
+        severity: newSeverity,
+        current_risk: newSeverity === 'CRITICAL' ? 90.0 : newSeverity === 'HIGH' ? 70.0 : 45.0,
+        notes: newNotes.trim() || 'Manual incident logged by Command Officer.'
+      });
+      setShowCreateModal(false);
+      setNewNotes('');
+      await fetchIncidents();
+      setSelectedIncident(created);
+    } catch (err) {
+      console.error('Failed to create incident:', err);
+    } finally {
+      setCreatingIncident(false);
+    }
+  };
 
   const handleSimulatedDispatch = async (agency: string) => {
     if (!selectedIncident) return;
@@ -107,13 +163,125 @@ export const IncidentsView: React.FC<IncidentsViewProps> = () => {
           </div>
         </div>
 
-        <button
-          onClick={fetchIncidents}
-          className="px-4 py-2 rounded-xl bg-[#121417] hover:bg-zinc-800 text-white text-xs font-bold flex items-center gap-2 transition-all cursor-pointer shadow-2xs"
-        >
-          <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-[#ff4405]' : 'text-slate-400'}`} /> Sync Incidents
-        </button>
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            onClick={() => setShowCreateModal(true)}
+            className="px-3.5 py-2 rounded-xl bg-[#ff4405] hover:bg-[#e03b00] text-white text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs"
+          >
+            <Plus className="w-3.5 h-3.5" /> Log Incident
+          </button>
+
+          <button
+            onClick={handleExportCsv}
+            className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer border border-slate-200 shadow-2xs"
+          >
+            <Download className="w-3.5 h-3.5 text-slate-600" /> Export CSV
+          </button>
+
+          <button
+            onClick={fetchIncidents}
+            className="px-4 py-2 rounded-xl bg-[#121417] hover:bg-zinc-800 text-white text-xs font-bold flex items-center gap-2 transition-all cursor-pointer shadow-2xs"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-[#ff4405]' : 'text-slate-400'}`} /> Sync
+          </button>
+        </div>
       </div>
+
+      {/* Create Incident Modal */}
+      {showCreateModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fadeIn">
+          <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-lg shadow-2xl p-6 space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <div className="flex items-center gap-2">
+                <div className="p-2 rounded-xl bg-orange-50 text-[#ff4405]">
+                  <FileSpreadsheet className="w-4 h-4" />
+                </div>
+                <h3 className="text-sm font-bold text-slate-900">Log Manual Hazard Incident</h3>
+              </div>
+              <button onClick={() => setShowCreateModal(false)} className="text-slate-400 hover:text-slate-700 cursor-pointer">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateIncident} className="space-y-3.5 text-xs">
+              <div>
+                <label className="text-slate-700 font-semibold block mb-1">Origin Node / Cluster</label>
+                <select
+                  value={newOriginNode}
+                  onChange={(e) => setNewOriginNode(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 font-semibold text-slate-900 focus:outline-none focus:border-[#ff4405]"
+                >
+                  {nodes.length > 0 ? (
+                    nodes.map((n) => (
+                      <option key={n.node_id} value={n.node_id}>{n.node_id} ({n.name})</option>
+                    ))
+                  ) : (
+                    ['ENV-001', 'ENV-002', 'ENV-003', 'ENV-004', 'ENV-005'].map((id) => (
+                      <option key={id} value={id}>{id}</option>
+                    ))
+                  )}
+                </select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-slate-700 font-semibold block mb-1">Hazard Type</label>
+                  <select
+                    value={newRiskType}
+                    onChange={(e) => setNewRiskType(e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 font-semibold text-slate-900 focus:outline-none focus:border-[#ff4405]"
+                  >
+                    <option value="FIRE">Wildfire / Thermal</option>
+                    <option value="FLOOD">Flash Flood</option>
+                    <option value="POLLUTION">Toxic Gas / AQI</option>
+                    <option value="WEATHER">Extreme Monsoon</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-slate-700 font-semibold block mb-1">Severity</label>
+                  <select
+                    value={newSeverity}
+                    onChange={(e) => setNewSeverity(e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 font-semibold text-slate-900 focus:outline-none focus:border-[#ff4405]"
+                  >
+                    <option value="CRITICAL">Critical Emergency</option>
+                    <option value="HIGH">High Priority</option>
+                    <option value="MODERATE">Moderate Warning</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="text-slate-700 font-semibold block mb-1">Operational Description / Notes</label>
+                <textarea
+                  rows={3}
+                  placeholder="Enter observed environmental hazard anomalies..."
+                  value={newNotes}
+                  onChange={(e) => setNewNotes(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#ff4405]"
+                />
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setShowCreateModal(false)}
+                  className="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 font-bold hover:bg-slate-200"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={creatingIncident}
+                  className="px-5 py-2 rounded-xl bg-[#ff4405] hover:bg-[#e03b00] text-white font-bold transition-all shadow-2xs"
+                >
+                  {creatingIncident ? 'Logging...' : 'Create Incident'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Main 2-Column Workflow */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">

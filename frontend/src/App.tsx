@@ -358,6 +358,9 @@ export function App() {
           isDemoRunning={isDemoRunning}
           onSwitchToPublic={() => handleSelectRole('public')}
           onLogout={handleLogout}
+          alerts={alerts}
+          onAcknowledgeAlert={handleAcknowledgeAlert}
+          onNavigateTab={setCurrentTab}
         />
 
         {/* Dynamic Route Container */}

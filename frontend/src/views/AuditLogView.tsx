@@ -1,17 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../services/api';
 import type { AuditLogEntry } from '../types';
-import { ClipboardList, RefreshCw } from 'lucide-react';
+import { ClipboardList, RefreshCw, Download } from 'lucide-react';
 
 export const AuditLogView: React.FC = () => {
   const [logs, setLogs] = useState<AuditLogEntry[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [filterEntity, setFilterEntity] = useState<string>('ALL');
+  const [searchTerm, setSearchTerm] = useState<string>('');
 
   const fetchLogs = async () => {
     try {
       setLoading(true);
-      const res = await api.getAuditLogs(50);
+      const res = await api.getAuditLogs(100);
       setLogs(res);
     } catch (err) {
       console.error(err);
@@ -24,8 +25,41 @@ export const AuditLogView: React.FC = () => {
     fetchLogs();
   }, []);
 
+  const handleExportCsv = () => {
+    if (logs.length === 0) return;
+    const headers = ['ID', 'Timestamp_UTC', 'Actor', 'Action', 'Entity', 'Entity_ID', 'Previous_State', 'New_State', 'Operational_Details'];
+    const rows = filtered.map((l) => [
+      l.id,
+      new Date(l.timestamp).toISOString(),
+      `"${(l.actor || '').replace(/"/g, '""')}"`,
+      `"${(l.action || '').replace(/"/g, '""')}"`,
+      `"${(l.entity || '').replace(/"/g, '""')}"`,
+      `"${(l.entity_id || '').replace(/"/g, '""')}"`,
+      `"${(l.previous_state || '').replace(/"/g, '""')}"`,
+      `"${(l.new_state || '').replace(/"/g, '""')}"`,
+      `"${(l.details || '').replace(/"/g, '""')}"`,
+    ]);
+
+    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `terrasentinel-audit-trail-${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const filtered = logs.filter((l) => {
     if (filterEntity !== 'ALL' && l.entity !== filterEntity) return false;
+    if (searchTerm.trim()) {
+      const q = searchTerm.toLowerCase();
+      const matchActor = l.actor.toLowerCase().includes(q);
+      const matchAction = l.action.toLowerCase().includes(q);
+      const matchDetails = (l.details || '').toLowerCase().includes(q);
+      const matchEntity = l.entity.toLowerCase().includes(q);
+      if (!matchActor && !matchAction && !matchDetails && !matchEntity) return false;
+    }
     return true;
   });
 
@@ -50,7 +84,18 @@ export const AuditLogView: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Search Input */}
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Search actor, action, details..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#ff4405] shadow-2xs font-medium w-48 sm:w-56"
+            />
+          </div>
+
           <select
             value={filterEntity}
             onChange={(e) => setFilterEntity(e.target.value)}
@@ -62,6 +107,14 @@ export const AuditLogView: React.FC = () => {
             <option value="SENSOR_NODE">Sensor Node</option>
             <option value="SIMULATION">Simulation</option>
           </select>
+
+          <button
+            onClick={handleExportCsv}
+            className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer border border-slate-200 shadow-2xs"
+            title="Download immutable audit trail in CSV format"
+          >
+            <Download className="w-3.5 h-3.5 text-slate-600" /> Export CSV
+          </button>
 
           <button
             onClick={fetchLogs}

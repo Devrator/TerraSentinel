@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../services/api';
 import type { DataQualityReport } from '../types';
-import { ShieldCheck, CheckCircle2, RefreshCw, Sparkles } from 'lucide-react';
+import { ShieldCheck, CheckCircle2, RefreshCw, Sparkles, Download } from 'lucide-react';
 
 export const DataQualityView: React.FC = () => {
   const [report, setReport] = useState<DataQualityReport | null>(null);
@@ -22,6 +22,17 @@ export const DataQualityView: React.FC = () => {
   useEffect(() => {
     fetchReport();
   }, []);
+
+  const handleExportReport = () => {
+    if (!report) return;
+    const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(report, null, 2));
+    const link = document.createElement('a');
+    link.setAttribute('href', dataStr);
+    link.setAttribute('download', `terrasentinel-data-quality-report-${new Date().toISOString().slice(0, 10)}.json`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   return (
     <div className="space-y-5">
@@ -44,12 +55,22 @@ export const DataQualityView: React.FC = () => {
           </div>
         </div>
 
-        <button
-          onClick={fetchReport}
-          className="px-4 py-2 rounded-xl bg-[#121417] hover:bg-zinc-800 text-white text-xs font-bold flex items-center gap-2 transition-all cursor-pointer shadow-2xs"
-        >
-          <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-[#ff4405]' : 'text-slate-400'}`} /> Run Hygiene Audit
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleExportReport}
+            className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer border border-slate-200 shadow-2xs"
+            title="Download full data hygiene report in JSON"
+          >
+            <Download className="w-3.5 h-3.5 text-slate-600" /> Export Audit (.json)
+          </button>
+
+          <button
+            onClick={fetchReport}
+            className="px-4 py-2 rounded-xl bg-[#121417] hover:bg-zinc-800 text-white text-xs font-bold flex items-center gap-2 transition-all cursor-pointer shadow-2xs"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-[#ff4405]' : 'text-slate-400'}`} /> Run Hygiene Audit
+          </button>
+        </div>
       </div>
 
       {/* KPI Cards */}

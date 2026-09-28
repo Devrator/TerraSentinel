@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Battery, Eye, Search, SlidersHorizontal, ChevronDown, ExternalLink } from 'lucide-react';
+import { Battery, Eye, Search, SlidersHorizontal, ExternalLink, Download } from 'lucide-react';
 import type { SensorNode } from '../types';
 
 interface FleetTableProps {
@@ -14,16 +14,50 @@ export const FleetTable: React.FC<FleetTableProps> = ({
   onOpenDetailModal,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [filterStatus, setFilterStatus] = useState('ALL');
   const [filterSector, setFilterSector] = useState('ALL');
 
-  const filteredNodes = nodes.filter((node) => {
+  const filteredNodes = nodes.filter((node, index) => {
     const matchesSearch =
       node.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       node.node_id.toLowerCase().includes(searchQuery.toLowerCase());
-    if (filterSector === 'ONLINE') return matchesSearch && node.status === 'ONLINE';
-    if (filterSector === 'OFFLINE') return matchesSearch && node.status !== 'ONLINE';
+    
+    if (filterStatus === 'ONLINE' && node.status !== 'ONLINE') return false;
+    if (filterStatus === 'OFFLINE' && node.status === 'ONLINE') return false;
+
+    const sectorLetter = `Sector ${String.fromCharCode(65 + index)}`;
+    if (filterSector !== 'ALL' && filterSector !== sectorLetter) return false;
+
     return matchesSearch;
   });
+
+  const handleExportCsv = () => {
+    if (nodes.length === 0) return;
+    const headers = ['Node_ID', 'Name', 'Latitude', 'Longitude', 'Status', 'Battery_Pct', 'Temperature_C', 'Humidity_Pct', 'Pressure_hPa', 'Rain_Value', 'AQI', 'Overall_Risk_Pct'];
+    const rows = filteredNodes.map((n) => [
+      n.node_id,
+      `"${n.name.replace(/"/g, '""')}"`,
+      n.latitude,
+      n.longitude,
+      n.status,
+      n.battery_percentage,
+      n.latest_reading?.temperature ?? '',
+      n.latest_reading?.humidity ?? '',
+      n.latest_reading?.pressure ?? '',
+      n.latest_reading?.rain_value ?? '',
+      n.latest_reading?.air_quality ?? '',
+      n.latest_risk?.overall_risk ?? '',
+    ]);
+
+    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `terrasentinel-fleet-registry-${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   const getStatusBadge = (status: string) => {
     if (status === 'ONLINE') {
@@ -69,7 +103,7 @@ export const FleetTable: React.FC<FleetTableProps> = ({
 
   return (
     <div className="rounded-2xl border border-slate-200/90 bg-white overflow-hidden shadow-2xs">
-      {/* Top Search & Filter Bar (Matching Reference Image) */}
+      {/* Top Search & Filter Bar */}
       <div className="p-4 lg:p-5 border-b border-slate-100 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3.5">
         <div>
           <h2 className="text-sm font-extrabold text-slate-900 tracking-tight">
@@ -82,7 +116,7 @@ export const FleetTable: React.FC<FleetTableProps> = ({
 
         <div className="flex flex-wrap items-center gap-2.5">
           {/* Search Input Bar */}
-          <div className="relative min-w-[220px]">
+          <div className="relative min-w-[200px]">
             <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
@@ -93,20 +127,38 @@ export const FleetTable: React.FC<FleetTableProps> = ({
             />
           </div>
 
-          {/* Filter Button */}
+          {/* Status Filter Button */}
           <button
-            onClick={() => setFilterSector(filterSector === 'ALL' ? 'ONLINE' : filterSector === 'ONLINE' ? 'OFFLINE' : 'ALL')}
+            onClick={() => setFilterStatus(filterStatus === 'ALL' ? 'ONLINE' : filterStatus === 'ONLINE' ? 'OFFLINE' : 'ALL')}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 transition-all cursor-pointer shadow-2xs"
           >
             <SlidersHorizontal className="w-3.5 h-3.5 text-slate-500" />
-            <span>Filter: {filterSector}</span>
+            <span>Status: {filterStatus}</span>
           </button>
 
-          {/* Dropdown Capsule */}
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 bg-white shadow-2xs">
-            <span>All Sectors</span>
-            <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
-          </div>
+          {/* Sector Filter Dropdown */}
+          <select
+            value={filterSector}
+            onChange={(e) => setFilterSector(e.target.value)}
+            className="px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 bg-white cursor-pointer shadow-2xs focus:outline-none focus:border-[#ff4405]"
+          >
+            <option value="ALL">All Sectors</option>
+            <option value="Sector A">Sector A (Kota North)</option>
+            <option value="Sector B">Sector B (Chambal)</option>
+            <option value="Sector C">Sector C (Mukundara)</option>
+            <option value="Sector D">Sector D (GIDC)</option>
+            <option value="Sector E">Sector E (Industrial)</option>
+          </select>
+
+          {/* Export CSV Button */}
+          <button
+            onClick={handleExportCsv}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-xs font-bold text-slate-800 border border-slate-200 transition-all cursor-pointer shadow-2xs"
+            title="Download fleet list in CSV"
+          >
+            <Download className="w-3.5 h-3.5 text-slate-600" />
+            <span>Export CSV</span>
+          </button>
         </div>
       </div>
 

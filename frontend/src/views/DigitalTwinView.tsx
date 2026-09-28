@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { api } from '../services/api';
 import type { DigitalTwinData, SensorNode } from '../types';
-import { Globe2 } from 'lucide-react';
+import { Globe2, Download, Play, Pause, RefreshCw } from 'lucide-react';
 import { LiveMap } from '../components/LiveMap';
 
 interface DigitalTwinViewProps {
@@ -17,6 +17,9 @@ export const DigitalTwinView: React.FC<DigitalTwinViewProps> = ({
 }) => {
   const [offsetMinutes, setOffsetMinutes] = useState<number>(0);
   const [twinData, setTwinData] = useState<DigitalTwinData | null>(null);
+  const [isPlaying, setIsPlaying] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
+  const playIntervalRef = useRef<number | null>(null);
 
   const timeOptions = [
     { label: 'LIVE NOW', value: 0 },
@@ -29,10 +32,13 @@ export const DigitalTwinView: React.FC<DigitalTwinViewProps> = ({
 
   const fetchTwinData = async (offset: number) => {
     try {
+      setLoading(true);
       const res = await api.getDigitalTwin(offset);
       setTwinData(res);
     } catch (err) {
       console.error('Failed to fetch digital twin:', err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -40,12 +46,49 @@ export const DigitalTwinView: React.FC<DigitalTwinViewProps> = ({
     fetchTwinData(offsetMinutes);
   }, [offsetMinutes]);
 
+  // Timeline scrub player
+  useEffect(() => {
+    if (isPlaying) {
+      playIntervalRef.current = window.setInterval(() => {
+        setOffsetMinutes((prev) => {
+          const currentIndex = timeOptions.findIndex((t) => t.value === prev);
+          const nextIndex = (currentIndex + 1) % timeOptions.length;
+          return timeOptions[nextIndex].value;
+        });
+      }, 3000);
+    } else if (playIntervalRef.current) {
+      window.clearInterval(playIntervalRef.current);
+      playIntervalRef.current = null;
+    }
+    return () => {
+      if (playIntervalRef.current) window.clearInterval(playIntervalRef.current);
+    };
+  }, [isPlaying]);
+
+  const handleExportSnapshot = () => {
+    if (!twinData) return;
+    const payload = {
+      exported_at: new Date().toISOString(),
+      offset_minutes: offsetMinutes,
+      mode: offsetMinutes === 0 ? 'LIVE' : `HISTORICAL_-${offsetMinutes}m`,
+      coverage_summary: twinData.coverage_summary,
+      biome_state: twinData.nodes,
+    };
+    const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(payload, null, 2));
+    const link = document.createElement('a');
+    link.setAttribute('href', dataStr);
+    link.setAttribute('download', `terrasentinel-digital-twin-snapshot-${offsetMinutes}m-${new Date().toISOString().slice(0, 10)}.json`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const selectedTwinNode = twinData?.nodes.find((n) => n.node_id === selectedNodeId) || twinData?.nodes[0] || null;
 
   return (
     <div className="space-y-5">
       {/* Top Banner & Time Playback Controls */}
-      <div className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-2xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <div className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-2xs flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
         <div className="flex items-center gap-3.5">
           <div className="w-10 h-10 rounded-xl bg-orange-50 border border-orange-200/80 flex items-center justify-center text-[#ff4405] shadow-2xs">
             <Globe2 className="w-5 h-5" />
@@ -69,21 +112,58 @@ export const DigitalTwinView: React.FC<DigitalTwinViewProps> = ({
           </div>
         </div>
 
-        {/* Time Playback Selector */}
-        <div className="flex flex-wrap items-center gap-1.5 p-1 rounded-xl bg-slate-100 border border-slate-200">
-          {timeOptions.map((opt) => (
-            <button
-              key={opt.value}
-              onClick={() => setOffsetMinutes(opt.value)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
-                offsetMinutes === opt.value
-                  ? 'bg-[#121417] text-white shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
-              }`}
-            >
-              {opt.label}
-            </button>
-          ))}
+        {/* Time Playback Selector & Actions */}
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Play/Pause Button */}
+          <button
+            onClick={() => setIsPlaying(!isPlaying)}
+            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs ${
+              isPlaying
+                ? 'bg-[#ff4405] text-white animate-pulse'
+                : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200'
+            }`}
+            title={isPlaying ? 'Pause auto time scrub' : 'Play historical playback loop'}
+          >
+            {isPlaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
+            <span>{isPlaying ? 'Playing' : 'Playback'}</span>
+          </button>
+
+          {/* Time Preset Buttons */}
+          <div className="flex flex-wrap items-center gap-1 p-1 rounded-xl bg-slate-100 border border-slate-200">
+            {timeOptions.map((opt) => (
+              <button
+                key={opt.value}
+                onClick={() => {
+                  setIsPlaying(false);
+                  setOffsetMinutes(opt.value);
+                }}
+                className={`px-2.5 py-1 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
+                  offsetMinutes === opt.value
+                    ? 'bg-[#121417] text-white shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
+                }`}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Export Snapshot */}
+          <button
+            onClick={handleExportSnapshot}
+            className="px-3.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer border border-slate-200 shadow-2xs"
+            title="Download Digital Twin Snapshot in JSON"
+          >
+            <Download className="w-3.5 h-3.5 text-slate-600" /> Export (.json)
+          </button>
+
+          <button
+            onClick={() => fetchTwinData(offsetMinutes)}
+            className="p-2 rounded-xl bg-[#121417] hover:bg-zinc-800 text-white text-xs font-bold transition-all cursor-pointer shadow-2xs"
+            title="Refresh snapshot"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-[#ff4405]' : 'text-slate-400'}`} />
+          </button>
         </div>
       </div>
 

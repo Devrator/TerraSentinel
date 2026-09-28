@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../services/api';
 import type { ExplainabilityData, SensorNode } from '../types';
-import { BrainCircuit, Flame, Droplets, Wind, Zap, Sparkles } from 'lucide-react';
+import { BrainCircuit, Flame, Droplets, Wind, Zap, Sparkles, Download, RefreshCw } from 'lucide-react';
 
 interface AiExplainabilityViewProps {
   nodes: SensorNode[];
@@ -16,19 +16,44 @@ export const AiExplainabilityView: React.FC<AiExplainabilityViewProps> = ({
 }) => {
   const [riskType, setRiskType] = useState<string>('FIRE');
   const [data, setData] = useState<ExplainabilityData | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
 
   const fetchExplainability = async (nodeId: string, risk: string) => {
     try {
+      setLoading(true);
       const res = await api.getAiExplainability(nodeId, risk);
       setData(res);
     } catch (err) {
       console.error('Failed to load explainability:', err);
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
     fetchExplainability(selectedNodeId, riskType);
   }, [selectedNodeId, riskType]);
+
+  const handleExportShap = () => {
+    const payload = {
+      exported_at: new Date().toISOString(),
+      node_id: selectedNodeId,
+      risk_type: riskType,
+      edge_risk_tier1: {
+        edge_status: edgeStatus,
+        reasons: edgeReasons,
+      },
+      sensor_trust_confidence: confidenceData,
+      shap_explainability_tier2: data,
+    };
+    const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(payload, null, 2));
+    const link = document.createElement('a');
+    link.setAttribute('href', dataStr);
+    link.setAttribute('download', `terrasentinel-shap-xai-${selectedNodeId}-${riskType.toLowerCase()}-${new Date().toISOString().slice(0, 10)}.json`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   const selectedNode = nodes.find((n) => n.node_id === selectedNodeId) || nodes[0] || null;
   const edgeStatus = selectedNode?.latest_risk?.edge_risk?.edge_status ?? 'NORMAL';
@@ -62,7 +87,7 @@ export const AiExplainabilityView: React.FC<AiExplainabilityViewProps> = ({
           </div>
         </div>
 
-        {/* Node & Risk Type Selectors */}
+        {/* Node & Risk Type Selectors & Action Buttons */}
         <div className="flex flex-wrap items-center gap-2">
           <select
             value={selectedNodeId}
@@ -96,6 +121,22 @@ export const AiExplainabilityView: React.FC<AiExplainabilityViewProps> = ({
               </button>
             ))}
           </div>
+
+          <button
+            onClick={handleExportShap}
+            className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer border border-slate-200 shadow-2xs"
+            title="Download SHAP XAI Attribution Report in JSON"
+          >
+            <Download className="w-3.5 h-3.5 text-slate-600" /> Export SHAP (.json)
+          </button>
+
+          <button
+            onClick={() => fetchExplainability(selectedNodeId, riskType)}
+            className="p-2 rounded-xl bg-[#121417] hover:bg-zinc-800 text-white text-xs font-bold transition-all cursor-pointer shadow-2xs"
+            title="Re-run XAI feature attribution inference"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-[#ff4405]' : 'text-slate-400'}`} />
+          </button>
         </div>
       </div>
 

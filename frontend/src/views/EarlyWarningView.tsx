@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { AlertTriangle, ShieldCheck, CheckCircle2, Search, ArrowUpRight, Check, ShieldAlert, Sparkles, Flame } from 'lucide-react';
+import { AlertTriangle, ShieldCheck, CheckCircle2, Search, ArrowUpRight, Check, ShieldAlert, Sparkles, Flame, Download } from 'lucide-react';
 import type { Alert, SensorNode } from '../types';
 import { api } from '../services/api';
 
@@ -25,6 +25,29 @@ export const EarlyWarningView: React.FC<EarlyWarningViewProps> = ({
     if (filterType !== 'ALL' && a.risk_type !== filterType) return false;
     return true;
   });
+
+  const handleExportCsv = () => {
+    const headers = ['Alert ID', 'Node ID', 'Risk Type', 'Severity', 'Risk Score', 'Message', 'Acknowledged', 'Timestamp'];
+    const rows = filteredAlerts.map((a) => [
+      a.id,
+      `"${a.node_id}"`,
+      `"${a.risk_type}"`,
+      `"${a.severity}"`,
+      a.risk_score.toFixed(2),
+      `"${(a.message || '').replace(/"/g, '""')}"`,
+      a.acknowledged ? 'TRUE' : 'FALSE',
+      `"${new Date(a.timestamp).toISOString()}"`,
+    ]);
+
+    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map((e) => e.join(','))].join('\n');
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `terrasentinel-early-warnings-${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   const handleAction = async (alert: Alert, actionType: 'INVESTIGATE' | 'ESCALATE' | 'RESOLVE') => {
     try {
@@ -68,7 +91,7 @@ export const EarlyWarningView: React.FC<EarlyWarningViewProps> = ({
           </div>
         </div>
 
-        {/* Filters */}
+        {/* Filters & Export */}
         <div className="flex flex-wrap items-center gap-2">
           <select
             value={filterSeverity}
@@ -92,6 +115,14 @@ export const EarlyWarningView: React.FC<EarlyWarningViewProps> = ({
             <option value="POLLUTION">Toxic Pollution</option>
             <option value="BATTERY">Battery Degradation</option>
           </select>
+
+          <button
+            onClick={handleExportCsv}
+            className="px-3.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer border border-slate-200 shadow-2xs"
+            title="Download early warnings registry in CSV"
+          >
+            <Download className="w-3.5 h-3.5 text-slate-600" /> Export CSV
+          </button>
         </div>
       </div>
 

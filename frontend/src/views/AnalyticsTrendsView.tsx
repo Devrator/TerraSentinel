@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../services/api';
 import type { AnalyticsTrendsData, SensorNode } from '../types';
-import { TrendingUp, Flame, Droplets, Wind, Gauge, CloudRain } from 'lucide-react';
+import { TrendingUp, Flame, Droplets, Wind, Gauge, CloudRain, Download, FileText } from 'lucide-react';
 import {
   ResponsiveContainer,
   AreaChart,
@@ -39,6 +39,42 @@ export const AnalyticsTrendsView: React.FC<AnalyticsTrendsViewProps> = ({
   useEffect(() => {
     fetchTrends(timeRange, selectedNodeId);
   }, [timeRange, selectedNodeId]);
+
+  const handleExportCsv = () => {
+    if (!trends || !trends.timestamps || trends.timestamps.length === 0) return;
+    const metric = getMetricData();
+    const headers = ['Timestamp_ISO', 'Node_ID', 'Metric', `Value_${metric.unit}`, 'Min', 'Max', 'Avg', 'Rate_of_Change'];
+    const rows = trends.timestamps.map((t, idx) => [
+      new Date(t).toISOString(),
+      selectedNodeId,
+      `"${metric.label}"`,
+      metric.values[idx] ?? 0,
+      metric.stats.min,
+      metric.stats.max,
+      metric.stats.avg,
+      metric.stats.rate_of_change,
+    ]);
+
+    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `terrasentinel-${selectedNodeId}-${activeMetric.toLowerCase()}-${timeRange.toLowerCase()}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleExportJson = () => {
+    if (!trends) return;
+    const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(trends, null, 2));
+    const link = document.createElement('a');
+    link.setAttribute('href', dataStr);
+    link.setAttribute('download', `terrasentinel-${selectedNodeId}-analytics-trends.json`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   const getMetricData = () => {
     if (!trends) return { values: [], stats: { min: 0, max: 0, avg: 0, rate_of_change: 0 }, color: '#ff4405', label: 'Telemetry', unit: '' };
@@ -118,6 +154,25 @@ export const AnalyticsTrendsView: React.FC<AnalyticsTrendsViewProps> = ({
               </button>
             ))}
           </div>
+
+          {/* Export Action Buttons */}
+          <button
+            onClick={handleExportCsv}
+            className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer border border-slate-200 shadow-2xs"
+            title="Download timeseries datapoints in CSV"
+          >
+            <Download className="w-3.5 h-3.5 text-slate-600" />
+            <span className="hidden sm:inline">Export CSV</span>
+          </button>
+
+          <button
+            onClick={handleExportJson}
+            className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer border border-slate-200 shadow-2xs"
+            title="Download full analytics payload in JSON"
+          >
+            <FileText className="w-3.5 h-3.5 text-slate-600" />
+            <span className="hidden sm:inline">JSON</span>
+          </button>
         </div>
       </div>
 

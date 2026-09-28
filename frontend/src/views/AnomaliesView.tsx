@@ -1,24 +1,59 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../services/api';
 import type { Anomaly } from '../types';
-import { Zap, ShieldCheck } from 'lucide-react';
+import { Zap, ShieldCheck, RefreshCw, Download, CheckCircle2, ArrowUpRight } from 'lucide-react';
 
 export const AnomaliesView: React.FC = () => {
   const [anomalies, setAnomalies] = useState<Anomaly[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
   const [filterSeverity, setFilterSeverity] = useState<string>('ALL');
+  const [triagedIds, setTriagedIds] = useState<Record<number, boolean>>({});
 
   const fetchAnomalies = async () => {
     try {
+      setLoading(true);
       const res = await api.getAnomalies(50);
       setAnomalies(res);
     } catch (err) {
       console.error('Failed to load anomalies:', err);
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
     fetchAnomalies();
   }, []);
+
+  const handleExportCsv = () => {
+    if (anomalies.length === 0) return;
+    const headers = ['ID', 'Node_ID', 'Parameter', 'Severity', 'Anomaly_Type', 'Previous_Value', 'Current_Value', 'Change_Pct', 'Description', 'Detected_At'];
+    const rows = filtered.map((a) => [
+      a.id,
+      a.node_id,
+      a.parameter,
+      a.severity,
+      a.anomaly_type,
+      a.previous_value,
+      a.current_value,
+      a.change_pct,
+      `"${(a.description || '').replace(/"/g, '""')}"`,
+      new Date(a.detected_at).toISOString(),
+    ]);
+
+    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `terrasentinel-anomalies-${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleTriageAnomaly = (id: number) => {
+    setTriagedIds((prev) => ({ ...prev, [id]: true }));
+  };
 
   const filtered = anomalies.filter((a) => {
     if (filterSeverity !== 'ALL' && a.severity !== filterSeverity) return false;
@@ -41,7 +76,7 @@ export const AnomaliesView: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <select
             value={filterSeverity}
             onChange={(e) => setFilterSeverity(e.target.value)}
@@ -52,6 +87,21 @@ export const AnomaliesView: React.FC = () => {
             <option value="HIGH">High</option>
             <option value="MODERATE">Moderate</option>
           </select>
+
+          <button
+            onClick={handleExportCsv}
+            className="px-3.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer border border-slate-200 shadow-2xs"
+            title="Download anomaly log in CSV"
+          >
+            <Download className="w-3.5 h-3.5 text-slate-600" /> Export CSV
+          </button>
+
+          <button
+            onClick={fetchAnomalies}
+            className="px-3.5 py-1.5 rounded-xl bg-[#121417] hover:bg-zinc-800 text-white text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-[#ff4405]' : 'text-slate-400'}`} /> Sync
+          </button>
         </div>
       </div>
 
@@ -60,12 +110,18 @@ export const AnomaliesView: React.FC = () => {
         {filtered.length > 0 ? (
           filtered.map((anom) => {
             const isCrit = anom.severity === 'CRITICAL';
+            const isTriaged = !!triagedIds[anom.id];
 
             return (
               <div
                 key={anom.id}
-                className={`p-4 rounded-2xl bg-white border space-y-3 transition-all shadow-2xs ${isCrit ? 'border-rose-300 ring-1 ring-rose-200/50' : 'border-slate-200/90'
-                  }`}
+                className={`p-4 rounded-2xl bg-white border space-y-3 transition-all shadow-2xs ${
+                  isTriaged
+                    ? 'border-emerald-200 bg-emerald-50/20 opacity-80'
+                    : isCrit
+                    ? 'border-rose-300 ring-1 ring-rose-200/50'
+                    : 'border-slate-200/90'
+                }`}
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
@@ -102,6 +158,22 @@ export const AnomaliesView: React.FC = () => {
                 <div className="flex items-center justify-between text-[10px] font-mono text-slate-400 pt-2 border-t border-slate-100 font-medium">
                   <span>Type: {anom.anomaly_type}</span>
                   <span>{new Date(anom.detected_at).toLocaleTimeString()}</span>
+                </div>
+
+                {/* Triage Action Button */}
+                <div className="pt-2 border-t border-slate-100 flex justify-end">
+                  {!isTriaged ? (
+                    <button
+                      onClick={() => handleTriageAnomaly(anom.id)}
+                      className="px-3 py-1 rounded-xl bg-[#121417] hover:bg-zinc-800 text-white text-[11px] font-bold flex items-center gap-1 cursor-pointer transition-all shadow-2xs"
+                    >
+                      <ArrowUpRight className="w-3 h-3 text-[#ff4405]" /> Triage Anomaly
+                    </button>
+                  ) : (
+                    <span className="text-[11px] font-mono text-emerald-700 font-bold flex items-center gap-1 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> Triaged
+                    </span>
+                  )}
                 </div>
               </div>
             );
