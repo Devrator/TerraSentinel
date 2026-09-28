@@ -12,16 +12,11 @@ import {
   Wind,
   ShieldAlert,
   Sparkles,
-  Zap,
   Activity,
-  Layers,
   Crosshair,
-  Maximize2,
   Download,
   CheckCircle2,
-  XCircle,
   ExternalLink,
-  Cpu
 } from 'lucide-react';
 
 interface LiveMapFullViewProps {
@@ -340,7 +335,7 @@ export const LiveMapFullView: React.FC<LiveMapFullViewProps> = ({
           </div>
 
           {/* Leaflet Map */}
-          <div className="flex-1 w-full h-full">
+          <div className="flex-1 w-full h-full relative z-0 isolate">
             <MapContainer
               key={`${basemap}-${mapZoomKey}`}
               center={mapCenter}
@@ -419,6 +414,18 @@ export const LiveMapFullView: React.FC<LiveMapFullViewProps> = ({
                           }`}>
                             {node.status}
                           </span>
+                        </div>
+
+                        {/* Edge & Trust Indicators */}
+                        <div className="grid grid-cols-2 gap-1.5 mb-2 text-[10px] font-mono">
+                          <div className="p-1.5 rounded-lg bg-[#121417] text-white flex justify-between">
+                            <span className="text-slate-400">Edge:</span>
+                            <span className="text-orange-300 font-bold">{edgeStatus}</span>
+                          </div>
+                          <div className="p-1.5 rounded-lg bg-orange-50 text-slate-800 border border-orange-200 flex justify-between">
+                            <span className="text-[#ea580c]">Trust:</span>
+                            <span className="font-bold">{confidenceScore.toFixed(0)}%</span>
+                          </div>
                         </div>
 
                         {/* Telemetry Summary */}

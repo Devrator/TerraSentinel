@@ -168,18 +168,6 @@ export function App() {
     }
   };
 
-  // Demo Mode Runner for Hackathon Judges
-  const handleTriggerDemo = async () => {
-    try {
-      setIsDemoRunning(true);
-      await api.startSimulation('FIRE', 'ENV-004', 'HIGH');
-      // Navigate to Simulation / Situation room
-      setCurrentTab('situation-room');
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
   const renderActiveView = () => {
     switch (currentTab) {
       case 'dashboard':
@@ -201,6 +189,15 @@ export function App() {
             nodes={nodes}
             selectedNodeId={selectedNodeId}
             onSelectNode={setSelectedNodeId}
+          />
+        );
+      case 'live-map':
+        return (
+          <LiveMapFullView
+            nodes={nodes}
+            selectedNodeId={selectedNodeId}
+            onSelectNode={setSelectedNodeId}
+            onOpenDetailModal={setModalNode}
           />
         );
       case 'live-monitoring':
@@ -332,7 +329,7 @@ export function App() {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 flex font-sans antialiased">
-      {/* Persistent SIH Navigation Sidebar */}
+      {/* Persistent Floating Navigation Sidebar */}
       <Sidebar
         currentTab={currentTab}
         onSelectTab={setCurrentTab}
@@ -340,10 +337,10 @@ export function App() {
         onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
       />
 
-      {/* Main Content Area */}
+      {/* Main Content Area with Floating Sidebar Offset Margin */}
       <div
         className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ${
-          isSidebarCollapsed ? 'md:ml-16' : 'md:ml-64'
+          isSidebarCollapsed ? 'md:ml-24' : 'md:ml-72'
         }`}
       >
         {/* Top Header */}
@@ -353,8 +350,6 @@ export function App() {
           lastUpdateTime={lastMessageTime}
           onRefresh={loadDashboardData}
           isLoading={isLoading}
-          onTriggerDemo={handleTriggerDemo}
-          isDemoRunning={isDemoRunning}
           onSwitchToPublic={() => handleSelectRole('public')}
           onLogout={handleLogout}
           alerts={alerts}
@@ -396,13 +391,6 @@ export function App() {
             onClose={() => setModalNode(null)}
           />
         )}
-
-        {/* 60-Second Evaluator Demo Mode Controller */}
-        <EvaluatorDemoController
-          currentTab={currentTab}
-          onNavigate={setCurrentTab}
-          onSelectNode={setSelectedNodeId}
-        />
 
         {/* Minimal White Footer */}
         <footer className="border-t border-slate-200 py-3.5 px-6 text-xs text-slate-500 bg-white shadow-2xs">

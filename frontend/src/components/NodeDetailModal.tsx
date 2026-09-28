@@ -114,7 +114,7 @@ export const NodeDetailModal: React.FC<NodeDetailModalProps> = ({ node, onClose 
   const edgeStatus = node.latest_risk?.edge_risk?.edge_status ?? 'NORMAL';
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fadeIn">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fadeIn">
       <div className="bg-white border border-slate-200/90 rounded-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto shadow-2xl relative text-slate-800 flex flex-col">
 
         {/* Modal Header */}

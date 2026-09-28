@@ -111,7 +111,7 @@ export const LiveMap: React.FC<LiveMapProps> = ({ nodes, onSelectNode, hazardZon
   };
 
   return (
-    <div className="rounded-2xl overflow-hidden border border-slate-200/90 bg-white shadow-2xs flex flex-col h-[520px]">
+    <div className="rounded-2xl overflow-hidden border border-slate-200/90 bg-white shadow-2xs flex flex-col h-[520px] relative z-0 isolate">
       {/* GIS Header & Basemap Layer Switcher */}
       <div className="px-5 py-3.5 bg-white border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-2.5">
