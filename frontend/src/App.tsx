@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback } from 'react';
 import { Header } from './components/Header';
 import { Sidebar } from './components/Sidebar';
 import { NodeDetailModal } from './components/NodeDetailModal';
-import { EvaluatorDemoController } from './components/EvaluatorDemoController';
 import { useWebSocket } from './hooks/useWebSocket';
 import { api } from './services/api';
 import type {
@@ -20,6 +19,7 @@ import { LandingLoginView } from './views/LandingLoginView';
 import { PublicPortalView } from './views/PublicPortalView';
 import { DashboardView } from './views/DashboardView';
 import { SituationRoomView } from './views/SituationRoomView';
+import { LiveMapFullView } from './views/LiveMapFullView';
 import { LiveMonitoringView } from './views/LiveMonitoringView';
 import { AiExplainabilityView } from './views/AiExplainabilityView';
 import { AnomaliesView } from './views/AnomaliesView';
@@ -57,7 +57,6 @@ export function App() {
   const [modalNode, setModalNode] = useState<SensorNode | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [backendError, setBackendError] = useState<string | null>(null);
-  const [isDemoRunning, setIsDemoRunning] = useState<boolean>(false);
 
   const handleSelectRole = (role: UserRole) => {
     setUserRole(role);
