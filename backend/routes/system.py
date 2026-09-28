@@ -14,6 +14,7 @@ router = APIRouter(prefix="/api/system", tags=["System Observability"])
 START_TIME = time.time()
 
 @router.get("/health", summary="Get comprehensive system technical health and metrics")
+@router.get("/observability/health", summary="Alias for system technical health and metrics")
 def get_system_health(db: Session = Depends(get_db)) -> Dict[str, Any]:
     # Measure DB Latency
     db_start = time.perf_counter()

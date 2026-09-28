@@ -453,6 +453,7 @@ export interface WebSocketNodeStatusUpdate {
 export type NavigationTab =
   | 'dashboard'
   | 'situation-room'
+  | 'live-map'
   | 'live-monitoring'
   | 'ai-explainability'
   | 'anomalies'

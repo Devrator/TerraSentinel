@@ -25,7 +25,8 @@ import {
   Cpu,
   Compass,
   ShieldAlert,
-  Leaf
+  Leaf,
+  MapPin
 } from 'lucide-react';
 import type { NavigationTab } from '../types';
 
@@ -62,6 +63,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       items: [
         { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
         { id: 'situation-room', label: 'Situation Room', icon: Globe2, badge: 'OPS' },
+        { id: 'live-map', label: 'Live GIS Map', icon: MapPin, badge: 'GIS' },
         { id: 'live-monitoring', label: 'Live Monitoring', icon: Radio },
       ],
     },
@@ -153,8 +155,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   return (
     <aside
-      className={`fixed top-0 left-0 bottom-0 z-40 flex flex-col bg-white border-r border-slate-200/90 text-slate-700 transition-all duration-300 select-none shadow-2xs ${
-        isCollapsed ? 'w-16' : 'w-64'
+      className={`fixed top-3.5 left-3.5 bottom-3.5 z-40 flex flex-col bg-white/95 backdrop-blur-xl border border-slate-200/90 rounded-3xl text-slate-700 transition-all duration-300 select-none shadow-xl ${
+        isCollapsed ? 'w-18' : 'w-64'
       }`}
     >
       {/* Floating Center-Border Collapse / Expand Button */}
@@ -166,22 +168,22 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {isCollapsed ? <ChevronRight className="w-3.5 h-3.5" /> : <ChevronLeft className="w-3.5 h-3.5" />}
       </button>
 
-      {/* Sidebar Header Brand with Official Logo */}
-      <div className="h-20 border-b border-slate-200/80 bg-slate-50/50 flex items-center justify-center px-2">
+      {/* Sidebar Header Brand with Prominent Official Logo */}
+      <div className="h-26 border-b border-slate-200/80 bg-slate-50/50 flex items-center justify-center px-3 rounded-t-3xl">
         {!isCollapsed ? (
-          <div className="flex items-center justify-center overflow-hidden py-1 w-full">
+          <div className="flex items-center justify-center overflow-hidden py-2 w-full">
             <img
               src="/logo.png"
               alt="TerraSentinel Logo"
-              className="h-14 sm:h-15 w-auto object-contain transition-transform hover:scale-102"
+              className="h-18 sm:h-20 w-auto object-contain transition-transform hover:scale-105 drop-shadow-xs"
             />
           </div>
         ) : (
-          <div className="flex items-center justify-center w-full py-1">
+          <div className="flex items-center justify-center w-full py-2">
             <img
               src="/logo-collapsed.png"
               alt="TerraSentinel Logo"
-              className="h-10 w-10 object-contain transition-transform hover:scale-105"
+              className="h-12 w-12 object-contain transition-transform hover:scale-110 drop-shadow-xs"
             />
           </div>
         )}
@@ -297,7 +299,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       </div>
 
       {/* Footer Node Summary */}
-      <div className="p-2 border-t border-slate-200/80 bg-slate-50/60">
+      <div className="p-2.5 border-t border-slate-200/80 bg-slate-50/60 rounded-b-3xl">
         {!isCollapsed ? (
           <div className="p-2.5 rounded-xl bg-white border border-slate-200 flex items-center justify-between text-[11px] shadow-2xs">
             <div className="flex items-center gap-2">

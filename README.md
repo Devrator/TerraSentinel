@@ -250,9 +250,30 @@ python mock_sensor.py --scenario pollution --node ENV-004
 
 ---
 
-## ☁️ Cloud Deployment Guide
+## ☁️ Production Deployment Guide
 
-### Deploying the Backend on Render (Free Tier)
+### Option 1: Docker Compose (Recommended Production Multi-Container Stack)
+
+Run the full production stack containing the NGINX-served Frontend SPA, FastAPI Ingestion Backend, and Persistent Storage in isolated containers:
+
+```bash
+# Clone the repository
+git clone https://github.com/your-org/terrasentinel.git
+cd terrasentinel
+
+# Launch the production stack
+docker-compose up -d --build
+```
+- **Public & Agency Application**: [http://localhost:80](http://localhost:80)
+- **FastAPI Backend & Interactive Swagger Docs**: [http://localhost:8000/docs](http://localhost:8000/docs)
+- **Real-Time WebSocket Hub**: `ws://localhost:8000/ws/dashboard`
+
+### Option 2: 1-Click Native Launch Scripts
+
+- **Windows**: Double-click or run `start_production.bat` in PowerShell / Command Prompt.
+- **Linux / macOS**: Run `chmod +x start_production.sh && ./start_production.sh`.
+
+### Option 3: Deploying the Backend on Render (Free Tier)
 
 This repository includes a native **Render Blueprint** (`render.yaml`) and Dockerfile for 1-click cloud deployment:
 
