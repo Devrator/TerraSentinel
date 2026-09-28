@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import Lenis from 'lenis';
 import {
   ShieldAlert,
   Users,
@@ -15,11 +16,15 @@ import {
   Globe,
   Sun,
   Moon,
-  ArrowUpRight
+  ArrowUpRight,
+  Radio,
+  Layers,
+  Activity
 } from 'lucide-react';
 import type { UserRole } from '../types';
 import { api } from '../services/api';
 import { useTheme } from '../context/ThemeContext';
+import { LandingThreeHero } from '../components/LandingThreeHero';
 
 interface LandingLoginViewProps {
   onSelectRole: (role: UserRole) => void;
@@ -30,6 +35,36 @@ export const LandingLoginView: React.FC<LandingLoginViewProps> = ({ onSelectRole
   const [systemOnline, setSystemOnline] = useState<boolean>(true);
   const [nodeCount, setNodeCount] = useState<number>(5);
   const [agencyRoleName, setAgencyRoleName] = useState<string>('Chief Disaster Officer');
+  const [scrollProgress, setScrollProgress] = useState<number>(0);
+  const lenisRef = useRef<Lenis | null>(null);
+
+  // Initialize Lenis Smooth Scrolling Engine
+  useEffect(() => {
+    const lenis = new Lenis({
+      duration: 1.2,
+      easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      smoothWheel: true,
+      wheelMultiplier: 1.0,
+      touchMultiplier: 1.5,
+    });
+    lenisRef.current = lenis;
+
+    let rafId: number;
+    function raf(time: number) {
+      lenis.raf(time);
+      rafId = requestAnimationFrame(raf);
+    }
+    rafId = requestAnimationFrame(raf);
+
+    lenis.on('scroll', (e: { progress: number }) => {
+      setScrollProgress(e.progress);
+    });
+
+    return () => {
+      cancelAnimationFrame(rafId);
+      lenis.destroy();
+    };
+  }, []);
 
   useEffect(() => {
     api.getDashboardSummary()
@@ -41,39 +76,47 @@ export const LandingLoginView: React.FC<LandingLoginViewProps> = ({ onSelectRole
   }, []);
 
   const scrollToSection = (id: string) => {
-    const element = document.getElementById(id);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
+    if (lenisRef.current) {
+      lenisRef.current.scrollTo(`#${id}`, { offset: -90, duration: 1.3 });
+    } else {
+      const element = document.getElementById(id);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#f4f5f8] text-slate-900 flex flex-col font-sans transition-colors duration-300">
-      
+    <div className="min-h-screen bg-[#f4f5f8] text-slate-900 flex flex-col font-sans transition-colors duration-300 relative selection:bg-[#ff4405] selection:text-white">
+
       {/* =========================================================================
-          1. TOP NAVIGATION HEADER (MATCHING DASHBOARD HEADER DESIGN)
+          THREE.JS 3D INTERACTIVE GEOSPATIAL MESH CANVAS (BACKGROUND)
+          ========================================================================= */}
+      <LandingThreeHero />
+
+      {/* Scroll Progress Bar at very top */}
+      <div
+        className="fixed top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-[#ff4405] via-orange-400 to-cyan-400 z-50 transition-all duration-75 origin-left"
+        style={{ transform: `scaleX(${scrollProgress})` }}
+      />
+
+      {/* =========================================================================
+          1. TOP NAVIGATION HEADER (WITH LOGO & THEME SWITCHER)
           ========================================================================= */}
       <header className="sticky top-0 z-30 pt-3 pb-2 px-4 lg:px-6">
         <div className="max-w-[1600px] mx-auto bg-white/95 backdrop-blur-md border border-slate-200/90 rounded-2xl px-5 lg:px-7 py-3 transition-all shadow-2xs flex items-center justify-between gap-4">
-          
+
           {/* Left: Brand Identity Logo */}
           <div className="flex items-center gap-3.5">
-            <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-[#ff5722] via-[#ff4405] to-[#d83500] text-white flex items-center justify-center font-black text-lg shadow-md shadow-orange-500/25 shrink-0 border border-orange-300/40">
-              <span className="tracking-tighter">TS</span>
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="text-lg font-black text-slate-900 tracking-tight font-mono">
-                  TerraSentinel
-                </span>
-                <span className="px-2.5 py-0.5 rounded-md text-[10px] font-mono font-bold bg-[#121417] text-white tracking-wider shadow-xs">
-                  SIH26178
-                </span>
-              </div>
-              <span className="text-[11px] text-slate-500 font-medium hidden sm:inline-block">
-                Distributed Edge Environmental Intelligence & Early Warning
-              </span>
-            </div>
+            <img
+              src="/logo.png"
+              alt="TerraSentinel Logo"
+              className="h-14 sm:h-16 lg:h-18 w-auto object-contain drop-shadow-sm transition-transform hover:scale-105 cursor-pointer py-0.5"
+              onClick={() => scrollToSection('hero')}
+            />
+            <span className="px-2.5 py-0.5 rounded-md text-[10px] font-mono font-bold bg-[#121417] text-white tracking-wider shadow-xs hidden sm:inline-block">
+              SIH26178
+            </span>
           </div>
 
           {/* Center Navigation Links */}
@@ -98,16 +141,10 @@ export const LandingLoginView: React.FC<LandingLoginViewProps> = ({ onSelectRole
             </button>
           </nav>
 
-          {/* Right Action Ribbon: Cluster Status, Theme Switcher, and Launch Buttons */}
+          {/* Right Action Ribbon */}
           <div className="flex items-center gap-2.5">
-            
-            {/* Live Mesh Status Pill */}
-            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100 border border-slate-200 text-xs font-mono shadow-2xs">
-              <span className={`w-2 h-2 rounded-full ${systemOnline ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'}`} />
-              <span className="text-slate-800 font-bold">{systemOnline ? 'CLUSTER LIVE' : 'CONNECTING'}</span>
-              <span className="text-slate-400">•</span>
-              <span className="text-[#ff4405] font-bold">{nodeCount} Nodes</span>
-            </div>
+
+
 
             {/* Bright / Dark Mode Switcher */}
             <button
@@ -116,19 +153,17 @@ export const LandingLoginView: React.FC<LandingLoginViewProps> = ({ onSelectRole
               title={`Switch to ${theme === 'bright' ? 'Dark' : 'Bright'} Mode`}
               aria-label="Toggle Bright/Dark Mode"
             >
-              <div className={`px-2.5 py-1 rounded-lg flex items-center gap-1.5 text-[11px] font-bold transition-all ${
-                theme === 'bright'
+              <div className={`px-2.5 py-1 rounded-lg flex items-center gap-1.5 text-[11px] font-bold transition-all ${theme === 'bright'
                   ? 'bg-white text-amber-600 shadow-2xs'
                   : 'text-slate-400 hover:text-slate-600'
-              }`}>
+                }`}>
                 <Sun className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
                 <span className="hidden sm:inline">Bright</span>
               </div>
-              <div className={`px-2.5 py-1 rounded-lg flex items-center gap-1.5 text-[11px] font-bold transition-all ${
-                theme === 'dark'
+              <div className={`px-2.5 py-1 rounded-lg flex items-center gap-1.5 text-[11px] font-bold transition-all ${theme === 'dark'
                   ? 'bg-[#121417] text-purple-300 shadow-2xs'
                   : 'text-slate-500 hover:text-slate-700'
-              }`}>
+                }`}>
                 <Moon className="w-3.5 h-3.5 text-purple-400 fill-purple-400" />
                 <span className="hidden sm:inline">Dark</span>
               </div>
@@ -157,30 +192,30 @@ export const LandingLoginView: React.FC<LandingLoginViewProps> = ({ onSelectRole
         </div>
       </header>
 
-      {/* Main Page Container */}
-      <main className="flex-1 max-w-[1600px] w-full mx-auto p-4 lg:p-6 space-y-8">
-        
+      {/* Main Content Area */}
+      <main className="flex-1 max-w-[1600px] w-full mx-auto p-4 lg:p-6 space-y-12 relative z-10">
+
         {/* =========================================================================
-            2. HERO SECTION
+            2. HERO SECTION WITH FLOATING 3D HUD ACCENTS
             ========================================================================= */}
-        <section id="hero" className="py-8 lg:py-14 text-center space-y-6 max-w-4xl mx-auto">
-          
+        <section id="hero" className="py-10 lg:py-16 text-center space-y-6 max-w-4xl mx-auto relative">
+
           {/* Eyebrow Pill */}
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-orange-50 border border-orange-200 text-[#ea580c] text-xs font-mono font-bold shadow-2xs">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/90 backdrop-blur-md border border-orange-200 text-[#ea580c] text-xs font-mono font-bold shadow-xs animate-bounce">
             <Sparkles className="w-3.5 h-3.5 text-[#ff4405]" />
             <span>AUTONOMOUS EDGE DISASTER INTELLIGENCE NETWORK</span>
           </div>
 
           {/* Main Hero Headline */}
-          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-slate-900 leading-[1.15] uppercase">
+          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-slate-900 leading-[1.12] uppercase drop-shadow-xs">
             Flash Flood & Wildfire <br className="hidden sm:inline" />
-            <span className="text-[#ff4405]">
+            <span className="text-[#ff4405] underline decoration-orange-300/40 underline-offset-8">
               Early Detection Network
             </span>
           </h1>
 
           {/* Subtitle */}
-          <p className="text-sm sm:text-base text-slate-600 font-medium leading-relaxed max-w-3xl mx-auto">
+          <p className="text-sm sm:text-base text-slate-600 font-medium leading-relaxed max-w-3xl mx-auto backdrop-blur-xs py-1">
             AegisNet operates a decentralized mesh of autonomous ESP32 nodes across river catchments and forests — processing TinyML risk scores on-device to deliver life-saving early warnings before disasters escalate.
           </p>
 
@@ -189,7 +224,7 @@ export const LandingLoginView: React.FC<LandingLoginViewProps> = ({ onSelectRole
             <button
               onClick={() => onSelectRole('agency')}
               id="btn-hero-launch-agency"
-              className="px-6 py-3 rounded-xl bg-[#ff4405] hover:bg-[#e03b00] text-white font-extrabold text-xs flex items-center gap-2 shadow-md shadow-orange-500/25 transition-all cursor-pointer"
+              className="px-6 py-3.5 rounded-xl bg-[#ff4405] hover:bg-[#e03b00] text-white font-extrabold text-xs flex items-center gap-2 shadow-lg shadow-orange-500/30 transition-all cursor-pointer hover:scale-105 active:scale-95"
             >
               <span>🚀 Launch Command Dashboard</span>
               <ArrowRight className="w-4 h-4" />
@@ -197,7 +232,7 @@ export const LandingLoginView: React.FC<LandingLoginViewProps> = ({ onSelectRole
 
             <button
               onClick={() => scrollToSection('architecture')}
-              className="px-5 py-3 rounded-xl bg-white hover:bg-slate-50 text-slate-800 font-bold text-xs border border-slate-200 flex items-center gap-2 transition-all cursor-pointer shadow-2xs"
+              className="px-5 py-3.5 rounded-xl bg-white/95 hover:bg-slate-50 text-slate-800 font-bold text-xs border border-slate-200 flex items-center gap-2 transition-all cursor-pointer shadow-2xs backdrop-blur-md hover:scale-102"
             >
               <Zap className="w-4 h-4 text-[#ff4405]" />
               <span>⚡ How Edge-AI Works</span>
@@ -205,32 +240,32 @@ export const LandingLoginView: React.FC<LandingLoginViewProps> = ({ onSelectRole
 
             <button
               onClick={() => onSelectRole('public')}
-              className="px-5 py-3 rounded-xl bg-white hover:bg-slate-50 text-slate-800 font-bold text-xs border border-slate-200 flex items-center gap-2 transition-all cursor-pointer shadow-2xs"
+              className="px-5 py-3.5 rounded-xl bg-white/95 hover:bg-slate-50 text-slate-800 font-bold text-xs border border-slate-200 flex items-center gap-2 transition-all cursor-pointer shadow-2xs backdrop-blur-md hover:scale-102"
             >
               <Users className="w-4 h-4 text-cyan-600" />
               <span>🌐 Public Portal</span>
             </button>
           </div>
 
-          {/* 5-Metric Ribbon */}
+          {/* Floating 3D Telemetry HUD Cards Ribbon */}
           <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 pt-6 max-w-4xl mx-auto">
-            <div className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-2xs">
+            <div className="p-4 rounded-2xl bg-white/90 backdrop-blur-md border border-slate-200/90 shadow-2xs transition-transform hover:-translate-y-1">
               <div className="text-2xl sm:text-3xl font-black font-mono text-slate-900">5</div>
               <div className="text-[11px] text-slate-500 font-medium mt-0.5">Edge Sensor Nodes</div>
             </div>
-            <div className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-2xs">
+            <div className="p-4 rounded-2xl bg-white/90 backdrop-blur-md border border-slate-200/90 shadow-2xs transition-transform hover:-translate-y-1">
               <div className="text-2xl sm:text-3xl font-black font-mono text-emerald-600">&lt;200ms</div>
               <div className="text-[11px] text-slate-500 font-medium mt-0.5">On-Device Inference</div>
             </div>
-            <div className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-2xs">
+            <div className="p-4 rounded-2xl bg-white/90 backdrop-blur-md border border-slate-200/90 shadow-2xs transition-transform hover:-translate-y-1">
               <div className="text-2xl sm:text-3xl font-black font-mono text-[#ff4405]">3</div>
               <div className="text-[11px] text-slate-500 font-medium mt-0.5">Disaster Vectors</div>
             </div>
-            <div className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-2xs">
+            <div className="p-4 rounded-2xl bg-white/90 backdrop-blur-md border border-slate-200/90 shadow-2xs transition-transform hover:-translate-y-1">
               <div className="text-2xl sm:text-3xl font-black font-mono text-cyan-600">6 Hours</div>
               <div className="text-[11px] text-slate-500 font-medium mt-0.5">Predictive Forecast</div>
             </div>
-            <div className="col-span-2 sm:col-span-1 p-4 rounded-2xl bg-white border border-slate-200/90 shadow-2xs">
+            <div className="col-span-2 sm:col-span-1 p-4 rounded-2xl bg-white/90 backdrop-blur-md border border-slate-200/90 shadow-2xs transition-transform hover:-translate-y-1">
               <div className="text-2xl sm:text-3xl font-black font-mono text-purple-600">100%</div>
               <div className="text-[11px] text-slate-500 font-medium mt-0.5">Mesh Network Uptime</div>
             </div>
@@ -242,19 +277,24 @@ export const LandingLoginView: React.FC<LandingLoginViewProps> = ({ onSelectRole
             3. THREE HAZARD DETECTION VECTORS
             ========================================================================= */}
         <section id="vectors" className="space-y-4">
-          <div className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-[#ff4405]" />
-            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900">
-              Core Multi-Disaster Vectors
-            </h3>
+          <div className="flex items-center justify-between pb-2 border-b border-slate-200">
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-[#ff4405]" />
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900">
+                Core Multi-Disaster Vectors
+              </h3>
+            </div>
+            <span className="text-[11px] font-mono text-slate-500 hidden sm:inline">
+              REAL-TIME PHYSICAL PROBES
+            </span>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            
+
             {/* Flash Flood */}
-            <div className="p-6 rounded-2xl bg-white border border-slate-200/90 shadow-2xs flex flex-col justify-between hover:border-slate-300 transition-all group">
+            <div className="p-6 rounded-2xl bg-white/95 backdrop-blur-md border border-slate-200/90 shadow-2xs flex flex-col justify-between hover:border-cyan-300 hover:shadow-md transition-all group">
               <div className="space-y-3">
-                <div className="w-10 h-10 rounded-xl bg-cyan-50 border border-cyan-200 text-cyan-600 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl bg-cyan-50 border border-cyan-200 text-cyan-600 flex items-center justify-center group-hover:scale-110 transition-transform">
                   <Waves className="w-5 h-5" />
                 </div>
                 <div>
@@ -273,9 +313,9 @@ export const LandingLoginView: React.FC<LandingLoginViewProps> = ({ onSelectRole
             </div>
 
             {/* Wildfire */}
-            <div className="p-6 rounded-2xl bg-white border border-slate-200/90 shadow-2xs flex flex-col justify-between hover:border-slate-300 transition-all group">
+            <div className="p-6 rounded-2xl bg-white/95 backdrop-blur-md border border-slate-200/90 shadow-2xs flex flex-col justify-between hover:border-orange-300 hover:shadow-md transition-all group">
               <div className="space-y-3">
-                <div className="w-10 h-10 rounded-xl bg-orange-50 border border-orange-200 text-[#ff4405] flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl bg-orange-50 border border-orange-200 text-[#ff4405] flex items-center justify-center group-hover:scale-110 transition-transform">
                   <Flame className="w-5 h-5" />
                 </div>
                 <div>
@@ -294,9 +334,9 @@ export const LandingLoginView: React.FC<LandingLoginViewProps> = ({ onSelectRole
             </div>
 
             {/* Air Quality */}
-            <div className="p-6 rounded-2xl bg-white border border-slate-200/90 shadow-2xs flex flex-col justify-between hover:border-slate-300 transition-all group">
+            <div className="p-6 rounded-2xl bg-white/95 backdrop-blur-md border border-slate-200/90 shadow-2xs flex flex-col justify-between hover:border-purple-300 hover:shadow-md transition-all group">
               <div className="space-y-3">
-                <div className="w-10 h-10 rounded-xl bg-purple-50 border border-purple-200 text-purple-600 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl bg-purple-50 border border-purple-200 text-purple-600 flex items-center justify-center group-hover:scale-110 transition-transform">
                   <Wind className="w-5 h-5" />
                 </div>
                 <div>
@@ -318,7 +358,7 @@ export const LandingLoginView: React.FC<LandingLoginViewProps> = ({ onSelectRole
         </section>
 
         {/* =========================================================================
-            4. OPERATIONAL ACCESS GATEWAY (THE DUAL CARDS)
+            4. OPERATIONAL ACCESS GATEWAYS (THE DUAL CARDS)
             ========================================================================= */}
         <section id="gateways" className="py-6 space-y-6">
           <div className="text-center space-y-2 max-w-3xl mx-auto">
@@ -335,9 +375,9 @@ export const LandingLoginView: React.FC<LandingLoginViewProps> = ({ onSelectRole
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5 max-w-5xl mx-auto items-stretch">
-            
+
             {/* Card 1: Public Community Portal */}
-            <div className="p-6 sm:p-7 rounded-2xl bg-white border border-slate-200/90 shadow-2xs flex flex-col justify-between hover:border-slate-300 transition-all">
+            <div className="p-6 sm:p-7 rounded-2xl bg-white/95 backdrop-blur-md border border-slate-200/90 shadow-2xs flex flex-col justify-between hover:border-slate-300 transition-all">
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="p-2.5 rounded-xl bg-orange-50 border border-orange-200 text-[#ff4405]">
@@ -390,7 +430,7 @@ export const LandingLoginView: React.FC<LandingLoginViewProps> = ({ onSelectRole
             </div>
 
             {/* Card 2: Agency Tactical Command Center */}
-            <div className="p-6 sm:p-7 rounded-2xl bg-white border border-slate-200/90 shadow-2xs flex flex-col justify-between hover:border-slate-300 transition-all">
+            <div className="p-6 sm:p-7 rounded-2xl bg-white/95 backdrop-blur-md border border-slate-200/90 shadow-2xs flex flex-col justify-between hover:border-slate-300 transition-all">
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="p-2.5 rounded-xl bg-orange-50 border border-orange-200 text-[#ff4405]">
@@ -425,11 +465,10 @@ export const LandingLoginView: React.FC<LandingLoginViewProps> = ({ onSelectRole
                         key={prof.title}
                         type="button"
                         onClick={() => setAgencyRoleName(prof.title)}
-                        className={`p-2 rounded-xl text-left border transition-all cursor-pointer ${
-                          agencyRoleName === prof.title
+                        className={`p-2 rounded-xl text-left border transition-all cursor-pointer ${agencyRoleName === prof.title
                             ? 'bg-[#121417] text-white border-zinc-800 shadow-2xs'
                             : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'
-                        }`}
+                          }`}
                       >
                         <div className="font-bold truncate text-[11px]">{prof.title}</div>
                         <div className="text-[9px] text-slate-400 font-mono truncate">{prof.desc}</div>
@@ -490,8 +529,8 @@ export const LandingLoginView: React.FC<LandingLoginViewProps> = ({ onSelectRole
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
-            
-            <div className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-2xs space-y-2">
+
+            <div className="p-4 rounded-2xl bg-white/95 backdrop-blur-md border border-slate-200/90 shadow-2xs space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-xl">🔬</span>
                 <span className="text-[10px] font-mono font-bold bg-slate-100 text-slate-700 px-2 py-0.5 rounded border border-slate-200">
@@ -504,7 +543,7 @@ export const LandingLoginView: React.FC<LandingLoginViewProps> = ({ onSelectRole
               </p>
             </div>
 
-            <div className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-2xs space-y-2">
+            <div className="p-4 rounded-2xl bg-white/95 backdrop-blur-md border border-slate-200/90 shadow-2xs space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-xl">🧠</span>
                 <span className="text-[10px] font-mono font-bold bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded border border-emerald-200">
@@ -517,7 +556,7 @@ export const LandingLoginView: React.FC<LandingLoginViewProps> = ({ onSelectRole
               </p>
             </div>
 
-            <div className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-2xs space-y-2">
+            <div className="p-4 rounded-2xl bg-white/95 backdrop-blur-md border border-slate-200/90 shadow-2xs space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-xl">📡</span>
                 <span className="text-[10px] font-mono font-bold bg-cyan-50 text-cyan-700 px-2 py-0.5 rounded border border-cyan-200">
@@ -530,7 +569,7 @@ export const LandingLoginView: React.FC<LandingLoginViewProps> = ({ onSelectRole
               </p>
             </div>
 
-            <div className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-2xs space-y-2">
+            <div className="p-4 rounded-2xl bg-white/95 backdrop-blur-md border border-slate-200/90 shadow-2xs space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-xl">🌐</span>
                 <span className="text-[10px] font-mono font-bold bg-purple-50 text-purple-700 px-2 py-0.5 rounded border border-purple-200">
@@ -543,7 +582,7 @@ export const LandingLoginView: React.FC<LandingLoginViewProps> = ({ onSelectRole
               </p>
             </div>
 
-            <div className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-2xs space-y-2">
+            <div className="p-4 rounded-2xl bg-white/95 backdrop-blur-md border border-slate-200/90 shadow-2xs space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-xl">⚡</span>
                 <span className="text-[10px] font-mono font-bold bg-orange-50 text-[#ff4405] px-2 py-0.5 rounded border border-orange-200">
@@ -556,7 +595,7 @@ export const LandingLoginView: React.FC<LandingLoginViewProps> = ({ onSelectRole
               </p>
             </div>
 
-            <div className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-2xs space-y-2">
+            <div className="p-4 rounded-2xl bg-white/95 backdrop-blur-md border border-slate-200/90 shadow-2xs space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-xl">🖥️</span>
                 <span className="text-[10px] font-mono font-bold bg-slate-900 text-white px-2 py-0.5 rounded">
@@ -589,8 +628,8 @@ export const LandingLoginView: React.FC<LandingLoginViewProps> = ({ onSelectRole
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
-            
-            <div className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-2xs space-y-1.5">
+
+            <div className="p-4 rounded-2xl bg-white/95 backdrop-blur-md border border-slate-200/90 shadow-2xs space-y-1.5">
               <div className="text-xl">🌊</div>
               <h4 className="text-xs font-bold text-slate-900">Flash Flood Wave Front Tracking</h4>
               <p className="text-[11px] text-slate-600 leading-relaxed font-medium">
@@ -598,7 +637,7 @@ export const LandingLoginView: React.FC<LandingLoginViewProps> = ({ onSelectRole
               </p>
             </div>
 
-            <div className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-2xs space-y-1.5">
+            <div className="p-4 rounded-2xl bg-white/95 backdrop-blur-md border border-slate-200/90 shadow-2xs space-y-1.5">
               <div className="text-xl">🔥</div>
               <h4 className="text-xs font-bold text-slate-900">Wildfire Flame Co-Validation</h4>
               <p className="text-[11px] text-slate-600 leading-relaxed font-medium">
@@ -606,7 +645,7 @@ export const LandingLoginView: React.FC<LandingLoginViewProps> = ({ onSelectRole
               </p>
             </div>
 
-            <div className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-2xs space-y-1.5">
+            <div className="p-4 rounded-2xl bg-white/95 backdrop-blur-md border border-slate-200/90 shadow-2xs space-y-1.5">
               <div className="text-xl">🔋</div>
               <h4 className="text-xs font-bold text-slate-900">Solar Autonomous Operation</h4>
               <p className="text-[11px] text-slate-600 leading-relaxed font-medium">
@@ -614,7 +653,7 @@ export const LandingLoginView: React.FC<LandingLoginViewProps> = ({ onSelectRole
               </p>
             </div>
 
-            <div className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-2xs space-y-1.5">
+            <div className="p-4 rounded-2xl bg-white/95 backdrop-blur-md border border-slate-200/90 shadow-2xs space-y-1.5">
               <div className="text-xl">🗺️</div>
               <h4 className="text-xs font-bold text-slate-900">Spatial IDW Correlation</h4>
               <p className="text-[11px] text-slate-600 leading-relaxed font-medium">
@@ -622,7 +661,7 @@ export const LandingLoginView: React.FC<LandingLoginViewProps> = ({ onSelectRole
               </p>
             </div>
 
-            <div className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-2xs space-y-1.5">
+            <div className="p-4 rounded-2xl bg-white/95 backdrop-blur-md border border-slate-200/90 shadow-2xs space-y-1.5">
               <div className="text-xl">📲</div>
               <h4 className="text-xs font-bold text-slate-900">Multilingual Civilian SMS</h4>
               <p className="text-[11px] text-slate-600 leading-relaxed font-medium">
@@ -630,7 +669,7 @@ export const LandingLoginView: React.FC<LandingLoginViewProps> = ({ onSelectRole
               </p>
             </div>
 
-            <div className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-2xs space-y-1.5">
+            <div className="p-4 rounded-2xl bg-white/95 backdrop-blur-md border border-slate-200/90 shadow-2xs space-y-1.5">
               <div className="text-xl">📡</div>
               <h4 className="text-xs font-bold text-slate-900">Decentralized Self-Healing Mesh</h4>
               <p className="text-[11px] text-slate-600 leading-relaxed font-medium">
@@ -658,9 +697,9 @@ export const LandingLoginView: React.FC<LandingLoginViewProps> = ({ onSelectRole
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            
+
             {/* Level 1: Edge TinyML */}
-            <div className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-2xs space-y-4">
+            <div className="p-5 rounded-2xl bg-white/95 backdrop-blur-md border border-slate-200/90 shadow-2xs space-y-4">
               <div className="flex items-center justify-between pb-3 border-b border-slate-100">
                 <div>
                   <span className="text-[10px] font-mono text-emerald-700 font-bold uppercase tracking-wider block">
@@ -706,7 +745,7 @@ export const LandingLoginView: React.FC<LandingLoginViewProps> = ({ onSelectRole
             </div>
 
             {/* Level 2: Cloud AI Service */}
-            <div className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-2xs space-y-4">
+            <div className="p-5 rounded-2xl bg-white/95 backdrop-blur-md border border-slate-200/90 shadow-2xs space-y-4">
               <div className="flex items-center justify-between pb-3 border-b border-slate-100">
                 <div>
                   <span className="text-[10px] font-mono text-[#ff4405] font-bold uppercase tracking-wider block">
@@ -794,7 +833,7 @@ export const LandingLoginView: React.FC<LandingLoginViewProps> = ({ onSelectRole
       {/* =========================================================================
           9. MINIMAL FOOTER
           ========================================================================= */}
-      <footer className="border-t border-slate-200 py-3.5 px-6 text-xs text-slate-500 bg-white shadow-2xs mt-auto">
+      <footer className="border-t border-slate-200 py-3.5 px-6 text-xs text-slate-500 bg-white/90 backdrop-blur-md shadow-2xs mt-auto relative z-10">
         <div className="max-w-[1600px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
           <div className="font-semibold text-slate-700">
             TerraSentinel (SIH26178) — Unified Dual-Portal Environmental Monitoring Platform

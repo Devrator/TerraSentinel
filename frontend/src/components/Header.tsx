@@ -67,24 +67,14 @@ export const Header: React.FC<HeaderProps> = ({
 
           {/* Left: Brand Identity & SIH Project Badges */}
           <div className="flex items-center gap-3.5">
-            {/* Prominent Flame Accent Logo */}
-            <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-br from-[#ff5722] via-[#ff4405] to-[#d83500] text-white flex items-center justify-center font-black text-lg shadow-md shadow-orange-500/25 shrink-0 border border-orange-300/40">
-              <span className="tracking-tighter drop-shadow-xs">TS</span>
-            </div>
-            
-            <div className="flex flex-col">
-              <div className="flex items-center gap-2.5">
-                <span className="text-lg font-black text-slate-900 tracking-tight">
-                  TerraSentinel
-                </span>
-                <span className="px-2.5 py-0.5 rounded-md text-[10px] font-mono font-bold bg-[#121417] text-white tracking-wider shadow-xs">
-                  AGENCY COMMAND
-                </span>
-              </div>
-              <span className="text-[11px] text-slate-500 font-medium hidden sm:inline-block">
-                Distributed Edge Environmental Intelligence & Early Warning {summary ? `• ${summary.online_nodes}/${summary.total_nodes} Nodes Live` : ''}
-              </span>
-            </div>
+            <img
+              src="/logo.png"
+              alt="TerraSentinel Logo"
+              className="h-12 sm:h-14 lg:h-16 w-auto object-contain drop-shadow-sm py-0.5"
+            />
+            <span className="px-2.5 py-0.5 rounded-md text-[10px] font-mono font-bold bg-[#121417] text-white tracking-wider shadow-xs hidden sm:inline-block">
+              AGENCY COMMAND
+            </span>
           </div>
 
           {/* Right: Switch to Public Portal, Theme Toggle, Notification & Logout */}
