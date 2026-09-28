@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ShieldAlert, Users, Radio, ArrowRight, Activity, MapPin, BellRing, Sparkles, CheckCircle2, ChevronRight, Lock } from 'lucide-react';
+import { ShieldAlert, Users, ArrowRight, Sparkles, CheckCircle2 } from 'lucide-react';
 import type { UserRole } from '../types';
 import { api } from '../services/api';
 

@@ -18,7 +18,6 @@ import {
   Moon,
   Sparkles,
   Send,
-  Radio,
   Battery,
   X
 } from 'lucide-react';
