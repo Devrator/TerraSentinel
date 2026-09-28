@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, Body
 from sqlalchemy.orm import Session
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 from pydantic import BaseModel
 from backend.database import get_db
 from backend.services.incident_service import IncidentService
@@ -38,6 +38,13 @@ class IncidentUpdatePayload(BaseModel):
     assigned_operator: Optional[str] = None
     note: Optional[str] = None
     actor: Optional[str] = "OPERATOR"
+
+class IncidentDispatchPayload(BaseModel):
+    agency: str = "SDMA"  # SDMA, FIRE_RESCUE, POLICE, AMBULANCE_108
+    priority: Optional[str] = "PRIORITY_1"
+    unit_assigned: Optional[str] = "UNIT-HAZMAT-04"
+    operator_name: Optional[str] = "Command Duty Officer"
+    notes: Optional[str] = None
 
 @router.get("", response_model=List[IncidentResponse], summary="List all operational incidents")
 def list_incidents(
@@ -135,3 +142,25 @@ def update_incident(
         evidence_snapshot=inc.evidence_snapshot,
         notes=inc.notes
     )
+
+@router.post("/{incident_id}/dispatch", summary="Simulate emergency agency dispatch")
+def dispatch_incident(
+    incident_id: int,
+    payload: IncidentDispatchPayload,
+    db: Session = Depends(get_db)
+):
+    try:
+        res = IncidentService.dispatch_incident(
+            db=db,
+            incident_id=incident_id,
+            agency=payload.agency,
+            priority=payload.priority or "PRIORITY_1",
+            unit_assigned=payload.unit_assigned or "UNIT-HAZMAT-04",
+            operator_name=payload.operator_name or "Command Duty Officer",
+            notes=payload.notes
+        )
+        return res
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

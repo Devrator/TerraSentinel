@@ -8,7 +8,7 @@ import {
   Tooltip,
   CartesianGrid,
 } from 'recharts';
-import { LineChart as ChartIcon, Thermometer, Droplets, Gauge, CloudRain, Wind } from 'lucide-react';
+import { Thermometer, Droplets, Gauge, CloudRain, Wind, Activity } from 'lucide-react';
 import { api } from '../services/api';
 import type { SensorReading } from '../types';
 
@@ -53,8 +53,8 @@ export const HistoricalCharts: React.FC<HistoricalChartsProps> = ({ selectedNode
     temperature: {
       label: 'Temperature',
       unit: '°C',
-      color: '#d97706',
-      fill: 'url(#tempLightGradient)',
+      color: '#ff4405',
+      fill: 'url(#tempFlameGradient)',
       icon: Thermometer,
       domain: ['dataMin - 2', 'dataMax + 2'],
     },
@@ -75,7 +75,7 @@ export const HistoricalCharts: React.FC<HistoricalChartsProps> = ({ selectedNode
       domain: ['dataMin - 5', 'dataMax + 5'],
     },
     rain_value: {
-      label: 'Rainfall',
+      label: 'Precipitation',
       unit: 'analog',
       color: '#2563eb',
       fill: 'url(#rainLightGradient)',
@@ -83,7 +83,7 @@ export const HistoricalCharts: React.FC<HistoricalChartsProps> = ({ selectedNode
       domain: [0, 'dataMax + 100'],
     },
     air_quality: {
-      label: 'Air Quality',
+      label: 'Air Quality (AQI)',
       unit: 'AQI',
       color: '#059669',
       fill: 'url(#aqiLightGradient)',
@@ -101,24 +101,31 @@ export const HistoricalCharts: React.FC<HistoricalChartsProps> = ({ selectedNode
   }));
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-xs">
+    <div className="rounded-2xl border border-slate-200/90 bg-white p-4 lg:p-5 shadow-2xs">
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 mb-4 border-b border-slate-100">
-        <div className="flex items-center gap-2">
-          <ChartIcon className="w-4 h-4 text-emerald-600" />
-          <h2 className="text-xs font-bold uppercase tracking-wider text-slate-700">
-            Historical Telemetry Analysis ({selectedNodeId})
-          </h2>
+        <div className="flex items-center gap-2.5">
+          <div className="p-2 rounded-xl bg-orange-50 text-[#ff4405]">
+            <Activity className="w-4 h-4" />
+          </div>
+          <div>
+            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900">
+              Historical Telemetry Analysis ({selectedNodeId})
+            </h2>
+            <div className="text-[10px] text-slate-400 font-medium">
+              High-frequency multi-channel environmental time series
+            </div>
+          </div>
         </div>
 
         {/* Time Filters */}
-        <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-lg border border-slate-200">
+        <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200">
           {(['5m', '30m', '1h', '24h'] as TimeFilter[]).map((tf) => (
             <button
               key={tf}
               onClick={() => setTimeFilter(tf)}
-              className={`px-2.5 py-1 text-xs font-semibold rounded-md transition-all cursor-pointer ${timeFilter === tf
-                  ? 'bg-white text-slate-900 shadow-xs'
+              className={`px-3 py-1 text-xs font-bold rounded-lg transition-all cursor-pointer ${timeFilter === tf
+                  ? 'bg-white text-slate-900 shadow-2xs'
                   : 'text-slate-500 hover:text-slate-900'
                 }`}
             >
@@ -138,12 +145,12 @@ export const HistoricalCharts: React.FC<HistoricalChartsProps> = ({ selectedNode
             <button
               key={m}
               onClick={() => setActiveMetric(m)}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${isActive
-                  ? 'bg-slate-900 text-white border-slate-900 shadow-xs'
+              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer ${isActive
+                  ? 'bg-[#121417] text-white border-zinc-900 shadow-xs'
                   : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900'
                 }`}
             >
-              <Icon className="w-3.5 h-3.5" style={{ color: isActive ? '#ffffff' : cfg.color }} />
+              <Icon className="w-3.5 h-3.5" style={{ color: isActive ? '#ff4405' : cfg.color }} />
               <span>{cfg.label}</span>
             </button>
           );
@@ -160,9 +167,9 @@ export const HistoricalCharts: React.FC<HistoricalChartsProps> = ({ selectedNode
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
               <defs>
-                <linearGradient id="tempLightGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#d97706" stopOpacity={0.25} />
-                  <stop offset="95%" stopColor="#d97706" stopOpacity={0.0} />
+                <linearGradient id="tempFlameGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#ff4405" stopOpacity={0.25} />
+                  <stop offset="95%" stopColor="#ff4405" stopOpacity={0.0} />
                 </linearGradient>
                 <linearGradient id="humLightGradient" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="#0891b2" stopOpacity={0.25} />
@@ -200,12 +207,12 @@ export const HistoricalCharts: React.FC<HistoricalChartsProps> = ({ selectedNode
                   if (active && payload && payload.length) {
                     const data = payload[0].payload;
                     return (
-                      <div className="bg-white border border-slate-200 p-2.5 rounded-lg shadow-md text-xs">
+                      <div className="bg-white border border-slate-200 p-3 rounded-xl shadow-lg text-xs">
                         <div className="text-slate-400 text-[10px] mb-1 font-mono">{data.fullDate}</div>
-                        <div className="flex items-center gap-2 font-bold text-slate-800">
+                        <div className="flex items-center gap-2 font-extrabold text-slate-900">
                           <span style={{ color: currentConfig.color }}>●</span>
                           <span>{currentConfig.label}:</span>
-                          <span className="text-slate-900 font-mono">{data.value} {currentConfig.unit}</span>
+                          <span className="font-mono">{data.value} {currentConfig.unit}</span>
                         </div>
                       </div>
                     );
@@ -228,3 +235,4 @@ export const HistoricalCharts: React.FC<HistoricalChartsProps> = ({ selectedNode
     </div>
   );
 };
+

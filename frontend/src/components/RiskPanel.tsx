@@ -18,33 +18,33 @@ export const RiskPanel: React.FC<RiskPanelProps> = ({
   const getCategoryBadge = (category: string = 'LOW') => {
     switch (category) {
       case 'CRITICAL':
-        return 'bg-rose-50 text-rose-700 border-rose-300 animate-pulse font-bold';
+        return 'bg-rose-50 text-rose-700 border-rose-200 animate-pulse font-bold';
       case 'HIGH':
-        return 'bg-orange-50 text-orange-700 border-orange-300 font-bold';
+        return 'bg-orange-50 text-orange-700 border-orange-200 font-bold';
       case 'MODERATE':
-        return 'bg-amber-50 text-amber-700 border-amber-300 font-bold';
+        return 'bg-amber-50 text-amber-700 border-amber-200 font-bold';
       default:
-        return 'bg-emerald-50 text-emerald-700 border-emerald-300 font-bold';
+        return 'bg-emerald-50 text-emerald-700 border-emerald-200 font-bold';
     }
   };
 
   const getProgressBarColor = (score: number) => {
     if (score > 75) return 'from-rose-500 to-rose-600';
-    if (score > 50) return 'from-orange-500 to-amber-500';
+    if (score > 50) return 'from-[#ff4405] to-amber-500';
     if (score > 25) return 'from-amber-400 to-amber-500';
     return 'from-emerald-400 to-teal-500';
   };
 
   const hazardCards = [
     {
-      title: 'FOREST FIRE RISK',
+      title: 'FOREST WILDFIRE RISK',
       score: risk?.fire_risk ?? 0,
       category: risk?.fire_category ?? 'LOW',
       icon: Flame,
-      color: 'text-orange-600',
+      color: 'text-[#ff4405]',
       bgColor: 'bg-orange-50',
-      borderColor: 'border-slate-200 hover:border-orange-200',
-      description: 'Thermal spikes, low humidity & combustion gas detection',
+      borderColor: 'border-slate-200/80 hover:border-orange-300',
+      description: 'Thermal gradient spikes, low humidity & combustion gas detection',
       indicators: [
         { label: 'Thermal Index', status: (selectedNode?.latest_reading?.temperature ?? 0) > 38 ? 'High' : 'Normal' },
         { label: 'Drying Factor', status: (selectedNode?.latest_reading?.humidity ?? 50) < 25 ? 'Dry' : 'Normal' },
@@ -52,14 +52,14 @@ export const RiskPanel: React.FC<RiskPanelProps> = ({
       ]
     },
     {
-      title: 'FLOOD & SURGE RISK',
+      title: 'FLASH FLOOD & SURGE',
       score: risk?.flood_risk ?? 0,
       category: risk?.flood_category ?? 'LOW',
       icon: Waves,
       color: 'text-cyan-600',
       bgColor: 'bg-cyan-50',
-      borderColor: 'border-slate-200 hover:border-cyan-200',
-      description: 'Rain intensity, moisture saturation & barometric drops',
+      borderColor: 'border-slate-200/80 hover:border-cyan-300',
+      description: 'Precipitation intensity, moisture saturation & barometric drops',
       indicators: [
         { label: 'Rain Inflow', status: (selectedNode?.latest_reading?.rain_value ?? 0) > 500 ? 'Surge' : 'Normal' },
         { label: 'Moisture Saturation', status: (selectedNode?.latest_reading?.humidity ?? 0) > 85 ? 'High' : 'Normal' },
@@ -67,14 +67,14 @@ export const RiskPanel: React.FC<RiskPanelProps> = ({
       ]
     },
     {
-      title: 'POLLUTION RISK',
+      title: 'ATMOSPHERIC POLLUTION',
       score: risk?.pollution_risk ?? 0,
       category: risk?.pollution_category ?? 'LOW',
       icon: Wind,
       color: 'text-purple-600',
       bgColor: 'bg-purple-50',
-      borderColor: 'border-slate-200 hover:border-purple-200',
-      description: 'Particulate air quality index & atmospheric trapping',
+      borderColor: 'border-slate-200/80 hover:border-purple-300',
+      description: 'Particulate air quality index & atmospheric inversion trapping',
       indicators: [
         { label: 'Particulates', status: (selectedNode?.latest_reading?.air_quality ?? 0) > 200 ? 'Elevated' : 'Clean' },
         { label: 'Inversion', status: (selectedNode?.latest_reading?.humidity ?? 0) > 75 && (selectedNode?.latest_reading?.temperature ?? 30) < 22 ? 'Inversion' : 'Dispersed' },
@@ -84,33 +84,32 @@ export const RiskPanel: React.FC<RiskPanelProps> = ({
   ];
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-4 lg:p-6 shadow-xs">
+    <div className="rounded-2xl border border-slate-200/90 bg-white p-4 lg:p-5 shadow-2xs">
       {/* Section Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-4 mb-4 border-b border-slate-100">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 mb-4 border-b border-slate-100">
         <div className="flex items-center gap-2.5">
-          <div className="p-2 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700">
+          <div className="p-2 rounded-xl bg-orange-50 border border-orange-200 text-[#ff4405]">
             <ShieldAlert className="w-5 h-5" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-sm font-bold uppercase tracking-wider text-slate-900">
+              <h2 className="text-sm font-extrabold text-slate-900 tracking-tight">
                 AI Environmental Risk Assessment
               </h2>
-
             </div>
             <p className="text-xs text-slate-500 font-medium">
-              Multi-variate predictive hazard scoring for <span className="font-mono text-emerald-700 font-bold">{selectedNode?.node_id ?? 'None'}</span>
+              Multi-variate predictive hazard scoring for <span className="font-mono text-slate-900 font-bold">{selectedNode?.node_id ?? 'ENV-001'}</span> ({selectedNode?.name ?? 'Central Station'})
             </p>
           </div>
         </div>
 
         {/* Overall Composite Score Pill */}
-        <div className="flex items-center gap-2.5 bg-slate-50 border border-slate-200 px-3.5 py-1.5 rounded-xl">
+        <div className="flex items-center gap-2.5 bg-slate-50 border border-slate-200 px-3.5 py-1.5 rounded-xl shadow-2xs">
           <span className="text-xs text-slate-600 font-medium">Composite Hazard:</span>
           <span className="text-base font-extrabold font-mono text-slate-900">
             {risk?.overall_risk.toFixed(1) ?? '0.0'}%
           </span>
-          <span className={`px-2 py-0.5 rounded text-[10px] border ${getCategoryBadge(risk?.overall_category)}`}>
+          <span className={`px-2.5 py-0.5 rounded-full text-[10px] border ${getCategoryBadge(risk?.overall_category)}`}>
             {risk?.overall_category ?? 'LOW'}
           </span>
         </div>
@@ -123,20 +122,20 @@ export const RiskPanel: React.FC<RiskPanelProps> = ({
           return (
             <div
               key={idx}
-              className={`rounded-xl bg-slate-50/50 border ${hazard.borderColor} p-4 flex flex-col justify-between shadow-2xs transition-all hover:bg-white hover:shadow-xs`}
+              className={`rounded-2xl bg-slate-50/50 border ${hazard.borderColor} p-4 flex flex-col justify-between shadow-2xs transition-all hover:bg-white hover:shadow-xs`}
             >
               <div>
                 {/* Title & Category Badge */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <div className={`p-1.5 rounded-md ${hazard.bgColor}`}>
+                    <div className={`p-2 rounded-xl ${hazard.bgColor}`}>
                       <Icon className={`w-4 h-4 ${hazard.color}`} />
                     </div>
-                    <span className="text-xs font-bold tracking-wider text-slate-800">
+                    <span className="text-xs font-extrabold tracking-wider text-slate-900">
                       {hazard.title}
                     </span>
                   </div>
-                  <span className={`px-2 py-0.5 rounded text-[10px] border ${getCategoryBadge(hazard.category)}`}>
+                  <span className={`px-2.5 py-0.5 rounded-full text-[10px] border ${getCategoryBadge(hazard.category)}`}>
                     {hazard.category}
                   </span>
                 </div>
@@ -167,9 +166,9 @@ export const RiskPanel: React.FC<RiskPanelProps> = ({
               {/* Indicators */}
               <div className="mt-4 pt-3 border-t border-slate-200/60 grid grid-cols-3 gap-1.5 text-center">
                 {hazard.indicators.map((ind, i) => (
-                  <div key={i} className="bg-white p-1.5 rounded-md border border-slate-200 shadow-2xs">
-                    <div className="text-[9px] text-slate-500 truncate">{ind.label}</div>
-                    <div className="text-[10px] font-mono font-bold text-slate-800 mt-0.5 truncate">{ind.status}</div>
+                  <div key={i} className="bg-white p-2 rounded-xl border border-slate-200 shadow-2xs">
+                    <div className="text-[9px] text-slate-500 truncate font-medium">{ind.label}</div>
+                    <div className="text-[10px] font-mono font-bold text-slate-900 mt-0.5 truncate">{ind.status}</div>
                   </div>
                 ))}
               </div>
@@ -180,3 +179,4 @@ export const RiskPanel: React.FC<RiskPanelProps> = ({
     </div>
   );
 };
+

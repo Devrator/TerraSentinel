@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   LayoutDashboard,
   Radio,
@@ -18,9 +18,14 @@ import {
   Sparkles,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
   TrendingUp,
   Boxes,
-  Zap
+  Zap,
+  Cpu,
+  Compass,
+  ShieldAlert,
+  Leaf
 } from 'lucide-react';
 import type { NavigationTab } from '../types';
 
@@ -33,12 +38,12 @@ interface SidebarProps {
 
 interface NavGroup {
   category: string;
+  icon: React.ElementType;
   items: {
     id: NavigationTab;
     label: string;
     icon: React.ElementType;
     badge?: string;
-    badgeColor?: string;
   }[];
 }
 
@@ -48,9 +53,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
   isCollapsed,
   onToggleCollapse,
 }) => {
-  const navGroups: NavGroup[] = [
+  const isSimulationEnabled = import.meta.env.VITE_SIMULATION_ENABLED !== 'false';
+
+  const rawNavGroups: NavGroup[] = [
     {
       category: 'OVERVIEW',
+      icon: Compass,
       items: [
         { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
         { id: 'situation-room', label: 'Situation Room', icon: Globe2, badge: 'OPS' },
@@ -59,6 +67,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     },
     {
       category: 'INTELLIGENCE',
+      icon: BrainCircuit,
       items: [
         { id: 'ai-explainability', label: 'AI Explainability', icon: BrainCircuit },
         { id: 'anomalies', label: 'Anomalies', icon: Zap },
@@ -68,6 +77,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     },
     {
       category: 'EARLY WARNING',
+      icon: ShieldAlert,
       items: [
         { id: 'alerts', label: 'Alerts', icon: AlertTriangle },
         { id: 'incidents', label: 'Incident Mgmt', icon: FileSpreadsheet, badge: 'Live' },
@@ -76,6 +86,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     },
     {
       category: 'NETWORK',
+      icon: Boxes,
       items: [
         { id: 'sensor-network', label: 'Sensor Network', icon: Boxes },
         { id: 'sensor-health', label: 'Sensor Health', icon: Activity },
@@ -83,15 +94,22 @@ export const Sidebar: React.FC<SidebarProps> = ({
         { id: 'data-quality', label: 'Data Quality', icon: ShieldCheck, badge: '94%' },
       ],
     },
-    {
-      category: 'SIMULATION',
-      items: [
-        { id: 'simulation', label: 'Simulation Lab', icon: FlaskConical },
-        { id: 'digital-twin', label: 'Digital Twin', icon: Globe2 },
-      ],
-    },
+    ...(isSimulationEnabled
+      ? [
+          {
+            category: 'SIMULATION',
+            icon: FlaskConical,
+            items: [
+              { id: 'simulation' as NavigationTab, label: 'Simulation Lab', icon: FlaskConical },
+              { id: 'hardware-simulator' as NavigationTab, label: '3D Hardware Twin', icon: Cpu, badge: '3D FX' },
+              { id: 'digital-twin' as NavigationTab, label: 'Digital Twin', icon: Globe2 },
+            ],
+          },
+        ]
+      : []),
     {
       category: 'SYSTEM',
+      icon: Server,
       items: [
         { id: 'system-health', label: 'System Health', icon: Server },
         { id: 'audit-logs', label: 'Audit Logs', icon: ClipboardList },
@@ -100,15 +118,42 @@ export const Sidebar: React.FC<SidebarProps> = ({
     },
     {
       category: 'IMPACT',
+      icon: Leaf,
       items: [
         { id: 'impact', label: 'Sustainability & Impact', icon: Sparkles },
       ],
     },
   ];
 
+  // Expanded sub-division state
+  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({
+    OVERVIEW: true,
+    INTELLIGENCE: true,
+    'EARLY WARNING': true,
+    NETWORK: true,
+    SIMULATION: true,
+    SYSTEM: true,
+    IMPACT: true,
+  });
+
+  // Automatically keep the category containing the active tab expanded
+  useEffect(() => {
+    const parentGroup = rawNavGroups.find((g) => g.items.some((i) => i.id === currentTab));
+    if (parentGroup && !expandedGroups[parentGroup.category]) {
+      setExpandedGroups((prev) => ({ ...prev, [parentGroup.category]: true }));
+    }
+  }, [currentTab]);
+
+  const toggleGroup = (category: string) => {
+    setExpandedGroups((prev) => ({
+      ...prev,
+      [category]: !prev[category],
+    }));
+  };
+
   return (
     <aside
-      className={`fixed top-0 left-0 bottom-0 z-40 flex flex-col bg-white border-r border-slate-200 text-slate-700 transition-all duration-300 select-none shadow-2xs ${
+      className={`fixed top-0 left-0 bottom-0 z-40 flex flex-col bg-white border-r border-slate-200/90 text-slate-700 transition-all duration-300 select-none shadow-2xs ${
         isCollapsed ? 'w-16' : 'w-64'
       }`}
     >
@@ -122,7 +167,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       </button>
 
       {/* Sidebar Header Brand with Official Logo */}
-      <div className="h-20 border-b border-slate-200 bg-slate-50/50 flex items-center justify-center px-2">
+      <div className="h-20 border-b border-slate-200/80 bg-slate-50/50 flex items-center justify-center px-2">
         {!isCollapsed ? (
           <div className="flex items-center justify-center overflow-hidden py-1 w-full">
             <img
@@ -142,63 +187,124 @@ export const Sidebar: React.FC<SidebarProps> = ({
         )}
       </div>
 
-      {/* Navigation Group Items (Scrollbar Hidden) */}
-      <div className="flex-1 overflow-y-auto overflow-x-hidden py-3 px-2 space-y-4 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-        {navGroups.map((group) => (
-          <div key={group.category} className="space-y-1">
-            {!isCollapsed && (
-              <div className="px-2.5 py-1 text-[10px] font-mono font-bold tracking-wider text-slate-400 uppercase">
-                {group.category}
-              </div>
-            )}
+      {/* Navigation Sub-Divisions (Scrollbar Hidden) */}
+      <div className="flex-1 overflow-y-auto overflow-x-hidden py-3 px-2 space-y-2.5 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+        {rawNavGroups.map((group) => {
+          const CategoryIcon = group.icon;
+          const isGroupActive = group.items.some((i) => i.id === currentTab);
+          const isExpanded = expandedGroups[group.category] ?? true;
 
-            {group.items.map((item) => {
-              const Icon = item.icon;
-              const isActive = currentTab === item.id;
-
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => onSelectTab(item.id)}
-                  title={isCollapsed ? item.label : undefined}
-                  className={`w-full flex items-center gap-3 px-2.5 py-2 rounded-xl text-xs font-medium transition-all cursor-pointer ${
-                    isActive
-                      ? 'bg-emerald-50 text-emerald-800 border border-emerald-200 font-semibold shadow-2xs'
-                      : 'hover:bg-slate-100/80 text-slate-600 hover:text-slate-900 border border-transparent'
-                  } ${isCollapsed ? 'justify-center px-0' : ''}`}
-                >
-                  <Icon
-                    className={`w-4 h-4 shrink-0 transition-transform ${
-                      isActive ? 'text-emerald-700 scale-105' : 'text-slate-400'
+          return (
+            <div key={group.category} className="rounded-xl transition-colors">
+              {!isCollapsed ? (
+                <div>
+                  {/* Category Header with Sub-Division Toggle */}
+                  <button
+                    onClick={() => toggleGroup(group.category)}
+                    className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl text-[11px] font-mono font-bold tracking-wider transition-all cursor-pointer ${
+                      isGroupActive
+                        ? 'text-[#ea580c] bg-orange-50/70 border border-orange-200/80'
+                        : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100/70'
                     }`}
-                  />
-
-                  {!isCollapsed && (
-                    <div className="flex-1 flex items-center justify-between min-w-0 text-left">
-                      <span className="truncate">{item.label}</span>
-                      {item.badge && (
-                        <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
-                          {item.badge}
-                        </span>
+                  >
+                    <div className="flex items-center gap-2 min-w-0">
+                      <CategoryIcon className={`w-3.5 h-3.5 shrink-0 ${isGroupActive ? 'text-[#ff4405]' : 'text-slate-400'}`} />
+                      <span className="truncate">{group.category}</span>
+                      {isGroupActive && (
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#ff4405] animate-pulse shrink-0" />
                       )}
                     </div>
+                    <div className="flex items-center gap-1.5 text-slate-400 shrink-0">
+                      <span className="text-[9px] font-mono px-1.5 py-0.2 rounded-full bg-slate-200/70 text-slate-700 font-bold">
+                        {group.items.length}
+                      </span>
+                      <ChevronDown
+                        className={`w-3.5 h-3.5 transition-transform duration-200 ${
+                          isExpanded ? 'rotate-0 text-slate-600' : '-rotate-90 text-slate-400'
+                        }`}
+                      />
+                    </div>
+                  </button>
+
+                  {/* Nested Sub-Divisions Tree with Left Connector Line */}
+                  {isExpanded && (
+                    <div className={`ml-3.5 pl-2.5 my-1 border-l-2 space-y-1 transition-all ${
+                      isGroupActive ? 'border-[#ff4405]/50' : 'border-slate-200/80'
+                    }`}>
+                      {group.items.map((item) => {
+                        const Icon = item.icon;
+                        const isActive = currentTab === item.id;
+
+                        return (
+                          <button
+                            key={item.id}
+                            onClick={() => onSelectTab(item.id)}
+                            className={`w-full flex items-center gap-2.5 px-3 py-1.5 rounded-xl text-xs transition-all cursor-pointer relative ${
+                              isActive
+                                ? 'bg-[#121417] text-white font-extrabold shadow-xs'
+                                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/80 font-medium'
+                            }`}
+                          >
+                            <Icon className={`w-3.5 h-3.5 shrink-0 ${isActive ? 'text-[#ff4405]' : 'text-slate-400'}`} />
+                            <span className="truncate flex-1 text-left">{item.label}</span>
+                            {item.badge && (
+                              <span
+                                className={`px-2 py-0.2 rounded-full text-[9px] font-mono font-bold ${
+                                  isActive
+                                    ? 'bg-white/20 text-white'
+                                    : 'bg-orange-50 text-[#ea580c] border border-orange-200'
+                                }`}
+                              >
+                                {item.badge}
+                              </span>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
                   )}
-                </button>
-              );
-            })}
-          </div>
-        ))}
+                </div>
+              ) : (
+                /* Collapsed View: Group Icon Separator & Sub-item Icons */
+                <div className="space-y-1 py-1 border-b border-slate-100 last:border-b-0">
+                  {group.items.map((item) => {
+                    const Icon = item.icon;
+                    const isActive = currentTab === item.id;
+
+                    return (
+                      <button
+                        key={item.id}
+                        onClick={() => onSelectTab(item.id)}
+                        title={`${group.category} › ${item.label}`}
+                        className={`w-full flex items-center justify-center p-2.5 rounded-xl text-xs transition-all cursor-pointer relative ${
+                          isActive
+                            ? 'bg-[#121417] text-white shadow-xs'
+                            : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'
+                        }`}
+                      >
+                        <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-[#ff4405]' : ''}`} />
+                        {isActive && (
+                          <span className="absolute right-1 top-1 w-1.5 h-1.5 rounded-full bg-[#ff4405]" />
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
 
       {/* Footer Node Summary */}
-      <div className="p-2 border-t border-slate-200 bg-slate-50/60">
+      <div className="p-2 border-t border-slate-200/80 bg-slate-50/60">
         {!isCollapsed ? (
           <div className="p-2.5 rounded-xl bg-white border border-slate-200 flex items-center justify-between text-[11px] shadow-2xs">
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-slate-700 font-medium">Node Telemetry</span>
+              <span className="text-slate-700 font-bold">Telemetry Fleet</span>
             </div>
-            <span className="font-mono text-emerald-700 font-bold">5 ACTIVE</span>
+            <span className="font-mono text-[#ff4405] font-black">5 NODES</span>
           </div>
         ) : (
           <div className="flex justify-center py-1">
@@ -209,3 +315,4 @@ export const Sidebar: React.FC<SidebarProps> = ({
     </aside>
   );
 };
+

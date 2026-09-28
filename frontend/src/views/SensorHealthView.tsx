@@ -1,6 +1,6 @@
 import React from 'react';
 import type { SensorNode } from '../types';
-import { Activity, CheckCircle2, XCircle } from 'lucide-react';
+import { Activity, CheckCircle2, XCircle, ShieldCheck } from 'lucide-react';
 
 interface SensorHealthViewProps {
   nodes: SensorNode[];
@@ -11,13 +11,18 @@ export const SensorHealthView: React.FC<SensorHealthViewProps> = ({ nodes, onOpe
   return (
     <div className="space-y-5">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-4 rounded-xl bg-white border border-slate-200 shadow-2xs">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-center">
-            <Activity className="w-5 h-5 text-blue-600" />
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-5 rounded-2xl bg-white border border-slate-200/90 shadow-2xs">
+        <div className="flex items-center gap-3.5">
+          <div className="w-10 h-10 rounded-xl bg-orange-50 border border-orange-200/80 flex items-center justify-center text-[#ff4405] shadow-2xs">
+            <Activity className="w-5 h-5" />
           </div>
           <div>
-            <h2 className="text-base font-bold text-slate-900 tracking-tight">Sensor Health & Edge Diagnostics</h2>
+            <div className="flex items-center gap-2">
+              <h2 className="text-base font-bold text-slate-900 tracking-tight">Sensor Health & Edge Diagnostics</h2>
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-mono bg-[#121417] text-white font-bold">
+                SIH26178 TELEMETRY
+              </span>
+            </div>
             <p className="text-xs text-slate-500 font-medium">
               Hardware telemetry validation, probe integrity diagnostics, and physical bus connectivity
             </p>
@@ -25,8 +30,8 @@ export const SensorHealthView: React.FC<SensorHealthViewProps> = ({ nodes, onOpe
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="px-3 py-1.5 rounded-lg bg-emerald-50 border border-emerald-200 text-xs font-mono text-emerald-700 font-bold shadow-2xs">
-            FLEET STATUS: HEALTHY
+          <span className="px-3.5 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200 text-xs font-mono text-emerald-700 font-bold shadow-2xs flex items-center gap-1.5">
+            <ShieldCheck className="w-4 h-4 text-emerald-600" /> FLEET STATUS: HEALTHY
           </span>
         </div>
       </div>
@@ -39,25 +44,25 @@ export const SensorHealthView: React.FC<SensorHealthViewProps> = ({ nodes, onOpe
           return (
             <div
               key={node.node_id}
-              className="p-5 rounded-xl bg-white border border-slate-200 shadow-2xs space-y-4"
+              className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-2xs space-y-4 hover:shadow-xs transition-shadow"
             >
               {/* Header */}
               <div className="flex items-center justify-between pb-3 border-b border-slate-100">
                 <div>
                   <div className="font-bold text-sm text-slate-900 flex items-center gap-2">
-                    {node.node_id}
-                    <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold border ${
+                    <span className="font-mono text-[#121417]">{node.node_id}</span>
+                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold border ${
                       isOnline ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-rose-50 text-rose-700 border-rose-200'
                     }`}>
                       {node.status}
                     </span>
                   </div>
-                  <div className="text-xs text-slate-500 font-medium">{node.name}</div>
+                  <div className="text-xs text-slate-500 font-medium mt-0.5">{node.name}</div>
                 </div>
 
                 <button
                   onClick={() => onOpenDetailModal(node)}
-                  className="px-2.5 py-1 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 text-xs font-semibold transition-all cursor-pointer shadow-2xs"
+                  className="px-3 py-1.5 rounded-xl bg-[#121417] hover:bg-zinc-800 text-white text-xs font-semibold transition-all cursor-pointer shadow-2xs"
                 >
                   Inspect
                 </button>
@@ -65,28 +70,28 @@ export const SensorHealthView: React.FC<SensorHealthViewProps> = ({ nodes, onOpe
 
               {/* Hardware Quick Stats */}
               <div className="grid grid-cols-3 gap-2 text-xs">
-                <div className="p-2 rounded-lg bg-slate-50 border border-slate-200 text-center">
+                <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 text-center">
                   <div className="text-[10px] text-slate-500 font-medium">Battery</div>
-                  <div className="font-mono font-bold text-emerald-700 text-xs">
+                  <div className="font-mono font-bold text-emerald-700 text-xs mt-0.5">
                     {node.battery_percentage.toFixed(0)}%
                   </div>
                 </div>
-                <div className="p-2 rounded-lg bg-slate-50 border border-slate-200 text-center">
+                <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 text-center">
                   <div className="text-[10px] text-slate-500 font-medium">Signal RSSI</div>
-                  <div className="font-mono font-bold text-slate-800 text-xs">
+                  <div className="font-mono font-bold text-slate-900 text-xs mt-0.5">
                     {isOnline ? '-62 dBm' : 'Offline'}
                   </div>
                 </div>
-                <div className="p-2 rounded-lg bg-slate-50 border border-slate-200 text-center">
+                <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 text-center">
                   <div className="text-[10px] text-slate-500 font-medium">GPS Lock</div>
-                  <div className="font-mono font-bold text-blue-700 text-xs">
+                  <div className="font-mono font-bold text-[#ea580c] text-xs mt-0.5">
                     3D Fix
                   </div>
                 </div>
               </div>
 
               {/* Probe Diagnostics Breakdown */}
-              <div className="space-y-1.5 pt-1">
+              <div className="space-y-2 pt-1">
                 <div className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-500 mb-2">
                   Integrated Sensor Probes
                 </div>
@@ -101,10 +106,10 @@ export const SensorHealthView: React.FC<SensorHealthViewProps> = ({ nodes, onOpe
                 ].map((probe, idx) => (
                   <div
                     key={idx}
-                    className="p-2 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-between text-xs font-medium"
+                    className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center justify-between text-xs font-medium"
                   >
-                    <span className="text-slate-700">{probe.name}</span>
-                    <div className="flex items-center gap-1 font-mono font-bold text-[11px]">
+                    <span className="text-slate-700 text-[11px]">{probe.name}</span>
+                    <div className="flex items-center gap-1.5 font-mono font-bold text-[11px]">
                       {probe.ok ? (
                         <>
                           <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
@@ -122,9 +127,9 @@ export const SensorHealthView: React.FC<SensorHealthViewProps> = ({ nodes, onOpe
               </div>
 
               {/* Communication Meta */}
-              <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500 font-medium">
-                <span>Firmware: <strong className="text-slate-800 font-mono">v2.4.1</strong></span>
-                <span>Interval: <strong className="text-slate-800 font-mono">15s</strong></span>
+              <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500 font-medium">
+                <span>Firmware: <strong className="text-slate-900 font-mono">v2.4.1</strong></span>
+                <span>Interval: <strong className="text-slate-900 font-mono">15s</strong></span>
                 <span>Uptime: <strong className="text-emerald-700 font-mono">99.8%</strong></span>
               </div>
             </div>

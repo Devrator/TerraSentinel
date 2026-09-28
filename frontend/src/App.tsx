@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Header } from './components/Header';
 import { Sidebar } from './components/Sidebar';
 import { NodeDetailModal } from './components/NodeDetailModal';
+import { EvaluatorDemoController } from './components/EvaluatorDemoController';
 import { useWebSocket } from './hooks/useWebSocket';
 import { api } from './services/api';
 import type {
@@ -10,10 +11,13 @@ import type {
   DashboardSummary,
   WebSocketSensorUpdate,
   WebSocketNodeStatusUpdate,
-  NavigationTab
+  NavigationTab,
+  UserRole
 } from './types';
 
 // Import Views
+import { LandingLoginView } from './views/LandingLoginView';
+import { PublicPortalView } from './views/PublicPortalView';
 import { DashboardView } from './views/DashboardView';
 import { SituationRoomView } from './views/SituationRoomView';
 import { LiveMonitoringView } from './views/LiveMonitoringView';
@@ -29,6 +33,7 @@ import { SensorHealthView } from './views/SensorHealthView';
 import { NetworkTopologyView } from './views/NetworkTopologyView';
 import { DataQualityView } from './views/DataQualityView';
 import { SimulationView } from './views/SimulationView';
+import { HardwareSimulatorView } from './views/HardwareSimulatorView';
 import { DigitalTwinView } from './views/DigitalTwinView';
 import { SystemObservabilityView } from './views/SystemObservabilityView';
 import { AuditLogView } from './views/AuditLogView';
@@ -39,6 +44,10 @@ import { SettingsView } from './views/SettingsView';
 import { WifiOff, RefreshCw } from 'lucide-react';
 
 export function App() {
+  const [userRole, setUserRole] = useState<UserRole>(() => {
+    const saved = localStorage.getItem('ts_user_role');
+    return (saved === 'public' || saved === 'agency') ? saved : null;
+  });
   const [currentTab, setCurrentTab] = useState<NavigationTab>('dashboard');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(false);
   const [nodes, setNodes] = useState<SensorNode[]>([]);
@@ -49,6 +58,20 @@ export function App() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [backendError, setBackendError] = useState<string | null>(null);
   const [isDemoRunning, setIsDemoRunning] = useState<boolean>(false);
+
+  const handleSelectRole = (role: UserRole) => {
+    setUserRole(role);
+    if (role) {
+      localStorage.setItem('ts_user_role', role);
+    } else {
+      localStorage.removeItem('ts_user_role');
+    }
+  };
+
+  const handleLogout = () => {
+    setUserRole(null);
+    localStorage.removeItem('ts_user_role');
+  };
 
   // Initial data loader
   const loadDashboardData = useCallback(async () => {
@@ -252,6 +275,14 @@ export function App() {
         return <DataQualityView />;
       case 'simulation':
         return <SimulationView nodes={nodes} />;
+      case 'hardware-simulator':
+        return (
+          <HardwareSimulatorView
+            nodes={nodes}
+            selectedNodeId={selectedNodeId}
+            onSelectNode={setSelectedNodeId}
+          />
+        );
       case 'digital-twin':
         return (
           <DigitalTwinView
@@ -286,6 +317,20 @@ export function App() {
     }
   };
 
+  if (userRole === null) {
+    return <LandingLoginView onSelectRole={handleSelectRole} />;
+  }
+
+  if (userRole === 'public') {
+    return (
+      <PublicPortalView
+        onSwitchToAgency={() => handleSelectRole('agency')}
+        onLogout={handleLogout}
+        nodes={nodes}
+      />
+    );
+  }
+
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 flex font-sans antialiased">
       {/* Persistent SIH Navigation Sidebar */}
@@ -311,6 +356,8 @@ export function App() {
           isLoading={isLoading}
           onTriggerDemo={handleTriggerDemo}
           isDemoRunning={isDemoRunning}
+          onSwitchToPublic={() => handleSelectRole('public')}
+          onLogout={handleLogout}
         />
 
         {/* Dynamic Route Container */}
@@ -347,6 +394,13 @@ export function App() {
             onClose={() => setModalNode(null)}
           />
         )}
+
+        {/* 60-Second Evaluator Demo Mode Controller */}
+        <EvaluatorDemoController
+          currentTab={currentTab}
+          onNavigate={setCurrentTab}
+          onSelectNode={setSelectedNodeId}
+        />
 
         {/* Minimal White Footer */}
         <footer className="border-t border-slate-200 py-3.5 px-6 text-xs text-slate-500 bg-white shadow-2xs">

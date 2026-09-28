@@ -1,3 +1,37 @@
+export type EdgeStatus = 'NORMAL' | 'WATCH' | 'WARNING' | 'CRITICAL';
+export type PowerMode = 'ACTIVE' | 'LOW_POWER' | 'SLEEP' | 'CRITICAL_BATTERY';
+
+export interface EdgeRiskAssessment {
+  edge_status: EdgeStatus;
+  reasons: string[];
+  summary: string;
+}
+
+export interface DataConfidenceAssessment {
+  confidence_score: number;
+  data_quality_grade: 'GOOD' | 'ACCEPTABLE' | 'DEGRADED' | 'SUSPICIOUS';
+  supporting_sensors: string;
+  penalties: string[];
+  summary: string;
+}
+
+export interface MultiNodeConsensusData {
+  regional_risk: number;
+  hazard_type: string;
+  agreeing_nodes_count: number;
+  total_nodes_count: number;
+  consensus_percentage: number;
+  consensus_status: 'STRONG_CONSENSUS' | 'MODERATE_CONSENSUS' | 'LOCALIZED_SPIKE' | 'NOMINAL_BASELINE' | string;
+  consensus_label: string;
+  high_threat_nodes: {
+    node_id: string;
+    name: string;
+    score: number;
+    latitude: number;
+    longitude: number;
+  }[];
+}
+
 export interface SensorReading {
   id: number;
   node_id: string;
@@ -10,6 +44,10 @@ export interface SensorReading {
   latitude: number;
   longitude: number;
   battery_percentage: number;
+  is_virtual?: boolean;
+  source?: 'SIMULATED' | 'HARDWARE';
+  edge_status?: EdgeStatus;
+  power_mode?: PowerMode;
 }
 
 export interface RiskScore {
@@ -24,6 +62,8 @@ export interface RiskScore {
   flood_category: 'LOW' | 'MODERATE' | 'HIGH' | 'CRITICAL';
   pollution_category: 'LOW' | 'MODERATE' | 'HIGH' | 'CRITICAL';
   overall_category: 'LOW' | 'MODERATE' | 'HIGH' | 'CRITICAL';
+  edge_risk?: EdgeRiskAssessment;
+  confidence?: DataConfidenceAssessment;
 }
 
 export interface Alert {
@@ -35,6 +75,8 @@ export interface Alert {
   message: string;
   timestamp: string;
   acknowledged: boolean;
+  edge_status?: EdgeStatus;
+  confidence_score?: number;
 }
 
 export interface Incident {
@@ -45,7 +87,7 @@ export interface Incident {
   risk_type: string;
   severity: 'LOW' | 'MODERATE' | 'HIGH' | 'CRITICAL';
   current_risk: number;
-  status: 'NEW' | 'ACKNOWLEDGED' | 'INVESTIGATING' | 'ESCALATED' | 'RESOLVED';
+  status: 'NEW' | 'ACKNOWLEDGED' | 'INVESTIGATING' | 'ESCALATED' | 'DISPATCHED' | 'EN_ROUTE' | 'RESOLVED';
   assigned_operator: string;
   detected_at: string;
   resolved_at?: string | null;
@@ -88,6 +130,10 @@ export interface SensorNode {
   battery_percentage: number;
   last_seen: string | null;
   created_at: string;
+  is_virtual?: boolean;
+  source?: 'SIMULATED' | 'HARDWARE';
+  power_mode?: PowerMode;
+  sampling_interval_sec?: number;
   latest_reading?: SensorReading | null;
   latest_risk?: RiskScore | null;
   sensor_health?: SensorHealth | null;
@@ -102,86 +148,15 @@ export interface DashboardSummary {
   average_temperature: number;
   average_humidity: number;
   average_air_quality: number;
-  system_status: 'OPERATIONAL' | 'STANDBY' | 'HAZARD_ALERT';
-  demo_mode: boolean;
-}
-
-export interface SituationRoomData {
-  threat_hierarchy: {
-    critical_count: number;
-    high_count: number;
-    moderate_count: number;
-    low_count: number;
-    items: {
-      CRITICAL: any[];
-      HIGH: any[];
-      MODERATE: any[];
-      LOW: any[];
-    };
-  };
-  active_threat_zones: {
-    zone_id: string;
+  highest_risk: {
     node_id: string;
-    latitude: number;
-    longitude: number;
-    radius_meters: number;
-    severity: string;
+    risk_score: number;
     risk_type: string;
-    score: number;
-  }[];
-  offline_nodes: any[];
-  live_timeline: {
-    timestamp: string;
-    node_id: string;
-    event: string;
-    type: string;
     severity: string;
-  }[];
-  system_status: string;
-}
-
-export interface DigitalTwinData {
-  target_offset_minutes: number;
-  playback_timestamp: string;
-  is_historical: boolean;
-  nodes: {
-    node_id: string;
-    name: string;
-    latitude: number;
-    longitude: number;
-    coverage_radius_meters: number;
-    connectivity_status: string;
-    battery_percentage: number;
-    playback_timestamp: string;
-    telemetry: {
-      temperature: number;
-      humidity: number;
-      pressure: number;
-      rain_value: number;
-      air_quality: number;
-      reading_timestamp?: string | null;
-    };
-    risk: {
-      fire_risk: number;
-      flood_risk: number;
-      pollution_risk: number;
-      overall_risk: number;
-    };
-  }[];
-  risk_zones: {
-    zone_id: string;
-    latitude: number;
-    longitude: number;
-    radius: number;
-    risk_type: string;
-    intensity: number;
-    level: string;
-  }[];
-  coverage_summary: {
-    total_nodes_mapped: number;
-    effective_monitoring_area_km2: number;
-    spatial_density: string;
-  };
+  } | null;
+  spatial_consensus?: MultiNodeConsensusData;
+  system_status: 'HEALTHY' | 'DEGRADED' | 'OFFLINE';
+  timestamp: string;
 }
 
 export interface DataQualityReport {
@@ -190,24 +165,89 @@ export interface DataQualityReport {
     completeness: number;
     freshness: number;
     validity: number;
-    sensor_consistency: number;
     outliers_detected: number;
-    total_samples_audited: number;
-    rejected_packets_count: number;
   };
   validation_rules: {
     rule: string;
-    status: string;
-    enforced: boolean;
+    status: 'ENFORCED' | 'VIOLATED';
+    description: string;
   }[];
   node_diagnostics: {
     node_id: string;
     name: string;
-    status: string;
     stale_minutes: number;
     anomaly_count: number;
     battery: number;
-    data_validity: number;
+    status: 'HEALTHY' | 'DEGRADED';
+  }[];
+}
+
+export interface SituationRoomData {
+  threat_level: 'NOMINAL' | 'ELEVATED' | 'CRITICAL';
+  active_hazard: string;
+  primary_threat_score: number;
+  spatial_consensus_percentage: number;
+  consensus_summary: string;
+  system_status?: string;
+  threat_hierarchy?: {
+    critical_count?: number;
+    high_count?: number;
+    moderate_count?: number;
+    low_count?: number;
+  };
+  active_threat_zones?: {
+    zone_id: string;
+    node_id: string;
+    hazard_type?: string;
+    risk_type?: string;
+    severity: string;
+    radius_meters?: number;
+    score?: number;
+  }[];
+  live_timeline?: {
+    time?: string;
+    timestamp?: string;
+    message?: string;
+    event?: string;
+    level?: string;
+    severity?: string;
+    node_id?: string;
+  }[];
+  participating_nodes: {
+    node_id: string;
+    name: string;
+    overall_risk: number;
+    status: string;
+    agreeing: boolean;
+  }[];
+  multi_hazard_matrix: {
+    fire: number;
+    flood: number;
+    pollution: number;
+  };
+}
+
+export interface DigitalTwinData {
+  coverage_summary: {
+    effective_monitoring_area_km2: number;
+    spatial_density: string;
+    total_active_nodes: number;
+  };
+  nodes: {
+    node_id: string;
+    name: string;
+    coords: [number, number];
+    telemetry: {
+      temperature: number;
+      humidity: number;
+      pressure: number;
+      air_quality: number;
+    };
+    risk: {
+      fire_risk: number;
+      flood_risk: number;
+      pollution_risk: number;
+    };
   }[];
 }
 
@@ -216,65 +256,24 @@ export interface ResponseRecommendation {
   node_id: string;
   risk_type: string;
   severity: string;
-  risk_score: number;
   message: string;
+  evidence: string;
   triggered_at: string;
   recommended_actions: {
     step: number;
     task: string;
-    status: string;
   }[];
   disclaimer: string;
 }
 
 export interface NetworkTopologyData {
-  architecture_layers: {
-    edge_layer: {
-      name: string;
-      node_count: number;
-      nodes: any[];
-      status: string;
-    };
-    gateway_layer: {
-      name: string;
-      gateway_id: string;
-      protocol: string;
-      latency_ms: number;
-      packet_success_rate: number;
-      status: string;
-    };
-    ingestion_layer: {
-      name: string;
-      endpoint: string;
-      throughput_req_per_sec: number;
-      avg_response_time_ms: number;
-      status: string;
-    };
-    intelligence_layer: {
-      name: string;
-      inference_time_ms: number;
-      anomaly_detector: string;
-      explainability_engine: string;
-      status: string;
-    };
-    storage_layer: {
-      name: string;
-      pool_size: number;
-      query_latency_ms: number;
-      status: string;
-    };
-    distribution_layer: {
-      name: string;
-      active_clients: number;
-      channel: string;
-      status: string;
-    };
-  };
-  scalability_metrics: {
-    max_supported_nodes: number;
-    distributed_broker: string;
-    redundancy_mode: string;
-  };
+  nodes: {
+    id: string;
+    label: string;
+    type: string;
+    status: string;
+    details: string;
+  }[];
 }
 
 export interface AuditLogEntry {
@@ -296,6 +295,8 @@ export interface SimulationStatus {
   target_node_id: string;
   intensity: string;
   step_index: number;
+  is_offline_mode: boolean;
+  buffered_readings_count: number;
   timeline_events: {
     time: string;
     message: string;
@@ -305,43 +306,62 @@ export interface SimulationStatus {
 
 export interface SystemHealthData {
   services: {
-    backend: { status: string; version: string; framework: string };
-    database: { status: string; latency_ms: number; engine: string };
-    ai_engine: { status: string; model: string; inference_latency_ms: number };
-    websocket: { status: string; active_connections: number; endpoint: string };
-    simulation: { status: string; scenario: string };
+    backend: { status: string; uptime_seconds: number };
+    database: { status: string; latency_ms: number };
+    ai_engine: { status: string; inference_latency_ms: number };
+    websocket: { status: string; active_connections: number };
   };
   metrics: {
-    uptime_seconds: number;
     uptime_human: string;
     api_latency_ms: number;
     requests_per_minute: number;
-    db_latency_ms: number;
-    active_ws_connections: number;
     ingestion_rate_per_sec: number;
     error_rate_pct: number;
-    last_successful_ingestion: string;
+    active_ws_connections: number;
+    db_latency_ms: number;
   };
 }
 
 export interface ExplainabilityData {
-  risk_type: string;
-  model_confidence: number;
-  is_prototype: boolean;
-  factors: {
+  node_id: string;
+  timestamp: string;
+  overall_risk: number;
+  risk_category: string;
+  feature_attributions: {
+    feature: string;
+    contribution_pct: number;
+    impact: string;
+    current_value: number;
+    baseline_value: number;
+    unit: string;
+  }[];
+  factors?: {
     name: string;
     weight: number;
-    impact: 'POSITIVE' | 'NEUTRAL' | 'NEGATIVE';
+    impact: string;
   }[];
-  summary: string;
-  node_id: string;
-  latest_telemetry: {
+  summary?: string;
+  latest_telemetry?: {
     temperature: number;
     humidity: number;
     pressure: number;
     rain_value: number;
     air_quality: number;
   };
+  sub_risk_scores: {
+    fire_risk: number;
+    flood_risk: number;
+    pollution_risk: number;
+  };
+  sensor_readings: {
+    temperature: number;
+    humidity: number;
+    pressure: number;
+    rain_value: number;
+    air_quality: number;
+  };
+  edge_evaluation?: EdgeRiskAssessment;
+  confidence_breakdown?: DataConfidenceAssessment;
 }
 
 export interface AnalyticsTrendsData {
@@ -359,6 +379,57 @@ export interface AnalyticsTrendsData {
     flood: { values: number[]; stats: { min: number; max: number; avg: number; rate_of_change: number } };
     pollution: { values: number[]; stats: { min: number; max: number; avg: number; rate_of_change: number } };
   };
+}
+
+// --- WebSerial Hardware Types ---
+export type WebSerialConnectionStatus =
+  | 'UNSUPPORTED'
+  | 'DISCONNECTED'
+  | 'CONNECTING'
+  | 'CONNECTED'
+  | 'STREAMING'
+  | 'ERROR';
+
+export interface WebSerialPacketLog {
+  timestamp: string;
+  raw: string;
+  parsed?: Partial<SensorReading>;
+  valid: boolean;
+}
+
+// --- Emergency Response Dispatch Types ---
+export type DispatchAgency = 'SDMA' | 'FIRE_RESCUE' | 'POLICE' | 'AMBULANCE_108';
+
+export interface IncidentDispatchResult {
+  incident_id: number;
+  incident_number: string;
+  agency: DispatchAgency | string;
+  agency_name: string;
+  dispatch_status: string;
+  unit_assigned?: string;
+  eta_minutes?: number;
+  estimated_eta_minutes?: number;
+  dispatch_reference?: string;
+  dispatch_id?: string;
+  dispatched_at: string;
+  simulated: boolean;
+  message?: string;
+  payload_preview?: any;
+}
+
+// --- GIS Layer Types ---
+export type GisBasemapLayer = 'osm' | 'satellite' | 'dark';
+
+// --- 60-Second Evaluator Demo Types ---
+export interface EvaluatorDemoStep {
+  step: number;
+  title: string;
+  targetTab: NavigationTab;
+  timeLabel: string;
+  durationSec: number;
+  description: string;
+  scenarioName?: string;
+  highlightCard?: string;
 }
 
 export interface WebSocketSensorUpdate {
@@ -395,9 +466,71 @@ export type NavigationTab =
   | 'network-topology'
   | 'data-quality'
   | 'simulation'
+  | 'hardware-simulator'
   | 'digital-twin'
   | 'system-health'
   | 'audit-logs'
   | 'configuration'
   | 'impact'
   | 'settings';
+
+// --- Portal Role & Public Community Types ---
+export type UserRole = 'public' | 'agency' | null;
+
+export interface PublicAreaSector {
+  sector_id: string;
+  node_id: string;
+  name: string;
+  description: string;
+  latitude: number;
+  longitude: number;
+  status: string;
+  current_risk_level: 'NOMINAL' | 'ELEVATED' | 'CRITICAL';
+  overall_risk_score: number;
+}
+
+export interface PublicTelemetryData {
+  temperature: number;
+  humidity: number;
+  pressure: number;
+  air_quality: number;
+  rain_value: number;
+  battery_percentage: number;
+  timestamp: string;
+}
+
+export interface PublicAreaTelemetryResponse {
+  area: PublicAreaSector;
+  telemetry: PublicTelemetryData | null;
+  risk_assessment: {
+    overall_risk: number;
+    fire_risk: number;
+    flood_risk: number;
+    pollution_risk: number;
+    risk_category: string;
+    level: string;
+  };
+  active_alerts: {
+    id: number;
+    risk_type: string;
+    severity: string;
+    title: string;
+    message: string;
+    timestamp: string;
+  }[];
+  community_advisory: string;
+  last_updated: string;
+}
+
+export interface PublicSubscriptionResponse {
+  id: number;
+  phone_number: string;
+  citizen_name: string;
+  area_sector: string;
+  preferred_alert_types: string;
+  status: string;
+  is_verified: boolean;
+  created_at: string;
+  simulation_otp_hint?: string;
+  message: string;
+}

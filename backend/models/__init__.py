@@ -5,6 +5,7 @@ from backend.models.alert import Alert
 from backend.models.incident import Incident
 from backend.models.anomaly import AnomalyEvent
 from backend.models.audit_log import AuditLog
+from backend.models.public_subscription import PublicAlertSubscription
 
 __all__ = [
     "SensorNode",
@@ -14,4 +15,5 @@ __all__ = [
     "Incident",
     "AnomalyEvent",
     "AuditLog",
+    "PublicAlertSubscription",
 ]

@@ -17,6 +17,7 @@ from backend.routes.system import router as system_router
 from backend.routes.configuration import router as configuration_router
 from backend.routes.analytics import router as analytics_router
 from backend.routes.explainability import router as explainability_router
+from backend.routes.public_portal import router as public_portal_router
 
 __all__ = [
     "sensors_router",
@@ -38,4 +39,5 @@ __all__ = [
     "configuration_router",
     "analytics_router",
     "explainability_router",
+    "public_portal_router",
 ]

@@ -18,14 +18,15 @@ class SensorService:
     @staticmethod
     async def ingest_sensor_data(db: Session, payload: SensorDataPayload) -> Dict[str, Any]:
         """
-        Main Ingestion Flow:
-        1. Validate & Ensure node exists
+        Main Ingestion Flow (identical pipeline for future ESP32 and Simulation Adapter):
+        1. Validate & Ensure node exists (marked as VIRTUAL/DEMO if simulated)
         2. Update sensor_nodes table (status, last_seen, battery, coordinates)
         3. Save reading in sensor_readings
-        4. Calculate multi-variate risk scores using RiskEngine
+        4. Calculate Edge Risk Logic + Central AI Risk + Confidence Scoring
         5. Save risk prediction in risk_predictions
         6. Generate alerts if hazard thresholds are exceeded
-        7. Broadcast update via WebSocket
+        7. Correlate with Incident Management & Audit Log
+        8. Broadcast update via WebSocket
         """
         now = payload.timestamp or datetime.now(timezone.utc)
         if now.tzinfo is None:
@@ -88,17 +89,34 @@ class SensorService:
             for r in reversed(recent_records)
         ]
 
-        # 4. Evaluate AI Risk Engine
+        # 4. Fetch neighboring nodes' latest readings for cross-sensor consensus & confidence
+        other_nodes = db.query(SensorNode).filter(SensorNode.node_id != payload.node_id).all()
+        neighbor_dicts = []
+        for on in other_nodes:
+            latest_nr = db.query(SensorReading).filter(
+                SensorReading.node_id == on.node_id
+            ).order_by(desc(SensorReading.timestamp)).first()
+            if latest_nr:
+                neighbor_dicts.append({
+                    "node_id": on.node_id,
+                    "temperature": latest_nr.temperature,
+                    "humidity": latest_nr.humidity,
+                    "air_quality": latest_nr.air_quality,
+                    "rain_value": latest_nr.rain_value,
+                })
+
+        # 5. Evaluate AI Risk Engine (Edge Risk + Central Multi-Variate + Confidence)
         risk_result = RiskEngine.evaluate_all(
             temperature=payload.temperature,
             humidity=payload.humidity,
             pressure=payload.pressure,
             rain_value=payload.rain_value,
             air_quality=payload.air_quality,
-            recent_readings=recent_dicts
+            recent_readings=recent_dicts,
+            neighbor_readings=neighbor_dicts
         )
 
-        # 5. Store Risk Prediction
+        # 6. Store Risk Prediction
         prediction = RiskPrediction(
             node_id=payload.node_id,
             timestamp=now,
@@ -111,7 +129,7 @@ class SensorService:
         db.commit()
         db.refresh(prediction)
 
-        # 6. Check for Anomaly Events
+        # 7. Check for Anomaly Events
         from backend.models.anomaly import AnomalyEvent
         prev_reading_dict = recent_dicts[-2] if len(recent_dicts) >= 2 else None
         current_dict = {
@@ -138,7 +156,7 @@ class SensorService:
             db.add(anom_entry)
             db.commit()
 
-        # 7. Evaluate & Store Alerts + Incident Correlation
+        # 8. Evaluate & Store Alerts + Incident Correlation
         created_alerts = AlertService.process_node_risks(
             db=db,
             node_id=payload.node_id,
@@ -148,7 +166,7 @@ class SensorService:
             battery_percentage=payload.battery_percentage
         )
 
-        # 8. Auto-create/correlate incidents for High/Critical risks
+        # 9. Auto-create/correlate incidents for High/Critical risks
         from backend.services.incident_service import IncidentService
         for alert in created_alerts:
             if alert.severity in ["HIGH", "CRITICAL"]:
@@ -158,10 +176,10 @@ class SensorService:
                     risk_type=alert.risk_type,
                     severity=alert.severity,
                     risk_score=alert.risk_score,
-                    evidence_snapshot=f"T:{payload.temperature}°C, H:{payload.humidity}%, AQI:{payload.air_quality}"
+                    evidence_snapshot=f"T:{payload.temperature}°C, H:{payload.humidity}%, AQI:{payload.air_quality} • Edge: {risk_result['edge_risk']['edge_status']}"
                 )
 
-        # 9. Broadcast update via WebSocket to connected dashboard clients
+        # 10. Broadcast update via WebSocket to connected dashboard clients
         ws_payload = {
             "type": "SENSOR_UPDATE",
             "node_id": payload.node_id,
@@ -174,6 +192,8 @@ class SensorService:
                 "status": node.status,
                 "battery_percentage": node.battery_percentage,
                 "last_seen": node.last_seen.isoformat() if node.last_seen else None,
+                "is_virtual": True,
+                "source": "SIMULATED",
             },
             "reading": {
                 "id": reading.id,
@@ -187,6 +207,8 @@ class SensorService:
                 "latitude": reading.latitude,
                 "longitude": reading.longitude,
                 "battery_percentage": reading.battery_percentage,
+                "is_virtual": True,
+                "source": "SIMULATED",
             },
             "risk": {
                 "id": prediction.id,
@@ -200,6 +222,8 @@ class SensorService:
                 "flood_category": risk_result["flood_category"],
                 "pollution_category": risk_result["pollution_category"],
                 "overall_category": risk_result["overall_category"],
+                "edge_risk": risk_result["edge_risk"],
+                "confidence": risk_result["confidence"],
             },
             "new_alerts": [
                 {
@@ -222,7 +246,30 @@ class SensorService:
             "message": "Sensor reading ingested and processed successfully",
             "node_id": payload.node_id,
             "risk": risk_result,
-            "alerts_generated": len(created_alerts)
+            "alerts_generated": len(created_alerts),
+            "edge_risk": risk_result["edge_risk"],
+            "confidence": risk_result["confidence"]
+        }
+
+    @staticmethod
+    async def ingest_batch_sensor_data(db: Session, payloads: List[SensorDataPayload]) -> Dict[str, Any]:
+        """
+        Batch Ingestion for Offline Resilience Synchronization.
+        Called when nodes reconnect after a network outage to flush buffered readings.
+        """
+        synced_count = 0
+        latest_res = None
+
+        for payload in payloads:
+            latest_res = await SensorService.ingest_sensor_data(db, payload)
+            synced_count += 1
+
+        return {
+            "status": "success",
+            "message": f"Successfully synchronized {synced_count} buffered offline readings",
+            "synced_count": synced_count,
+            "data_loss": 0,
+            "latest_processed": latest_res
         }
 
     @staticmethod

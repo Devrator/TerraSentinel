@@ -15,12 +15,40 @@ import type {
   SimulationStatus,
   SystemHealthData,
   ExplainabilityData,
-  AnalyticsTrendsData
+  AnalyticsTrendsData,
+  MultiNodeConsensusData
 } from '../types';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 export const api = {
+  // --- Ingestion Pipeline (ESP32 Contract & Simulation Adapter) ---
+  async ingestSensorData(payload: any): Promise<any> {
+    const res = await fetch(`${API_BASE_URL}/api/sensor-data`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) throw new Error(`Failed to ingest sensor telemetry: ${res.statusText}`);
+    return res.json();
+  },
+
+  async ingestBatchSensorData(payloads: any[]): Promise<any> {
+    const res = await fetch(`${API_BASE_URL}/api/sensor-data/batch`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payloads)
+    });
+    if (!res.ok) throw new Error(`Failed to batch sync sensor telemetry: ${res.statusText}`);
+    return res.json();
+  },
+
+  async getMultiNodeConsensus(hazardType: string = 'FIRE'): Promise<MultiNodeConsensusData> {
+    const res = await fetch(`${API_BASE_URL}/api/consensus?hazard_type=${hazardType}`);
+    if (!res.ok) throw new Error(`Failed to fetch multi-node consensus: ${res.statusText}`);
+    return res.json();
+  },
+
   // --- Core Dashboard & Fleet ---
   async getDashboardSummary(): Promise<DashboardSummary> {
     const res = await fetch(`${API_BASE_URL}/api/dashboard/summary`);
@@ -154,6 +182,22 @@ export const api = {
     return res.json();
   },
 
+  async dispatchIncident(incidentId: number, data: {
+    agency: string;
+    priority?: string;
+    unit_assigned?: string;
+    operator_name?: string;
+    notes?: string;
+  }): Promise<any> {
+    const res = await fetch(`${API_BASE_URL}/api/incidents/${incidentId}/dispatch`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    if (!res.ok) throw new Error(`Failed to dispatch incident: ${res.statusText}`);
+    return res.json();
+  },
+
   // --- Anomalies ---
   async getAnomalies(limit: number = 50): Promise<Anomaly[]> {
     const res = await fetch(`${API_BASE_URL}/api/anomalies?limit=${limit}`);
@@ -196,7 +240,7 @@ export const api = {
     return res.json();
   },
 
-  async startSimulation(scenario: string, target_node_id: string = "ENV-004", intensity: string = "HIGH"): Promise<SimulationStatus> {
+  async startSimulation(scenario: string, target_node_id: string = "ENV-001", intensity: string = "HIGH"): Promise<SimulationStatus> {
     const res = await fetch(`${API_BASE_URL}/api/simulation/start`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -260,6 +304,60 @@ export const api = {
     const qs = nodeId ? `?time_range=${timeRange}&node_id=${nodeId}` : `?time_range=${timeRange}`;
     const res = await fetch(`${API_BASE_URL}/api/analytics/trends${qs}`);
     if (!res.ok) throw new Error(`Failed to fetch analytics trends: ${res.statusText}`);
+    return res.json();
+  },
+
+  // --- Public Portal Services ---
+  async getPublicAreas(): Promise<any[]> {
+    const res = await fetch(`${API_BASE_URL}/api/public/areas`);
+    if (!res.ok) throw new Error(`Failed to fetch public areas: ${res.statusText}`);
+    return res.json();
+  },
+
+  async getPublicAreaData(areaId: string = "ENV-001"): Promise<any> {
+    const res = await fetch(`${API_BASE_URL}/api/public/area-data?area=${areaId}`);
+    if (!res.ok) throw new Error(`Failed to fetch area data: ${res.statusText}`);
+    return res.json();
+  },
+
+  async subscribePublicAlerts(data: {
+    phone_number: string;
+    citizen_name?: string;
+    area_sector: string;
+    preferred_alert_types?: string;
+  }): Promise<any> {
+    const res = await fetch(`${API_BASE_URL}/api/public/subscribe`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    if (!res.ok) throw new Error(`Failed to register alert subscription: ${res.statusText}`);
+    return res.json();
+  },
+
+  async verifyPublicOtp(data: { phone_number: string; otp: string }): Promise<any> {
+    const res = await fetch(`${API_BASE_URL}/api/public/verify-otp`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    if (!res.ok) throw new Error(`Failed to verify OTP: ${res.statusText}`);
+    return res.json();
+  },
+
+  async getPublicSubscription(phone: string): Promise<any> {
+    const res = await fetch(`${API_BASE_URL}/api/public/subscriptions?phone=${encodeURIComponent(phone)}`);
+    if (!res.ok) throw new Error(`Failed to query subscription: ${res.statusText}`);
+    return res.json();
+  },
+
+  async unsubscribePublicAlerts(phone_number: string): Promise<any> {
+    const res = await fetch(`${API_BASE_URL}/api/public/unsubscribe`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phone_number })
+    });
+    if (!res.ok) throw new Error(`Failed to deactivate alerts: ${res.statusText}`);
     return res.json();
   }
 };

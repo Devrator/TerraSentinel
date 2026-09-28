@@ -29,6 +29,7 @@ from backend.routes import (
     configuration_router,
     analytics_router,
     explainability_router,
+    public_portal_router,
 )
 
 # Logging configuration
@@ -149,6 +150,7 @@ app.include_router(system_router)
 app.include_router(configuration_router)
 app.include_router(analytics_router)
 app.include_router(explainability_router)
+app.include_router(public_portal_router)
 
 @app.get("/", tags=["Health"])
 def root_status():
