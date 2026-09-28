@@ -40,7 +40,7 @@ interface LandingLoginViewProps {
 }
 
 export const LandingLoginView: React.FC<LandingLoginViewProps> = ({ onSelectRole }) => {
-  const { theme, toggleTheme } = useTheme();
+
   const [systemOnline, setSystemOnline] = useState<boolean>(true);
   const [nodeCount, setNodeCount] = useState<number>(5);
   const [agencyRoleName, setAgencyRoleName] = useState<string>('Chief Disaster Officer');
