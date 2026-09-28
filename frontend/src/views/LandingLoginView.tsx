@@ -14,25 +14,13 @@ import {
   ShieldCheck,
   Zap,
   Globe,
-  Sun,
-  Moon,
   ArrowUpRight,
   Radio,
-  Layers,
-  Activity,
   Radar,
-  Network,
-  Gauge,
-  MapPin,
   Clock,
-  Terminal,
-  Server,
-  Lock,
   Compass
 } from 'lucide-react';
 import type { UserRole } from '../types';
-import { api } from '../services/api';
-import { useTheme } from '../context/ThemeContext';
 import { LandingThreeHero } from '../components/LandingThreeHero';
 
 interface LandingLoginViewProps {
@@ -40,9 +28,6 @@ interface LandingLoginViewProps {
 }
 
 export const LandingLoginView: React.FC<LandingLoginViewProps> = ({ onSelectRole }) => {
-
-  const [systemOnline, setSystemOnline] = useState<boolean>(true);
-  const [nodeCount, setNodeCount] = useState<number>(5);
   const [agencyRoleName, setAgencyRoleName] = useState<string>('Chief Disaster Officer');
   const [activeVectorTab, setActiveVectorTab] = useState<'flood' | 'fire' | 'aqi'>('flood');
   const [scrollProgress, setScrollProgress] = useState<number>(0);
@@ -74,15 +59,6 @@ export const LandingLoginView: React.FC<LandingLoginViewProps> = ({ onSelectRole
       cancelAnimationFrame(rafId);
       lenis.destroy();
     };
-  }, []);
-
-  useEffect(() => {
-    api.getDashboardSummary()
-      .then((s) => {
-        setSystemOnline(true);
-        if (s?.total_nodes) setNodeCount(s.total_nodes);
-      })
-      .catch(() => setSystemOnline(false));
   }, []);
 
   const scrollToSection = (id: string) => {

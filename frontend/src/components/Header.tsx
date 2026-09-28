@@ -66,15 +66,22 @@ export const Header: React.FC<HeaderProps> = ({
         <div className="flex items-center justify-between gap-4">
 
           {/* Left: Brand Identity & SIH Project Badges */}
-          <div className="flex items-center gap-3.5">
+          <div className="flex items-center gap-3">
             <img
               src="/logo.png"
               alt="TerraSentinel Logo"
               className="h-12 sm:h-14 lg:h-16 w-auto object-contain drop-shadow-sm py-0.5"
             />
-            <span className="px-2.5 py-0.5 rounded-md text-[10px] font-mono font-bold bg-[#121417] text-white tracking-wider shadow-xs hidden sm:inline-block">
-              AGENCY COMMAND
-            </span>
+            <div className="hidden sm:flex items-center gap-2">
+              <span className="px-2.5 py-0.5 rounded-md text-[10px] font-mono font-bold bg-[#121417] text-white tracking-wider shadow-xs">
+                AGENCY COMMAND
+              </span>
+              {summary && (
+                <span className="text-[11px] text-slate-500 font-mono font-semibold">
+                  • {summary.online_nodes}/{summary.total_nodes} Nodes Live
+                </span>
+              )}
+            </div>
           </div>
 
           {/* Right: Switch to Public Portal, Theme Toggle, Notification & Logout */}

@@ -2,11 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { useTheme } from '../context/ThemeContext';
 
-interface LandingThreeHeroProps {
-  scrollY?: number;
-}
-
-export const LandingThreeHero: React.FC<LandingThreeHeroProps> = ({ scrollY = 0 }) => {
+export const LandingThreeHero: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const { theme } = useTheme();
 
@@ -175,7 +171,6 @@ export const LandingThreeHero: React.FC<LandingThreeHeroProps> = ({ scrollY = 0 
         const v2 = nodeVectors[j];
         const mid = v1.clone().add(v2).multiplyScalar(0.5);
         // Push mid-point outward to form arc
-        const midDist = mid.length();
         mid.normalize().multiplyScalar(radius * 1.25);
 
         const curve = new THREE.CatmullRomCurve3([v1, mid, v2]);
