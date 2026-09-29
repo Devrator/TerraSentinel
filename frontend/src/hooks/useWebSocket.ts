@@ -13,7 +13,16 @@ export function useWebSocket(options: WebSocketHookOptions = {}) {
   const optionsRef = useRef(options);
   optionsRef.current = options;
 
-  const wsUrl = import.meta.env.VITE_WS_URL || 'ws://localhost:8000/ws/dashboard';
+  const getWsUrl = useCallback(() => {
+    if (import.meta.env.VITE_WS_URL) {
+      return import.meta.env.VITE_WS_URL;
+    }
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const host = window.location.hostname || 'localhost';
+    return `${protocol}//${host}:8000/ws/dashboard`;
+  }, []);
+
+  const retryDelayRef = useRef<number>(2000);
 
   const connect = useCallback(() => {
     if (wsRef.current && (wsRef.current.readyState === WebSocket.OPEN || wsRef.current.readyState === WebSocket.CONNECTING)) {
@@ -21,12 +30,14 @@ export function useWebSocket(options: WebSocketHookOptions = {}) {
     }
 
     try {
-      const ws = new WebSocket(wsUrl);
+      const url = getWsUrl();
+      const ws = new WebSocket(url);
       wsRef.current = ws;
 
       ws.onopen = () => {
         setIsConnected(true);
-        console.log('[WebSocket] Connected to live telemetry stream');
+        retryDelayRef.current = 2000;
+        console.log('[WebSocket] Connected to live telemetry stream:', url);
       };
 
       ws.onmessage = (event) => {
@@ -39,25 +50,31 @@ export function useWebSocket(options: WebSocketHookOptions = {}) {
             optionsRef.current.onNodeStatusUpdate(data);
           }
         } catch (err) {
-          console.error('[WebSocket] Error parsing message:', err);
+          console.warn('[WebSocket] Error parsing telemetry payload:', err);
         }
       };
 
       ws.onclose = () => {
         setIsConnected(false);
-        console.warn('[WebSocket] Connection closed. Reconnecting in 3s...');
-        reconnectTimeoutRef.current = window.setTimeout(connect, 3000);
+        const nextDelay = Math.min(retryDelayRef.current * 1.5, 10000);
+        retryDelayRef.current = nextDelay;
+        if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current);
+        reconnectTimeoutRef.current = window.setTimeout(connect, nextDelay);
       };
 
-      ws.onerror = (err) => {
-        console.error('[WebSocket] Error:', err);
-        ws.close();
+      ws.onerror = () => {
+        // Quietly handle connection errors (e.g. backend offline or starting up)
+        // onclose will handle scheduled reconnection
+        if (ws.readyState === WebSocket.OPEN) {
+          ws.close();
+        }
       };
     } catch (e) {
-      console.error('[WebSocket] Connection attempt failed:', e);
+      console.warn('[WebSocket] Connection attempt failed, retrying in 3s...', e);
+      if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current);
       reconnectTimeoutRef.current = window.setTimeout(connect, 3000);
     }
-  }, [wsUrl]);
+  }, [getWsUrl]);
 
   useEffect(() => {
     connect();
