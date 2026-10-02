@@ -13,7 +13,7 @@ import {
   ShieldCheck,
   Cpu
 } from 'lucide-react';
-import type { SensorNode, Alert, DashboardSummary, MultiNodeConsensusData } from '../types';
+import type { SensorNode, Alert, DashboardSummary, MultiNodeConsensusData, NavigationTab } from '../types';
 import { api } from '../services/api';
 
 interface DashboardViewProps {
@@ -25,6 +25,7 @@ interface DashboardViewProps {
   summary: DashboardSummary | null;
   isLoading: boolean;
   onOpenDetailModal: (node: SensorNode) => void;
+  onNavigateTab?: (tab: NavigationTab) => void;
 }
 
 export const DashboardView: React.FC<DashboardViewProps> = ({
@@ -36,6 +37,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   summary,
   isLoading,
   onOpenDetailModal,
+  onNavigateTab,
 }) => {
   const selectedNode = nodes.find((n) => n.node_id === selectedNodeId) || nodes[0] || null;
   const [consensus, setConsensus] = useState<MultiNodeConsensusData | null>(null);
@@ -228,6 +230,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           <AlertPanel
             alerts={alerts}
             onAcknowledge={onAcknowledgeAlert}
+            onNavigateTab={onNavigateTab}
           />
         </div>
       </div>

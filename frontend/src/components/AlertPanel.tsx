@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
-import { AlertCircle, CheckCircle2, Flame, Waves, Wind, Battery, Bell } from 'lucide-react';
-import type { Alert } from '../types';
+import { AlertCircle, CheckCircle2, Flame, Waves, Wind, Battery, Bell, ArrowUpRight } from 'lucide-react';
+import type { Alert, NavigationTab } from '../types';
 
 interface AlertPanelProps {
   alerts: Alert[];
   onAcknowledge: (alertId: number) => void;
+  onNavigateTab?: (tab: NavigationTab) => void;
 }
 
-export const AlertPanel: React.FC<AlertPanelProps> = ({ alerts, onAcknowledge }) => {
+export const AlertPanel: React.FC<AlertPanelProps> = ({ alerts, onAcknowledge, onNavigateTab }) => {
   const [filterType, setFilterType] = useState<string>('ALL');
 
   const filteredAlerts = alerts.filter((a) => {
@@ -64,20 +65,32 @@ export const AlertPanel: React.FC<AlertPanelProps> = ({ alerts, onAcknowledge })
           </span>
         </div>
 
-        {/* Filter Badges */}
-        <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs">
-          {['ALL', 'FIRE', 'FLOOD', 'POLLUTION'].map((type) => (
+        <div className="flex items-center gap-2">
+          {onNavigateTab && (
             <button
-              key={type}
-              onClick={() => setFilterType(type)}
-              className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${filterType === type
-                  ? 'bg-white text-slate-900 shadow-2xs'
-                  : 'text-slate-500 hover:text-slate-900'
-                }`}
+              onClick={() => onNavigateTab('alerts')}
+              className="text-[11px] font-bold text-[#ff4405] hover:underline flex items-center gap-1 cursor-pointer"
             >
-              {type}
+              <span>Full Console</span>
+              <ArrowUpRight className="w-3.5 h-3.5" />
             </button>
-          ))}
+          )}
+          {/* Filter Badges */}
+          <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs">
+            {['ALL', 'FIRE', 'FLOOD', 'POLLUTION'].map((type) => (
+              <button
+                key={type}
+                onClick={() => setFilterType(type)}
+                className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
+                  filterType === type
+                    ? 'bg-white text-slate-900 shadow-2xs'
+                    : 'text-slate-500 hover:text-slate-900'
+                }`}
+              >
+                {type}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -93,12 +106,13 @@ export const AlertPanel: React.FC<AlertPanelProps> = ({ alerts, onAcknowledge })
           filteredAlerts.map((alert) => (
             <div
               key={alert.id}
-              className={`p-3.5 rounded-2xl border transition-all ${alert.acknowledged
+              className={`p-3.5 rounded-2xl border transition-all ${
+                alert.acknowledged
                   ? 'bg-slate-50/60 border-slate-200 opacity-60'
                   : alert.severity === 'CRITICAL'
-                    ? 'bg-rose-50/40 border-rose-200 shadow-2xs'
-                    : 'bg-white border-slate-200/80 hover:border-slate-300'
-                }`}
+                  ? 'bg-rose-50/40 border-rose-200 shadow-2xs'
+                  : 'bg-white border-slate-200/80 hover:border-slate-300'
+              }`}
             >
               <div className="flex items-start justify-between gap-2">
                 <div className="flex items-center gap-2.5">
@@ -152,4 +166,3 @@ export const AlertPanel: React.FC<AlertPanelProps> = ({ alerts, onAcknowledge })
     </div>
   );
 };
-

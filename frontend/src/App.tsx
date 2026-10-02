@@ -1,6 +1,7 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Header } from './components/Header';
-import { Sidebar } from './components/Sidebar';
+import { Sidebar, type ActiveSituationInfo, type ActiveIncidentInfo } from './components/Sidebar';
+import { Breadcrumbs } from './components/Breadcrumbs';
 import { NodeDetailModal } from './components/NodeDetailModal';
 import { useWebSocket } from './hooks/useWebSocket';
 import { api } from './services/api';
@@ -11,7 +12,8 @@ import type {
   WebSocketSensorUpdate,
   WebSocketNodeStatusUpdate,
   NavigationTab,
-  UserRole
+  UserRole,
+  Incident
 } from './types';
 
 // Import Views
@@ -48,15 +50,36 @@ export function App() {
     const saved = localStorage.getItem('ts_user_role');
     return (saved === 'public' || saved === 'agency') ? saved : null;
   });
-  const [currentTab, setCurrentTab] = useState<NavigationTab>('dashboard');
+
+  const [currentTab, setCurrentTab] = useState<NavigationTab>(() => {
+    const savedTab = localStorage.getItem('ts_current_tab') as NavigationTab;
+    return savedTab || 'dashboard';
+  });
+
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(false);
   const [nodes, setNodes] = useState<SensorNode[]>([]);
   const [selectedNodeId, setSelectedNodeId] = useState<string>('ENV-001');
   const [alerts, setAlerts] = useState<Alert[]>([]);
+  const [incidents, setIncidents] = useState<Incident[]>([]);
   const [summary, setSummary] = useState<DashboardSummary | null>(null);
   const [modalNode, setModalNode] = useState<SensorNode | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [backendError, setBackendError] = useState<string | null>(null);
+
+  // Active Situation state (persisted & derived)
+  const [activeSituation, setActiveSituation] = useState<ActiveSituationInfo | null>(() => {
+    try {
+      const saved = localStorage.getItem('ts_active_situation');
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  });
+
+  // Persist current tab
+  useEffect(() => {
+    localStorage.setItem('ts_current_tab', currentTab);
+  }, [currentTab]);
 
   const handleSelectRole = (role: UserRole) => {
     setUserRole(role);
@@ -72,23 +95,65 @@ export function App() {
     localStorage.removeItem('ts_user_role');
   };
 
+  const handleActivateSituation = (situation: ActiveSituationInfo) => {
+    setActiveSituation(situation);
+    localStorage.setItem('ts_active_situation', JSON.stringify(situation));
+  };
+
+  const handleResolveSituation = (_situationId: string) => {
+    setActiveSituation(null);
+    localStorage.removeItem('ts_active_situation');
+    // If currently on situation-room, transition gracefully to dashboard
+    if (currentTab === 'situation-room') {
+      setCurrentTab('dashboard');
+    }
+  };
+
+  // Fetch incidents from backend
+  const loadIncidents = useCallback(async () => {
+    try {
+      const res = await api.getIncidents({ limit: 50 });
+      setIncidents(res);
+    } catch (err) {
+      console.error('Failed to load incidents:', err);
+    }
+  }, []);
+
   // Initial data loader
   const loadDashboardData = useCallback(async () => {
     setIsLoading(true);
     setBackendError(null);
     try {
-      const [summaryData, nodesData, alertsData] = await Promise.all([
+      const [summaryData, nodesData, alertsData, incidentsData] = await Promise.all([
         api.getDashboardSummary(),
         api.getNodes(),
         api.getAlerts({ limit: 50 }),
+        api.getIncidents({ limit: 50 }),
       ]);
 
       setSummary(summaryData);
       setNodes(nodesData);
       setAlerts(alertsData);
+      setIncidents(incidentsData);
 
       if (nodesData.length > 0 && !nodesData.some((n) => n.node_id === selectedNodeId)) {
         setSelectedNodeId(nodesData[0].node_id);
+      }
+
+      // Check if there are active high threats that should auto-propose an active situation if none exists
+      const criticalAlert = alertsData.find((a) => a.severity === 'CRITICAL' && !a.acknowledged);
+      if (criticalAlert && !localStorage.getItem('ts_active_situation')) {
+        const targetNode = nodesData.find((n) => n.node_id === criticalAlert.node_id);
+        const autoSituation: ActiveSituationInfo = {
+          id: `SIT-AUTO-${criticalAlert.node_id}`,
+          title: `Autonomous Threat: ${criticalAlert.risk_type} Spike`,
+          severity: 'CRITICAL',
+          location: `${targetNode?.name || 'Sector'} (${criticalAlert.node_id})`,
+          nodeId: criticalAlert.node_id,
+          riskScore: criticalAlert.risk_score,
+        };
+        setActiveSituation(autoSituation);
+        localStorage.setItem('ts_active_situation', JSON.stringify(autoSituation));
       }
     } catch (err: any) {
       console.error('Failed to load dashboard data:', err);
@@ -128,10 +193,26 @@ export function App() {
         const filteredPrev = prevAlerts.filter((a) => !newIds.has(a.id));
         return [...data.new_alerts, ...filteredPrev];
       });
+
+      // Auto-escalate if critical hazard detected over WebSocket
+      const crit = data.new_alerts.find((a) => a.severity === 'CRITICAL');
+      if (crit && !localStorage.getItem('ts_active_situation')) {
+        const autoSituation: ActiveSituationInfo = {
+          id: `SIT-LIVE-${crit.node_id}`,
+          title: `Live Surge: ${crit.risk_type} Threat`,
+          severity: 'CRITICAL',
+          location: `Sensor ${crit.node_id}`,
+          nodeId: crit.node_id,
+          riskScore: crit.risk_score,
+        };
+        setActiveSituation(autoSituation);
+        localStorage.setItem('ts_active_situation', JSON.stringify(autoSituation));
+      }
     }
 
     api.getDashboardSummary().then(setSummary).catch(console.error);
-  }, []);
+    loadIncidents();
+  }, [loadIncidents]);
 
   const handleNodeStatusUpdate = useCallback((data: WebSocketNodeStatusUpdate) => {
     if (data.nodes) {
@@ -168,6 +249,30 @@ export function App() {
     }
   };
 
+  // Computed active context properties for Sidebar & Breadcrumbs
+  const activeIncidentList: ActiveIncidentInfo[] = useMemo(() => {
+    return incidents
+      .filter((inc) => inc.status !== 'RESOLVED')
+      .map((inc) => ({
+        id: inc.id,
+        incidentNumber: inc.incident_number,
+        title: inc.title,
+        severity: inc.severity,
+        status: inc.status,
+        nodeId: inc.origin_node_id,
+      }));
+  }, [incidents]);
+
+  const alertCounts = useMemo(() => {
+    const unacknowledged = alerts.filter((a) => !a.acknowledged).length;
+    const critical = alerts.filter((a) => a.severity === 'CRITICAL' && !a.acknowledged).length;
+    return {
+      total: alerts.length,
+      unacknowledged,
+      critical,
+    };
+  }, [alerts]);
+
   const renderActiveView = () => {
     switch (currentTab) {
       case 'dashboard':
@@ -181,6 +286,7 @@ export function App() {
             summary={summary}
             isLoading={isLoading}
             onOpenDetailModal={setModalNode}
+            onNavigateTab={setCurrentTab}
           />
         );
       case 'situation-room':
@@ -189,6 +295,10 @@ export function App() {
             nodes={nodes}
             selectedNodeId={selectedNodeId}
             onSelectNode={setSelectedNodeId}
+            activeSituation={activeSituation}
+            onResolveSituation={handleResolveSituation}
+            onActivateSituation={handleActivateSituation}
+            onNavigateTab={setCurrentTab}
           />
         );
       case 'live-map':
@@ -208,6 +318,7 @@ export function App() {
             onSelectNode={setSelectedNodeId}
             alerts={alerts}
             onAcknowledgeAlert={handleAcknowledgeAlert}
+            onNavigateTab={setCurrentTab}
           />
         );
       case 'ai-explainability':
@@ -243,12 +354,25 @@ export function App() {
             nodes={nodes}
             onAcknowledgeAlert={handleAcknowledgeAlert}
             onRefreshAlerts={loadDashboardData}
+            onNavigateTab={setCurrentTab}
+            onActivateSituation={handleActivateSituation}
           />
         );
       case 'incidents':
-        return <IncidentsView nodes={nodes} />;
+        return (
+          <IncidentsView
+            nodes={nodes}
+            onNavigateTab={setCurrentTab}
+            onRefreshIncidents={loadIncidents}
+          />
+        );
       case 'response':
-        return <ResponseRecommendationsView />;
+        return (
+          <ResponseRecommendationsView
+            onNavigateTab={setCurrentTab}
+            onRefreshIncidents={loadIncidents}
+          />
+        );
       case 'sensor-network':
         return (
           <SensorNetworkView
@@ -308,6 +432,7 @@ export function App() {
             summary={summary}
             isLoading={isLoading}
             onOpenDetailModal={setModalNode}
+            onNavigateTab={setCurrentTab}
           />
         );
     }
@@ -329,15 +454,18 @@ export function App() {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 flex font-sans antialiased">
-      {/* Persistent Floating Navigation Sidebar */}
+      {/* Context-Aware Emergency Operations Sidebar */}
       <Sidebar
         currentTab={currentTab}
         onSelectTab={setCurrentTab}
         isCollapsed={isSidebarCollapsed}
         onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+        activeSituation={activeSituation}
+        activeIncidents={activeIncidentList}
+        alertCounts={alertCounts}
       />
 
-      {/* Main Content Area with Floating Sidebar Offset Margin */}
+      {/* Main Content Area */}
       <div
         className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ${
           isSidebarCollapsed ? 'md:ml-24' : 'md:ml-72'
@@ -358,7 +486,17 @@ export function App() {
         />
 
         {/* Dynamic Route Container */}
-        <main className="flex-1 max-w-[1600px] w-full mx-auto p-4 lg:p-6 space-y-5">
+        <main className="flex-1 max-w-[1600px] w-full mx-auto p-4 lg:p-6 space-y-4">
+          
+          {/* Breadcrumbs & Operational Context Banner */}
+          <Breadcrumbs
+            currentTab={currentTab}
+            onNavigate={setCurrentTab}
+            activeSituation={activeSituation}
+            activeIncidentCount={activeIncidentList.length}
+            criticalAlertCount={alertCounts.critical}
+          />
+
           {/* Connection Error Banner */}
           {backendError && (
             <div className="rounded-2xl bg-rose-50 border border-rose-200 p-4 flex items-center justify-between gap-4 text-rose-800 shadow-2xs">
@@ -392,7 +530,7 @@ export function App() {
           />
         )}
 
-        {/* Minimal White Footer */}
+        {/* Minimal Footer */}
         <footer className="border-t border-slate-200 py-3.5 px-6 text-xs text-slate-500 bg-white shadow-2xs">
           <div className="flex flex-col sm:flex-row items-center justify-between max-w-[1600px] mx-auto gap-2">
             <div className="font-semibold text-slate-700">

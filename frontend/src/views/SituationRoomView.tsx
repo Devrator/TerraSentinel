@@ -1,23 +1,45 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../services/api';
-import type { SituationRoomData, SensorNode, MultiNodeConsensusData } from '../types';
-import { ShieldAlert, RefreshCw, Radio, Wifi, Zap, Sparkles, Layers, ShieldCheck } from 'lucide-react';
+import type { SituationRoomData, SensorNode, MultiNodeConsensusData, NavigationTab } from '../types';
+import type { ActiveSituationInfo } from '../components/Sidebar';
+import {
+  ShieldAlert,
+  RefreshCw,
+  Radio,
+  Zap,
+  Sparkles,
+  Layers,
+  ShieldCheck,
+  FileSpreadsheet,
+  CheckSquare,
+  CheckCircle2,
+  Plus
+} from 'lucide-react';
 import { LiveMap } from '../components/LiveMap';
 
 interface SituationRoomViewProps {
   nodes: SensorNode[];
   selectedNodeId: string;
   onSelectNode: (id: string) => void;
+  activeSituation?: ActiveSituationInfo | null;
+  onResolveSituation?: (situationId: string) => void;
+  onActivateSituation?: (situation: ActiveSituationInfo) => void;
+  onNavigateTab?: (tab: NavigationTab) => void;
 }
 
 export const SituationRoomView: React.FC<SituationRoomViewProps> = ({
   nodes,
   selectedNodeId,
   onSelectNode,
+  activeSituation,
+  onResolveSituation,
+  onActivateSituation,
+  onNavigateTab,
 }) => {
   const [data, setData] = useState<SituationRoomData | null>(null);
   const [consensus, setConsensus] = useState<MultiNodeConsensusData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [isResolving, setIsResolving] = useState<boolean>(false);
 
   const fetchSituationRoom = async () => {
     try {
@@ -29,7 +51,7 @@ export const SituationRoomView: React.FC<SituationRoomViewProps> = ({
       setData(roomData);
       setConsensus(consensusData);
     } catch (err: any) {
-      console.error(err);
+      console.error('Failed to load situation room data:', err);
     } finally {
       setLoading(false);
     }
@@ -42,47 +64,140 @@ export const SituationRoomView: React.FC<SituationRoomViewProps> = ({
   }, []);
 
   const selectedNode = nodes.find((n) => n.node_id === selectedNodeId) || nodes[0] || null;
-  const isAllOnline = nodes.every((n) => n.status === 'ONLINE');
   const edgeStatus = selectedNode?.latest_risk?.edge_risk?.edge_status ?? 'NORMAL';
   const confidenceScore = selectedNode?.latest_risk?.confidence?.confidence_score ?? 92;
 
+  const handleResolve = () => {
+    if (!activeSituation) return;
+    setIsResolving(true);
+    setTimeout(() => {
+      if (onResolveSituation) {
+        onResolveSituation(activeSituation.id);
+      }
+      setIsResolving(false);
+    }, 600);
+  };
+
+  const handleQuickDeclareSituation = () => {
+    if (onActivateSituation) {
+      onActivateSituation({
+        id: `SIT-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 900) + 100)}`,
+        title: `Flash Threat Surge (${selectedNode?.name || 'River Basin'})`,
+        severity: 'CRITICAL',
+        location: `${selectedNode?.name || 'Sector 4'} [${selectedNode?.node_id || 'ENV-001'}]`,
+        nodeId: selectedNode?.node_id || 'ENV-001',
+        riskScore: 88.5,
+      });
+    }
+  };
+
   return (
     <div className="space-y-5">
-      {/* Header Bar */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-4 lg:p-5 rounded-2xl bg-white border border-slate-200/90 shadow-2xs">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-orange-50 text-[#ff4405] flex items-center justify-center shadow-2xs">
-            <ShieldAlert className="w-5 h-5" />
-          </div>
-          <div>
-            <h2 className="text-base font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
-              Environmental Situation Room
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono bg-orange-50 text-[#ea580c] border border-orange-200 uppercase font-bold">
-                {data?.system_status || 'COMMAND ACTIVE'}
-              </span>
-            </h2>
-            <p className="text-xs text-slate-500 font-medium">
-              High-level command-center interface for emergency environmental operators & incident triage
-            </p>
+      {/* =========================================================================
+          1. ACTIVE EMERGENCY SITUATION BANNER & WORKFLOW ACTIONS
+          ========================================================================= */}
+      {activeSituation ? (
+        <div className="p-5 rounded-2xl bg-gradient-to-r from-orange-500 via-rose-500 to-[#121417] text-white shadow-md relative overflow-hidden">
+          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+            <div className="flex items-start gap-3.5">
+              <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-white shrink-0 shadow-inner">
+                <ShieldAlert className="w-6 h-6 animate-pulse" />
+              </div>
+              <div className="space-y-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-black bg-white text-orange-950 uppercase tracking-wider">
+                    DECLARED SITUATION #{activeSituation.id}
+                  </span>
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-rose-900/80 text-rose-100 border border-rose-400">
+                    {activeSituation.severity} SEVERITY
+                  </span>
+                  <span className="text-[11px] font-mono text-orange-100 font-bold">
+                    Target: {activeSituation.location}
+                  </span>
+                </div>
+                <h2 className="text-lg font-black tracking-tight">{activeSituation.title}</h2>
+                <p className="text-xs text-orange-100/90 max-w-2xl font-medium">
+                  Emergency Tactical War Room Active. Multi-agency coordination, live hazard telemetry, and standard operating dispatch protocols engaged.
+                </p>
+              </div>
+            </div>
+
+            {/* Workflow Action Buttons */}
+            <div className="flex flex-wrap items-center gap-2.5 w-full lg:w-auto justify-end shrink-0">
+              {onNavigateTab && (
+                <button
+                  onClick={() => onNavigateTab('incidents')}
+                  className="px-3.5 py-2 rounded-xl bg-white/20 hover:bg-white/30 backdrop-blur-md text-white font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs"
+                  title="Create or view active incident ticket"
+                >
+                  <FileSpreadsheet className="w-4 h-4 text-orange-200" />
+                  <span>Open Incident Console</span>
+                </button>
+              )}
+
+              {onNavigateTab && (
+                <button
+                  onClick={() => onNavigateTab('response')}
+                  className="px-3.5 py-2 rounded-xl bg-white text-slate-900 hover:bg-orange-50 font-extrabold text-xs flex items-center gap-1.5 transition-all cursor-pointer shadow-xs"
+                  title="Deploy AI standard operating procedures"
+                >
+                  <CheckSquare className="w-4 h-4 text-[#ff4405]" />
+                  <span>AI Response SOPs</span>
+                </button>
+              )}
+
+              <button
+                onClick={handleResolve}
+                disabled={isResolving}
+                className="px-4 py-2 rounded-xl bg-[#121417] hover:bg-black text-emerald-400 border border-emerald-500/40 font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer shadow-xs"
+                title="Mark this situation as resolved and close the war room"
+              >
+                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                <span>{isResolving ? 'Resolving...' : 'Resolve Situation'}</span>
+              </button>
+            </div>
           </div>
         </div>
-
-        <div className="flex items-center gap-2">
-          {/* Offline Resilience State Badge */}
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-mono font-bold text-slate-700">
-            <Wifi className="w-3.5 h-3.5 text-emerald-600" />
-            <span>{isAllOnline ? 'NETWORK LIVE' : 'EDGE BUFFER ACTIVE'}</span>
+      ) : (
+        /* Standby / Nominal Banner */
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-4 lg:p-5 rounded-2xl bg-white border border-slate-200/90 shadow-2xs">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shadow-2xs">
+              <ShieldCheck className="w-5 h-5" />
+            </div>
+            <div>
+              <h2 className="text-base font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
+                Situation Room Command Center
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono bg-emerald-50 text-emerald-700 border border-emerald-200 uppercase font-bold">
+                  {data?.system_status || 'STANDBY NOMINAL'}
+                </span>
+              </h2>
+              <p className="text-xs text-slate-500 font-medium">
+                No active critical emergencies declared. Ready to activate on-demand or upon hazard threshold breaches.
+              </p>
+            </div>
           </div>
 
-          <button
-            onClick={fetchSituationRoom}
-            className="px-3.5 py-1.5 rounded-xl bg-[#121417] hover:bg-zinc-800 text-white text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-xs"
-          >
-            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-[#ff4405]' : ''}`} />
-            Sync Ops
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleQuickDeclareSituation}
+              className="px-3.5 py-1.5 rounded-xl bg-orange-50 hover:bg-orange-100 text-[#ea580c] border border-orange-200 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs"
+              title="Declare an emergency situation drill for the current selected node"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>Declare Situation</span>
+            </button>
+
+            <button
+              onClick={fetchSituationRoom}
+              className="px-3.5 py-1.5 rounded-xl bg-[#121417] hover:bg-zinc-800 text-white text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-xs"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-[#ff4405]' : ''}`} />
+              Sync Ops
+            </button>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Distributed Consensus & Resilience Context Strip */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -353,4 +468,3 @@ export const SituationRoomView: React.FC<SituationRoomViewProps> = ({
     </div>
   );
 };
-

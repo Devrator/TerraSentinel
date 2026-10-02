@@ -1,13 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../services/api';
-import type { Incident, SensorNode, IncidentDispatchResult } from '../types';
-import { FileSpreadsheet, RefreshCw, Send, AlertTriangle, UserCheck, Plus, Download, X } from 'lucide-react';
+import type { Incident, SensorNode, IncidentDispatchResult, NavigationTab } from '../types';
+import { FileSpreadsheet, RefreshCw, Send, AlertTriangle, UserCheck, Plus, Download, X, CheckSquare } from 'lucide-react';
 
 interface IncidentsViewProps {
   nodes?: SensorNode[];
+  onNavigateTab?: (tab: NavigationTab) => void;
+  onRefreshIncidents?: () => void;
 }
 
-export const IncidentsView: React.FC<IncidentsViewProps> = ({ nodes = [] }) => {
+export const IncidentsView: React.FC<IncidentsViewProps> = ({
+  nodes = [],
+  onNavigateTab,
+  onRefreshIncidents,
+}) => {
   const [incidents, setIncidents] = useState<Incident[]>([]);
   const [selectedIncident, setSelectedIncident] = useState<Incident | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -87,6 +93,7 @@ export const IncidentsView: React.FC<IncidentsViewProps> = ({ nodes = [] }) => {
       setNewNotes('');
       await fetchIncidents();
       setSelectedIncident(created);
+      if (onRefreshIncidents) onRefreshIncidents();
     } catch (err) {
       console.error('Failed to create incident:', err);
     } finally {
@@ -104,7 +111,8 @@ export const IncidentsView: React.FC<IncidentsViewProps> = ({ nodes = [] }) => {
         priority: selectedIncident.severity,
       });
       setLastDispatch(res);
-      fetchIncidents();
+      await fetchIncidents();
+      if (onRefreshIncidents) onRefreshIncidents();
     } catch (err) {
       console.error('Simulated dispatch failed:', err);
     } finally {
@@ -120,7 +128,8 @@ export const IncidentsView: React.FC<IncidentsViewProps> = ({ nodes = [] }) => {
         note: `Status updated to ${status}`
       });
       setSelectedIncident(updated);
-      fetchIncidents();
+      await fetchIncidents();
+      if (onRefreshIncidents) onRefreshIncidents();
     } catch (err) {
       console.error(err);
     }
@@ -136,7 +145,8 @@ export const IncidentsView: React.FC<IncidentsViewProps> = ({ nodes = [] }) => {
       });
       setSelectedIncident(updated);
       setNoteInput('');
-      fetchIncidents();
+      await fetchIncidents();
+      if (onRefreshIncidents) onRefreshIncidents();
     } catch (err) {
       console.error(err);
     }
@@ -367,8 +377,18 @@ export const IncidentsView: React.FC<IncidentsViewProps> = ({ nodes = [] }) => {
                   <h3 className="text-base font-bold text-slate-900 mt-1">{selectedIncident.title}</h3>
                 </div>
 
-                {/* Status Changer Actions */}
+                {/* Status Changer Actions & Workflow Quick Links */}
                 <div className="flex flex-wrap items-center gap-1.5">
+                  {onNavigateTab && (
+                    <button
+                      onClick={() => onNavigateTab('response')}
+                      className="px-3 py-1.5 rounded-xl bg-orange-50 hover:bg-orange-100 text-[#ea580c] border border-orange-200 text-[10px] font-bold transition-all flex items-center gap-1 cursor-pointer shadow-2xs"
+                      title="View AI Response Recommendations for this incident"
+                    >
+                      <CheckSquare className="w-3.5 h-3.5" />
+                      <span>AI Response SOPs</span>
+                    </button>
+                  )}
                   {['ACKNOWLEDGED', 'INVESTIGATING', 'ESCALATED', 'RESOLVED'].map((st) => (
                     <button
                       key={st}

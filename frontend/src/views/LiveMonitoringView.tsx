@@ -1,5 +1,5 @@
 import React from 'react';
-import type { SensorNode, Alert } from '../types';
+import type { SensorNode, Alert, NavigationTab } from '../types';
 import { SensorOverview } from '../components/SensorOverview';
 import { RiskPanel } from '../components/RiskPanel';
 import { AlertPanel } from '../components/AlertPanel';
@@ -11,6 +11,7 @@ interface LiveMonitoringViewProps {
   onSelectNode: (id: string) => void;
   alerts: Alert[];
   onAcknowledgeAlert: (id: number) => void;
+  onNavigateTab?: (tab: NavigationTab) => void;
 }
 
 export const LiveMonitoringView: React.FC<LiveMonitoringViewProps> = ({
@@ -19,6 +20,7 @@ export const LiveMonitoringView: React.FC<LiveMonitoringViewProps> = ({
   onSelectNode,
   alerts,
   onAcknowledgeAlert,
+  onNavigateTab,
 }) => {
   const selectedNode = nodes.find((n) => n.node_id === selectedNodeId) || nodes[0] || null;
 
@@ -62,6 +64,7 @@ export const LiveMonitoringView: React.FC<LiveMonitoringViewProps> = ({
           <AlertPanel
             alerts={alerts}
             onAcknowledge={onAcknowledgeAlert}
+            onNavigateTab={onNavigateTab}
           />
         </div>
       </div>

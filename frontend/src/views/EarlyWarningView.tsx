@@ -1,6 +1,18 @@
 import React, { useState } from 'react';
-import { AlertTriangle, ShieldCheck, CheckCircle2, Search, ArrowUpRight, Check, ShieldAlert, Sparkles, Flame, Download } from 'lucide-react';
-import type { Alert, SensorNode } from '../types';
+import {
+  AlertTriangle,
+  ShieldCheck,
+  CheckCircle2,
+  ArrowUpRight,
+  Check,
+  ShieldAlert,
+  Sparkles,
+  Flame,
+  Download,
+  FileSpreadsheet
+} from 'lucide-react';
+import type { Alert, SensorNode, NavigationTab } from '../types';
+import type { ActiveSituationInfo } from '../components/Sidebar';
 import { api } from '../services/api';
 
 interface EarlyWarningViewProps {
@@ -8,6 +20,8 @@ interface EarlyWarningViewProps {
   nodes: SensorNode[];
   onAcknowledgeAlert: (id: number) => void;
   onRefreshAlerts?: () => void;
+  onNavigateTab?: (tab: NavigationTab) => void;
+  onActivateSituation?: (situation: ActiveSituationInfo) => void;
 }
 
 export const EarlyWarningView: React.FC<EarlyWarningViewProps> = ({
@@ -15,6 +29,8 @@ export const EarlyWarningView: React.FC<EarlyWarningViewProps> = ({
   nodes,
   onAcknowledgeAlert,
   onRefreshAlerts,
+  onNavigateTab,
+  onActivateSituation,
 }) => {
   const [filterSeverity, setFilterSeverity] = useState<string>('ALL');
   const [filterType, setFilterType] = useState<string>('ALL');
@@ -49,7 +65,48 @@ export const EarlyWarningView: React.FC<EarlyWarningViewProps> = ({
     document.body.removeChild(link);
   };
 
-  const handleAction = async (alert: Alert, actionType: 'INVESTIGATE' | 'ESCALATE' | 'RESOLVE') => {
+  const handleEscalateToSituation = async (alert: Alert) => {
+    try {
+      setActionLoadingId(alert.id);
+      const targetNode = nodes.find((n) => n.node_id === alert.node_id);
+      const locationName = targetNode?.name || `${alert.node_id} Sector`;
+
+      // 1. Create or ensure Incident exists in backend
+      await api.createIncident({
+        origin_node_id: alert.node_id,
+        risk_type: alert.risk_type,
+        severity: alert.severity,
+        current_risk: alert.risk_score,
+        notes: `Operator escalated Alert #${alert.id} to Active Situation War Room.`
+      });
+
+      // 2. Activate Situation in application state
+      if (onActivateSituation) {
+        onActivateSituation({
+          id: `SIT-${new Date().getFullYear()}-${alert.node_id.replace(/[^0-9]/g, '') || '001'}`,
+          title: `${alert.risk_type} Emergency at ${locationName}`,
+          severity: alert.severity,
+          location: `${locationName} (${alert.node_id})`,
+          nodeId: alert.node_id,
+          riskScore: alert.risk_score,
+        });
+      }
+
+      // 3. Refresh alerts
+      if (onRefreshAlerts) onRefreshAlerts();
+
+      // 4. Navigate directly to Situation Room
+      if (onNavigateTab) {
+        onNavigateTab('situation-room');
+      }
+    } catch (err) {
+      console.error('Failed to escalate alert:', err);
+    } finally {
+      setActionLoadingId(null);
+    }
+  };
+
+  const handleCreateIncident = async (alert: Alert) => {
     try {
       setActionLoadingId(alert.id);
       await api.createIncident({
@@ -57,12 +114,10 @@ export const EarlyWarningView: React.FC<EarlyWarningViewProps> = ({
         risk_type: alert.risk_type,
         severity: alert.severity,
         current_risk: alert.risk_score,
-        notes: `Operator initiated [${actionType}] from Early Warning Center for Alert #${alert.id}`
+        notes: `Operator logged Incident from Alert #${alert.id}: ${alert.message}`
       });
-      if (actionType === 'RESOLVE') {
-        await api.acknowledgeAlert(alert.id);
-      }
       if (onRefreshAlerts) onRefreshAlerts();
+      if (onNavigateTab) onNavigateTab('incidents');
     } catch (err) {
       console.error(err);
     } finally {
@@ -80,13 +135,13 @@ export const EarlyWarningView: React.FC<EarlyWarningViewProps> = ({
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-base font-bold text-slate-900 tracking-tight">Early Warning Center</h2>
+              <h2 className="text-base font-bold text-slate-900 tracking-tight">Alerts & Early Warning Console</h2>
               <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-[#121417] text-white">
-                SIH26178 ACTIVE TRIAGE
+                LIVE TRIAGE
               </span>
             </div>
             <p className="text-xs text-slate-500 font-medium">
-              Operational early-warning triage & response console with real-time incident escalation
+              Operational alert triage center. Escalate critical hazards into active situations, create incidents, and deploy responses.
             </p>
           </div>
         </div>
@@ -175,7 +230,7 @@ export const EarlyWarningView: React.FC<EarlyWarningViewProps> = ({
                           {alert.risk_type}
                         </span>
                         <span className="font-mono text-xs font-bold text-[#121417]">
-                          {alert.node_id}
+                          {alert.node_id} ({node?.name || 'Sector'})
                         </span>
                       </div>
 
@@ -198,12 +253,13 @@ export const EarlyWarningView: React.FC<EarlyWarningViewProps> = ({
                     </div>
                   </div>
 
-                  {/* Right: Actions */}
+                  {/* Right: Actions in Alert Flow */}
                   <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto justify-end shrink-0">
                     {!alert.acknowledged ? (
                       <button
                         onClick={() => onAcknowledgeAlert(alert.id)}
-                        className="px-3.5 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-300 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                        className="px-3 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-300 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                        title="Acknowledge alert"
                       >
                         <Check className="w-3.5 h-3.5" /> Acknowledge
                       </button>
@@ -214,19 +270,23 @@ export const EarlyWarningView: React.FC<EarlyWarningViewProps> = ({
                     )}
 
                     <button
-                      onClick={() => handleAction(alert, 'INVESTIGATE')}
+                      onClick={() => handleCreateIncident(alert)}
                       disabled={actionLoadingId === alert.id}
-                      className="px-3.5 py-2 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs"
+                      className="px-3.5 py-2 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-800 border border-slate-200 text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs"
+                      title="Log as an operational incident"
                     >
-                      <Search className="w-3.5 h-3.5" /> Investigate
+                      <FileSpreadsheet className="w-3.5 h-3.5 text-slate-600" /> Log Incident
                     </button>
 
                     <button
-                      onClick={() => handleAction(alert, 'ESCALATE')}
+                      onClick={() => handleEscalateToSituation(alert)}
                       disabled={actionLoadingId === alert.id}
-                      className="px-4 py-2 rounded-xl bg-[#121417] hover:bg-zinc-800 text-white text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs"
+                      className="px-4 py-2 rounded-xl bg-[#ff4405] hover:bg-[#e03a00] text-white text-xs font-extrabold transition-all cursor-pointer flex items-center gap-1.5 shadow-xs"
+                      title="Escalate to Active Situation and open War Room"
                     >
-                      <ArrowUpRight className="w-3.5 h-3.5 text-[#ff4405]" /> Escalate
+                      <ShieldAlert className="w-3.5 h-3.5 text-white" />
+                      <span>{actionLoadingId === alert.id ? 'Escalating...' : 'Escalate to Situation Room'}</span>
+                      <ArrowUpRight className="w-3.5 h-3.5" />
                     </button>
                   </div>
 

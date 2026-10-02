@@ -1,9 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../services/api';
-import type { ResponseRecommendation } from '../types';
-import { CheckSquare, ShieldCheck, RefreshCw, Sparkles, CheckCircle2, Download, Send } from 'lucide-react';
+import type { ResponseRecommendation, NavigationTab } from '../types';
+import { CheckSquare, ShieldCheck, RefreshCw, Sparkles, CheckCircle2, Download, Send, ShieldAlert, FileSpreadsheet } from 'lucide-react';
 
-export const ResponseRecommendationsView: React.FC = () => {
+interface ResponseRecommendationsViewProps {
+  onNavigateTab?: (tab: NavigationTab) => void;
+  onRefreshIncidents?: () => void;
+}
+
+export const ResponseRecommendationsView: React.FC<ResponseRecommendationsViewProps> = ({
+  onNavigateTab,
+  onRefreshIncidents,
+}) => {
   const [recommendations, setRecommendations] = useState<ResponseRecommendation[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [checkedTasks, setCheckedTasks] = useState<Record<string, boolean>>({});
@@ -48,6 +56,7 @@ export const ResponseRecommendationsView: React.FC = () => {
         priority: rec.severity,
       });
 
+      if (onRefreshIncidents) onRefreshIncidents();
       setDispatchSuccess(`Incident ${incident.incident_number} logged! Dispatched to ${dispatchRes.agency_name} (ETA: ${dispatchRes.estimated_eta_minutes} mins)`);
       setTimeout(() => setDispatchSuccess(null), 5000);
     } catch (err: any) {
@@ -109,21 +118,41 @@ export const ResponseRecommendationsView: React.FC = () => {
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
+          {onNavigateTab && (
+            <button
+              onClick={() => onNavigateTab('situation-room')}
+              className="px-3.5 py-2 rounded-xl bg-orange-50 hover:bg-orange-100 text-[#ea580c] border border-orange-200 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs"
+              title="Return to Situation Room"
+            >
+              <ShieldAlert className="w-3.5 h-3.5" /> War Room
+            </button>
+          )}
+
+          {onNavigateTab && (
+            <button
+              onClick={() => onNavigateTab('incidents')}
+              className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer border border-slate-200 shadow-2xs"
+              title="Go to Incident Console"
+            >
+              <FileSpreadsheet className="w-3.5 h-3.5" /> Incidents
+            </button>
+          )}
+
           {recommendations.length > 0 && (
             <button
               onClick={handleExportDirectives}
-              className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer border border-slate-200 shadow-2xs"
+              className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer border border-slate-200 shadow-2xs"
               title="Download full SOP directives in Markdown"
             >
-              <Download className="w-3.5 h-3.5 text-slate-600" /> Export SOP (.md)
+              <Download className="w-3.5 h-3.5 text-slate-600" /> Export SOP
             </button>
           )}
 
           <button
             onClick={fetchRecommendations}
-            className="px-4 py-2 rounded-xl bg-[#121417] hover:bg-zinc-800 text-white text-xs font-bold flex items-center gap-2 transition-all cursor-pointer shadow-2xs"
+            className="px-3.5 py-2 rounded-xl bg-[#121417] hover:bg-zinc-800 text-white text-xs font-bold flex items-center gap-2 transition-all cursor-pointer shadow-2xs"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-[#ff4405]' : 'text-slate-400'}`} /> Refresh Protocols
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-[#ff4405]' : 'text-slate-400'}`} /> Sync
           </button>
         </div>
       </div>
