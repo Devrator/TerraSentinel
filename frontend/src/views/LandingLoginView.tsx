@@ -23,6 +23,7 @@ import {
 import type { UserRole } from '../types';
 import { LandingThreeHero } from '../components/LandingThreeHero';
 import { AmbientBackground } from '../components/AmbientBackground';
+import { LogoAnimated } from '../components/LogoAnimated';
 
 interface LandingLoginViewProps {
   onSelectRole: (role: UserRole) => void;
@@ -95,17 +96,16 @@ export const LandingLoginView: React.FC<LandingLoginViewProps> = ({ onSelectRole
 
           {/* Brand Logo */}
           <div className="flex items-center gap-3">
-            <img
-              src="/logo.svg"
-              alt="TerraSentinel Logo"
-              className="h-10 sm:h-12 w-auto object-contain drop-shadow-sm transition-transform hover:scale-105 cursor-pointer py-0.5"
+            <div
+              className="cursor-pointer transition-transform hover:scale-105"
               onClick={() => scrollToSection('hero')}
-            />
+            >
+              <LogoAnimated variant="full" className="h-10 sm:h-12 w-auto drop-shadow-xs" />
+            </div>
             <div className="hidden sm:flex items-center gap-2">
               <span className="px-2.5 py-0.5 rounded-md text-[10px] font-mono font-bold bg-[#121417] text-white tracking-wider shadow-xs">
                 SIH26178
               </span>
-
             </div>
           </div>
 

@@ -1,114 +1,110 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 540 180" width="100%" height="100%" fill="none">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 780 290" width="100%" height="100%">
   <defs>
-    <!-- Tower & Dark Terrain Colors -->
-    <linearGradient id="tsDarkGreen" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#1e3427" />
-      <stop offset="100%" stop-color="#13231a" />
+    <!-- Brand Gradients & Colors -->
+    <linearGradient id="shieldLeftSlopeFull" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#183123" />
+      <stop offset="100%" stop-color="#0f2016" />
     </linearGradient>
 
-    <!-- Mountain Slope Colors (Faceted Shading) -->
-    <linearGradient id="tsMidGreen" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#41684f" />
-      <stop offset="100%" stop-color="#2d4c38" />
+    <linearGradient id="shieldRightSlopeFull" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#558162" />
+      <stop offset="100%" stop-color="#3d6349" />
     </linearGradient>
 
-    <linearGradient id="tsLightGreen" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#558365" />
-      <stop offset="100%" stop-color="#3d634b" />
+    <linearGradient id="mountainTopFull" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#5a8668" />
+      <stop offset="100%" stop-color="#466f53" />
     </linearGradient>
 
-    <!-- Brand Flame Accent (#ff4405) -->
-    <linearGradient id="tsFlameOrange" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#ff6b00" />
-      <stop offset="100%" stop-color="#ff4405" />
+    <linearGradient id="flameDotFull" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ff5722" />
+      <stop offset="100%" stop-color="#e64a19" />
     </linearGradient>
-
-    <!-- Emerald Sensor Pip -->
-    <linearGradient id="tsPipGreen" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#6ea27d" />
-      <stop offset="100%" stop-color="#4d7c5a" />
-    </linearGradient>
-
-    <!-- Soft Glow Filter -->
-    <filter id="sensorGlow" x="-30%" y="-30%" width="160%" height="160%">
-      <feGaussianBlur stdDeviation="2.5" result="blur" />
-      <feComposite in="SourceGraphic" in2="blur" operator="over" />
-    </filter>
   </defs>
 
-  <!-- =========================================================================
-       1. EMBLEM ICON CREST (Left, center at X: 110, Y: 90, Radius: 65)
-       ========================================================================= -->
-  <g transform="translate(10, 5)">
-    <!-- Base Circular Mask / Contour Background Silhouette -->
-    <circle cx="100" cy="85" r="64" fill="#ffffff" opacity="0.01" />
+  <!-- ==========================================
+       1. EMBLEM CREST (Left)
+       ========================================== -->
+  <g transform="translate(15, 0)">
+    <!-- Shield basin clip -->
+    <clipPath id="shieldBasinClipFull">
+      <path d="M 46 142 C 46 195, 88 238, 140 258 C 192 238, 234 195, 234 142 Z" />
+    </clipPath>
 
-    <!-- Radio / Wireless Telemetry Waves (Top of Watchtower) -->
-    <path d="M86 28 A 16 16 0 0 1 114 28" stroke="#1f3729" stroke-width="3.8" stroke-linecap="round" fill="none" />
-    <path d="M78 20 A 26 26 0 0 1 122 20" stroke="#1f3729" stroke-width="3.8" stroke-linecap="round" fill="none" />
+    <g clip-path="url(#shieldBasinClipFull)">
+      <!-- Left dark green terrain block -->
+      <path d="M 46 142 L 140 142 L 140 258 C 88 238, 46 195, 46 142 Z" fill="url(#shieldLeftSlopeFull)" />
+      
+      <!-- Right sage green terrain block -->
+      <path d="M 140 142 L 234 142 C 234 195, 192 238, 140 258 Z" fill="url(#shieldRightSlopeFull)" />
 
-    <!-- Circular Orbit Ring with Openings for Satellite Nodes -->
-    <path d="M46 68 A 62 62 0 0 1 82 25" stroke="#1f3729" stroke-width="3.2" stroke-linecap="round" fill="none" />
-    <path d="M118 25 A 62 62 0 0 1 154 68" stroke="#1f3729" stroke-width="3.2" stroke-linecap="round" fill="none" />
-    <path d="M161 98 A 62 62 0 0 1 138 143" stroke="#1f3729" stroke-width="3.2" stroke-linecap="round" fill="none" />
-    <path d="M62 143 A 62 62 0 0 1 39 98" stroke="#1f3729" stroke-width="3.2" stroke-linecap="round" fill="none" />
+      <!-- S-Curve Winding River (White) -->
+      <path d="M 140 152 
+               C 175 168, 185 188, 160 210 
+               C 135 230, 155 248, 140 258
+               C 128 248, 115 228, 142 206
+               C 168 186, 152 168, 135 152 Z" 
+            fill="#ffffff" />
+      
+      <!-- Transverse Valley Road / Dividing Line -->
+      <path d="M 40 162 Q 140 138 240 162" stroke="#ffffff" stroke-width="4.5" fill="none" stroke-linecap="round" />
+    </g>
 
-    <!-- Orbit Satellite Nodes -->
-    <!-- Left Node (Sage Green) -->
-    <circle cx="41" cy="83" r="6.5" fill="url(#tsPipGreen)" stroke="#ffffff" stroke-width="1.8" />
-    <!-- Right Node (Flame Orange) -->
-    <circle cx="159" cy="83" r="6.5" fill="url(#tsFlameOrange)" stroke="#ffffff" stroke-width="1.8" filter="url(#sensorGlow)" />
-    <!-- Small Orbit Connecting Tail to Orange Node -->
-    <path d="M150 67 Q156 75 158 81" stroke="#ff4405" stroke-width="2.5" fill="none" stroke-linecap="round" />
+    <!-- Lower Shield Border Outline -->
+    <path d="M 48 142 C 48 193, 89 235, 140 254 C 191 235, 232 193, 232 142" 
+          stroke="#1b3224" stroke-width="5" fill="none" stroke-linecap="round" />
 
-    <!-- Left Faceted Mountain Range -->
-    <polygon points="38,122 38,108 72,78 92,98 92,122" fill="url(#tsDarkGreen)" />
-    <polygon points="72,78 92,68 92,98" fill="url(#tsLightGreen)" />
-    <polygon points="38,108 72,78 92,98 72,112" fill="url(#tsMidGreen)" opacity="0.9" />
+    <!-- 3D Mountain Prisms -->
+    <!-- Left Mountain -->
+    <polygon points="50,165 92,130 92,160 50,180" fill="#172e21" />
+    <polygon points="50,165 92,130 120,154 78,185" fill="url(#mountainTopFull)" />
+    <polygon points="92,130 120,154 120,172 92,160" fill="#0f2016" />
 
-    <!-- Right Faceted Mountain Range -->
-    <polygon points="162,122 162,108 128,78 108,98 108,122" fill="url(#tsDarkGreen)" />
-    <polygon points="128,78 108,68 108,98" fill="url(#tsLightGreen)" />
-    <polygon points="162,108 128,78 108,98 128,112" fill="url(#tsMidGreen)" opacity="0.9" />
+    <!-- Right Mountain -->
+    <polygon points="230,165 188,130 188,160 230,180" fill="#172e21" />
+    <polygon points="230,165 188,130 160,154 202,185" fill="url(#mountainTopFull)" />
+    <polygon points="188,130 160,154 160,172 188,160" fill="#0f2016" />
 
-    <!-- Central Watchtower / Sentry Tower Structure -->
-    <!-- Tower Body (Tapered) -->
-    <polygon points="93,48 107,48 111,114 89,114" fill="url(#tsDarkGreen)" />
-    <!-- Tower Apex / Observation Cupola Roof -->
-    <polygon points="100,32 113,44 107,48 93,48 87,44" fill="url(#tsDarkGreen)" />
-    <!-- Cupola Aperture / Beacon Hole -->
-    <polygon points="100,40 104,44 100,47 96,44" fill="#ffffff" />
+    <!-- Central Watchtower Shaft -->
+    <polygon points="135,76 140,76 140,162 131,162" fill="#162d1f" />
+    <polygon points="140,76 145,76 149,162 140,162" fill="#1d3827" />
 
-    <!-- Foreground Valley Terrain and S-Curved Winding River Contour -->
-    <!-- Lower Hill Left -->
-    <path d="M38 122 Q65 110 93 114 Q75 138 60 148 Q46 138 38 122 Z" fill="url(#tsDarkGreen)" />
-    <!-- Lower Hill Right -->
-    <path d="M162 122 Q135 110 107 114 Q125 138 140 148 Q154 138 162 122 Z" fill="url(#tsMidGreen)" />
-    <!-- Central River Road (Clean White S-Curve Flow) -->
-    <path d="M96 114 Q104 122 98 128 Q92 135 102 144 Q106 148 108 152 Q100 152 94 145 Q84 135 90 126 Q95 120 93 114 Z" fill="#ffffff" />
-    <path d="M104 114 Q112 122 108 128 Q102 134 114 145 Q120 150 124 152 Q116 152 108 144 Q98 134 104 125 Q108 120 104 114 Z" fill="#ffffff" opacity="0.3" />
-    <!-- Bottom Shield Contour Arc -->
-    <path d="M60 148 Q100 168 140 148" stroke="#1f3729" stroke-width="4.5" stroke-linecap="round" fill="none" />
+    <!-- Watchtower Lantern / Cupola -->
+    <polygon points="140,54 154,68 147,78 133,78 126,68" fill="#183223" />
+    <circle cx="140" cy="67" r="4.5" fill="#ffffff" />
+
+    <!-- Top Telemetry Radar Waves -->
+    <path d="M 120 44 A 24 24 0 0 1 160 44" stroke="#1b3224" stroke-width="5.5" stroke-linecap="round" fill="none" />
+    <path d="M 108 28 A 38 38 0 0 1 172 28" stroke="#1b3224" stroke-width="5.5" stroke-linecap="round" fill="none" />
+
+    <!-- Orbit Ring Segments & Nodes -->
+    <path d="M 68 95 A 92 92 0 0 1 118 52" stroke="#1b3224" stroke-width="4.5" stroke-linecap="round" fill="none" />
+    <path d="M 162 52 A 92 92 0 0 1 202 88" stroke="#1b3224" stroke-width="4.5" stroke-linecap="round" fill="none" />
+    <path d="M 48 142 A 92 92 0 0 1 54 116" stroke="#1b3224" stroke-width="4.5" stroke-linecap="round" fill="none" />
+    <circle cx="54" cy="116" r="9" fill="#507c5d" stroke="#ffffff" stroke-width="1.8" />
+
+    <path d="M 204 90 A 92 92 0 0 1 216 104" stroke="#ff5722" stroke-width="4.5" stroke-linecap="round" fill="none" />
+    <path d="M 232 142 A 92 92 0 0 1 228 126" stroke="#1b3224" stroke-width="4.5" stroke-linecap="round" fill="none" />
+    <circle cx="224" cy="116" r="9" fill="url(#flameDotFull)" stroke="#ffffff" stroke-width="1.8" />
   </g>
 
-  <!-- =========================================================================
-       2. VERTICAL DIVIDER LINE
-       ========================================================================= -->
-  <line x1="225" y1="52" x2="225" y2="128" stroke="#d1d5db" stroke-width="1.2" stroke-linecap="round" />
+  <!-- ==========================================
+       2. VERTICAL DIVIDER SEPARATOR
+       ========================================== -->
+  <line x1="335" y1="110" x2="335" y2="225" stroke="#cbd5e1" stroke-width="1.5" stroke-linecap="round" />
 
-  <!-- =========================================================================
-       3. TYPOGRAPHY (TerraSentinel + WATCH • ANALYZE • ALERT)
-       ========================================================================= -->
-  <g transform="translate(245, 62)">
-    <!-- "TerraSentinel" -->
-    <text x="0" y="38" font-family="'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="44" font-weight="900" letter-spacing="-1">
-      <tspan fill="#111827">Terra</tspan>
-      <tspan fill="#3a6349">Sentinel</tspan>
+  <!-- ==========================================
+       3. TYPOGRAPHY
+       ========================================== -->
+  <g font-family="system-ui, -apple-system, 'Segoe UI', Roboto, Inter, sans-serif">
+    <!-- Brand Title: "TerraSentinel" -->
+    <text x="360" y="172" font-size="58" font-weight="900" letter-spacing="-1.5">
+      <tspan fill="#0f172a">Terra</tspan><tspan fill="#2d583b">Sentinel</tspan>
     </text>
 
-    <!-- Tagline: "WATCH • ANALYZE • ALERT" -->
-    <text x="4" y="64" font-family="'JetBrains Mono', 'Plus Jakarta Sans', monospace" font-size="12" font-weight="700" letter-spacing="5.5" fill="#475569">
-      WATCH <tspan fill="#3a6349" font-size="14">•</tspan> ANALYZE <tspan fill="#ff4405" font-size="14">•</tspan> ALERT
+    <!-- Subtitle: "WATCH • ANALYZE • ALERT" -->
+    <text x="388" y="210" font-size="14.5" font-weight="700" fill="#1b3224" letter-spacing="5.5" opacity="0.9">
+      WATCH &#160;&#8226;&#160; ANALYZE &#160;&#8226;&#160; ALERT
     </text>
   </g>
 </svg>
