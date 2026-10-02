@@ -240,13 +240,41 @@ export const api = {
     return res.json();
   },
 
-  async startSimulation(scenario: string, target_node_id: string = "ENV-001", intensity: string = "HIGH"): Promise<SimulationStatus> {
+  async startSimulation(scenario: string, target_node_id: string = "ENV-001", intensity: string = "HIGH", location?: string): Promise<SimulationStatus> {
     const res = await fetch(`${API_BASE_URL}/api/simulation/start`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ scenario, target_node_id, intensity })
+      body: JSON.stringify({ scenario, target_node_id, intensity, location })
     });
     if (!res.ok) throw new Error(`Failed to start simulation: ${res.statusText}`);
+    return res.json();
+  },
+
+  async startCustomSimulation(payload: any): Promise<SimulationStatus> {
+    const res = await fetch(`${API_BASE_URL}/api/simulation/start-custom`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) throw new Error(`Failed to start custom simulation: ${res.statusText}`);
+    return res.json();
+  },
+
+  async startEvaluationMode(autoAdvance: boolean = true): Promise<SimulationStatus> {
+    const res = await fetch(`${API_BASE_URL}/api/simulation/evaluation/start?auto_advance=${autoAdvance}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' }
+    });
+    if (!res.ok) throw new Error(`Failed to start evaluation mode: ${res.statusText}`);
+    return res.json();
+  },
+
+  async nextEvaluationStep(): Promise<SimulationStatus> {
+    const res = await fetch(`${API_BASE_URL}/api/simulation/evaluation/next-step`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' }
+    });
+    if (!res.ok) throw new Error(`Failed to advance evaluation step: ${res.statusText}`);
     return res.json();
   },
 
@@ -265,6 +293,15 @@ export const api = {
       headers: { 'Content-Type': 'application/json' }
     });
     if (!res.ok) throw new Error(`Failed to stop simulation: ${res.statusText}`);
+    return res.json();
+  },
+
+  async resetSimulation(): Promise<SimulationStatus> {
+    const res = await fetch(`${API_BASE_URL}/api/simulation/reset`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' }
+    });
+    if (!res.ok) throw new Error(`Failed to reset simulation: ${res.statusText}`);
     return res.json();
   },
 

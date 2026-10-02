@@ -288,13 +288,43 @@ export interface AuditLogEntry {
   details?: string | null;
 }
 
+export interface ScenarioMetrics {
+  scenario_name: string;
+  status: string;
+  elapsed_seconds: number;
+  detection_time_seconds?: number | null;
+  peak_risk: number;
+  nodes_participating: string[];
+  consensus_status: string;
+  consensus_percentage: number;
+  alerts_generated_count: number;
+  alerts_generated_ids: number[];
+  incident_number?: string | null;
+  incident_id?: number | null;
+  response_reference?: string | null;
+  packets_processed: number;
+  offline_packets_recovered: number;
+  final_status: string;
+}
+
+export interface EvaluationPhase {
+  step: number;
+  phase: string;
+  title: string;
+  description: string;
+  level: string;
+}
+
 export interface SimulationStatus {
   is_running: boolean;
   is_paused: boolean;
   scenario: string;
+  location?: string;
   target_node_id: string;
+  affected_node_ids?: string[];
   intensity: string;
   step_index: number;
+  elapsed_seconds?: number;
   is_offline_mode: boolean;
   buffered_readings_count: number;
   timeline_events: {
@@ -302,6 +332,30 @@ export interface SimulationStatus {
     message: string;
     level: string;
   }[];
+  is_custom?: boolean;
+  custom_config?: Record<string, any>;
+  is_evaluation_mode?: boolean;
+  evaluation_step?: number;
+  evaluation_max_steps?: number;
+  current_evaluation_phase?: EvaluationPhase | null;
+  metrics?: ScenarioMetrics;
+}
+
+export interface CustomScenarioPayload {
+  location: string;
+  hazard_type: string;
+  duration_seconds: number;
+  target_node_id: string;
+  affected_node_ids: string[];
+  temperature: number;
+  humidity: number;
+  air_quality: number;
+  pressure: number;
+  rain_value: number;
+  battery_percentage: number;
+  intensity: string;
+  node_failure: boolean;
+  network_failure: boolean;
 }
 
 export interface SystemHealthData {
