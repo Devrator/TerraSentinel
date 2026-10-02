@@ -12,6 +12,8 @@
 [![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
 [![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
 
+[![License](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](LICENSE)
+
 <p align="center">
   <b>A distributed, hardware-decoupled environmental intelligence platform combining low-cost edge sensors, real-time spatial AI risk modeling, spatiotemporal digital twins, and tactical incident response workflows.</b>
 </p>
