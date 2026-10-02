@@ -31,6 +31,14 @@
 
 body {
   background-color: var(--canvas-bg);
+  background-image:
+    radial-gradient(at 90% 10%, rgba(255, 68, 5, 0.16) 0px, transparent 55%),
+    radial-gradient(at 10% 85%, rgba(255, 68, 5, 0.14) 0px, transparent 50%),
+    radial-gradient(at 80% 80%, rgba(255, 100, 20, 0.12) 0px, transparent 45%),
+    radial-gradient(at 20% 20%, rgba(255, 68, 5, 0.10) 0px, transparent 50%),
+    radial-gradient(at 50% 50%, rgba(255, 68, 5, 0.08) 0px, transparent 60%);
+  background-attachment: fixed;
+  background-size: cover;
   color: var(--text-primary);
   margin: 0;
   min-height: 100vh;
@@ -38,6 +46,15 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+.dark body {
+  background-image:
+    radial-gradient(at 90% 10%, rgba(255, 68, 5, 0.22) 0px, transparent 55%),
+    radial-gradient(at 10% 85%, rgba(255, 68, 5, 0.18) 0px, transparent 50%),
+    radial-gradient(at 80% 80%, rgba(255, 100, 20, 0.15) 0px, transparent 45%),
+    radial-gradient(at 20% 20%, rgba(255, 68, 5, 0.14) 0px, transparent 50%),
+    radial-gradient(at 50% 50%, rgba(255, 68, 5, 0.10) 0px, transparent 60%);
 }
 
 /* Custom Scrollbars */
@@ -383,5 +400,25 @@ body {
   100% {
     transform: scale(1.8);
     opacity: 0;
+  }
+}
+
+/* Slow ambient breathing animation for shaded spots */
+.animate-pulse-slow {
+  animation: pulse-slow 8s cubic-bezier(0.4, 0, 0.6, 1) infinite alternate;
+}
+
+@keyframes pulse-slow {
+  0% {
+    opacity: 0.5;
+    transform: scale(0.96) translate(0px, 0px);
+  }
+  50% {
+    opacity: 0.75;
+    transform: scale(1.05) translate(15px, -10px);
+  }
+  100% {
+    opacity: 0.5;
+    transform: scale(0.96) translate(0px, 0px);
   }
 }

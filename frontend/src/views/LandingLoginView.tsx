@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import type { UserRole } from '../types';
 import { LandingThreeHero } from '../components/LandingThreeHero';
+import { AmbientBackground } from '../components/AmbientBackground';
 
 interface LandingLoginViewProps {
   onSelectRole: (role: UserRole) => void;
@@ -74,6 +75,8 @@ export const LandingLoginView: React.FC<LandingLoginViewProps> = ({ onSelectRole
 
   return (
     <div className="min-h-screen bg-[#f4f5f8] text-slate-900 flex flex-col font-sans transition-colors duration-300 relative selection:bg-[#ff4405] selection:text-white">
+      {/* Ambient Flame Glowing Shaded Spots (#ff4405) */}
+      <AmbientBackground />
 
       {/* 3D Interactive WebGL Mesh Background */}
       <LandingThreeHero />
