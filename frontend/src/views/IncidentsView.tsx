@@ -475,11 +475,11 @@ export const IncidentsView: React.FC<IncidentsViewProps> = ({
                         Dispatched to {lastDispatch.agency_name}
                       </span>
                       <span className="font-mono text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded">
-                        REF: {lastDispatch.dispatch_id}
+                        REF: {lastDispatch.dispatch_reference || lastDispatch.dispatch_id || 'DSP-ACTIVE'}
                       </span>
                     </div>
                     <div className="text-[11px] text-emerald-700 font-medium">
-                      {lastDispatch.message} — Estimated Unit Response ETA: <strong className="font-mono font-bold">{lastDispatch.estimated_eta_minutes} mins</strong>
+                      {lastDispatch.message || 'Emergency dispatch payload transmitted to operational unit.'} — Estimated Response ETA: <strong className="font-mono font-bold">{lastDispatch.eta_minutes ?? lastDispatch.estimated_eta_minutes ?? 8} mins</strong>
                     </div>
                   </div>
                 )}
