@@ -118,6 +118,8 @@ app = FastAPI(
     title=settings.PROJECT_NAME,
     description="Real-Time Environmental Intelligence & Early Warning System (SIH26178)",
     version="1.0.0",
+    docs_url="/docs",
+    redoc_url="/redoc",
     lifespan=lifespan
 )
 
