@@ -179,22 +179,22 @@ export const Sidebar: React.FC<SidebarProps> = ({
       </button>
 
       {/* Brand Header */}
-      <div className="h-20 border-b border-slate-200/80 bg-slate-50/50 flex items-center justify-center px-3 rounded-t-3xl shrink-0">
+      <div className="h-24 border-b border-slate-200/80 bg-slate-50/50 flex items-center justify-center px-3 rounded-t-3xl shrink-0">
         {!isCollapsed ? (
           <div
-            className="flex items-center justify-center overflow-hidden py-1 w-full cursor-pointer transition-transform hover:scale-105"
+            className="flex items-center justify-center overflow-hidden py-1.5 w-full cursor-pointer transition-transform hover:scale-105"
             onClick={() => onSelectTab('dashboard')}
             title="Return to Command Center"
           >
-            <LogoAnimated variant="full" className="h-12 w-auto drop-shadow-xs" />
+            <LogoAnimated variant="full" size="lg" className="h-16 w-auto drop-shadow-xs" />
           </div>
         ) : (
           <div
-            className="flex items-center justify-center w-full py-1 cursor-pointer transition-transform hover:scale-110"
+            className="flex items-center justify-center w-full py-1.5 cursor-pointer transition-transform hover:scale-110"
             onClick={() => onSelectTab('dashboard')}
             title="Return to Command Center"
           >
-            <LogoAnimated variant="icon" className="h-10 w-10 drop-shadow-xs" />
+            <LogoAnimated variant="icon" size="lg" className="h-12 w-12 drop-shadow-xs" />
           </div>
         )}
       </div>

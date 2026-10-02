@@ -100,7 +100,7 @@ export const LandingLoginView: React.FC<LandingLoginViewProps> = ({ onSelectRole
               className="cursor-pointer transition-transform hover:scale-105"
               onClick={() => scrollToSection('hero')}
             >
-              <LogoAnimated variant="full" className="h-10 sm:h-12 w-auto drop-shadow-xs" />
+              <LogoAnimated variant="full" size="lg" className="h-12 sm:h-14 lg:h-16 w-auto drop-shadow-xs" />
             </div>
             <div className="hidden sm:flex items-center gap-2">
               <span className="px-2.5 py-0.5 rounded-md text-[10px] font-mono font-bold bg-[#121417] text-white tracking-wider shadow-xs">

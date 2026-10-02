@@ -47,50 +47,59 @@ export const AlertPanel: React.FC<AlertPanelProps> = ({ alerts, onAcknowledge, o
   return (
     <div className="rounded-2xl border border-slate-200/90 bg-white p-4 lg:p-5 shadow-2xs flex flex-col h-[520px]">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 mb-3 border-b border-slate-100">
-        <div className="flex items-center gap-2">
-          <div className="p-2 rounded-xl bg-orange-50 text-[#ff4405]">
-            <Bell className="w-4 h-4" />
-          </div>
-          <div>
-            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900">
-              Real-Time Hazard Alert Stream
-            </h2>
-            <div className="text-[10px] text-slate-400 font-medium">
-              Autonomous spatial triggers
+      <div className="flex flex-col gap-2.5 pb-3 mb-3 border-b border-slate-100 shrink-0">
+        {/* Top Row: Title & Console Link */}
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="p-1.5 rounded-xl bg-orange-50 text-[#ff4405] shrink-0">
+              <Bell className="w-4 h-4" />
+            </div>
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5">
+                <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 truncate">
+                  Real-Time Hazard Alert Stream
+                </h2>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-slate-900 text-white shrink-0">
+                  {filteredAlerts.length}
+                </span>
+              </div>
+              <div className="text-[10px] text-slate-400 font-medium truncate">
+                Autonomous spatial triggers
+              </div>
             </div>
           </div>
-          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-slate-900 text-white ml-1">
-            {filteredAlerts.length}
-          </span>
-        </div>
 
-        <div className="flex items-center gap-2">
           {onNavigateTab && (
             <button
               onClick={() => onNavigateTab('alerts')}
-              className="text-[11px] font-bold text-[#ff4405] hover:underline flex items-center gap-1 cursor-pointer"
+              className="text-[11px] font-bold text-[#ff4405] hover:text-[#d43700] hover:underline flex items-center gap-1 shrink-0 cursor-pointer transition-colors"
             >
               <span>Full Console</span>
               <ArrowUpRight className="w-3.5 h-3.5" />
             </button>
           )}
-          {/* Filter Badges */}
-          <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs">
-            {['ALL', 'FIRE', 'FLOOD', 'POLLUTION'].map((type) => (
-              <button
-                key={type}
-                onClick={() => setFilterType(type)}
-                className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
-                  filterType === type
-                    ? 'bg-white text-slate-900 shadow-2xs'
-                    : 'text-slate-500 hover:text-slate-900'
-                }`}
-              >
-                {type}
-              </button>
-            ))}
-          </div>
+        </div>
+
+        {/* Filter Badges Row (Full Width segmented controls) */}
+        <div className="grid grid-cols-4 gap-1 bg-slate-100/80 p-1 rounded-xl border border-slate-200/90 text-xs w-full">
+          {[
+            { id: 'ALL', label: 'ALL' },
+            { id: 'FIRE', label: 'FIRE' },
+            { id: 'FLOOD', label: 'FLOOD' },
+            { id: 'POLLUTION', label: 'POLLUTION' }
+          ].map(({ id, label }) => (
+            <button
+              key={id}
+              onClick={() => setFilterType(id)}
+              className={`py-1 text-center rounded-lg text-[10.5px] font-bold transition-all cursor-pointer ${
+                filterType === id
+                  ? 'bg-white text-slate-900 shadow-2xs font-extrabold'
+                  : 'text-slate-500 hover:text-slate-800'
+              }`}
+            >
+              {label}
+            </button>
+          ))}
         </div>
       </div>
 
