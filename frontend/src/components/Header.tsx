@@ -65,20 +65,18 @@ export const Header: React.FC<HeaderProps> = ({
       <div className="max-w-[1600px] mx-auto bg-white/95 backdrop-blur-md border border-slate-200/90 rounded-2xl px-5 lg:px-7 py-3 transition-all shadow-2xs">
         <div className="flex items-center justify-between gap-4">
 
-          {/* Left: Brand Identity & SIH Project Badges */}
+          {/* Left: Agency Command Status & Fleet Metrics (Logo rendered in Sidebar) */}
           <div className="flex items-center gap-3">
-            <img
-              src="/logo.png"
-              alt="TerraSentinel Logo"
-              className="h-12 sm:h-14 lg:h-16 w-auto object-contain drop-shadow-sm py-0.5"
-            />
-            <div className="hidden sm:flex items-center gap-2">
-              <span className="px-2.5 py-0.5 rounded-md text-[10px] font-mono font-bold bg-[#121417] text-white tracking-wider shadow-xs">
-                AGENCY COMMAND
+            <div className="flex items-center gap-2.5">
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="px-3 py-1 rounded-xl text-xs font-mono font-black bg-[#121417] text-white tracking-wider shadow-xs flex items-center gap-2">
+                <span className="text-[#ff4405]">TERRASENTINEL</span>
+                <span className="text-slate-500">/</span>
+                <span>AGENCY COMMAND</span>
               </span>
               {summary && (
-                <span className="text-[11px] text-slate-500 font-mono font-semibold">
-                  • {summary.online_nodes}/{summary.total_nodes} Nodes Live
+                <span className="text-xs text-slate-500 font-mono font-semibold hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-100 border border-slate-200/80">
+                  <span className="text-emerald-700 font-bold">{summary.online_nodes}/{summary.total_nodes}</span> Nodes Online
                 </span>
               )}
             </div>

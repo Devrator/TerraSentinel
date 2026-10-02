@@ -174,7 +174,7 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
   const aqiInfo = getAqiCategory(tel?.air_quality ?? 35);
 
   return (
-    <div className="min-h-screen bg-transparent text-slate-900 font-sans flex flex-col justify-between selection:bg-[#ff4405] selection:text-white relative">
+    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans flex flex-col justify-between selection:bg-[#ff4405] selection:text-white relative">
       <AmbientBackground />
       
       {/* 1. Dedicated Public Portal Header */}

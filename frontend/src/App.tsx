@@ -454,7 +454,7 @@ export function App() {
   }
 
   return (
-    <div className="min-h-screen bg-transparent text-slate-900 flex font-sans antialiased relative selection:bg-orange-500 selection:text-white">
+    <div className="min-h-screen bg-slate-50 text-slate-900 flex font-sans antialiased relative selection:bg-orange-500 selection:text-white">
       {/* Ambient Flame Glowing Shaded Spots (#ff4405) */}
       <AmbientBackground />
 

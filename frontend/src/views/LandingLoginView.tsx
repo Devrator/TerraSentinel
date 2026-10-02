@@ -96,9 +96,9 @@ export const LandingLoginView: React.FC<LandingLoginViewProps> = ({ onSelectRole
           {/* Brand Logo */}
           <div className="flex items-center gap-3">
             <img
-              src="/logo.png"
+              src="/logo.svg"
               alt="TerraSentinel Logo"
-              className="h-12 sm:h-14 lg:h-16 w-auto object-contain drop-shadow-sm transition-transform hover:scale-105 cursor-pointer py-0.5"
+              className="h-10 sm:h-12 w-auto object-contain drop-shadow-sm transition-transform hover:scale-105 cursor-pointer py-0.5"
               onClick={() => scrollToSection('hero')}
             />
             <div className="hidden sm:flex items-center gap-2">

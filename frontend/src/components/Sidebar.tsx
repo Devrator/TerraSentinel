@@ -186,9 +186,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
             title="Return to Command Center"
           >
             <img
-              src="/logo.png"
+              src="/logo.svg"
               alt="TerraSentinel Logo"
-              className="h-14 sm:h-16 w-auto object-contain transition-transform hover:scale-105 drop-shadow-xs"
+              className="h-12 sm:h-14 w-auto object-contain transition-transform hover:scale-105 drop-shadow-xs"
             />
           </div>
         ) : (
@@ -198,7 +198,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             title="Return to Command Center"
           >
             <img
-              src="/logo-collapsed.png"
+              src="/logo-icon.svg"
               alt="TerraSentinel Logo"
               className="h-10 w-10 object-contain transition-transform hover:scale-110 drop-shadow-xs"
             />
