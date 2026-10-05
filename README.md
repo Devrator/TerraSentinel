@@ -24,13 +24,36 @@
 
 ---
 
-## 📺 Live Video Demonstration & Walkthrough
+## 📺 Live Video Demonstration & System Walkthrough
 
-[![TerraSentinel System Demo](https://img.youtube.com/vi/J6Uy2Busc2Y/maxresdefault.jpg)](https://youtu.be/J6Uy2Busc2Y?si=mIV-PQ-zOWnfKfyS)
+<div align="center">
 
-> 🔗 **Direct YouTube Link:** [https://youtu.be/J6Uy2Busc2Y?si=mIV-PQ-zOWnfKfyS](https://youtu.be/J6Uy2Busc2Y?si=mIV-PQ-zOWnfKfyS)
->
-> 📽️ **Overview:** Complete video demonstration showcasing TerraSentinel's end-to-end architecture, real-time IoT edge telemetry ingestion, multi-hazard AI risk engine, interactive geospatial digital twin, situational incident room, and SIH hardware simulation lab.
+<a href="https://www.youtube.com/watch?v=J6Uy2Busc2Y" target="_blank" rel="noopener noreferrer">
+  <img src="https://img.youtube.com/vi/J6Uy2Busc2Y/maxresdefault.jpg" alt="TerraSentinel System Demo Walkthrough" width="100%" style="max-width: 880px; border-radius: 14px; box-shadow: 0 12px 35px rgba(0, 0, 0, 0.2); border: 1px solid #e2e8f0;" />
+</a>
+
+<br/>
+
+[![Watch on YouTube](https://img.shields.io/badge/YouTube-Watch%20Demo%20Video-red?style=for-the-badge&logo=youtube&logoColor=white)](https://www.youtube.com/watch?v=J6Uy2Busc2Y)
+[![Direct Video Link](https://img.shields.io/badge/Video_Link-youtu.be%2FJ6Uy2Busc2Y-FF0000?style=for-the-badge&logo=youtube)](https://youtu.be/J6Uy2Busc2Y?si=mIV-PQ-zOWnfKfyS)
+
+<p align="center">
+  <b>▶️ Click the video banner above to launch the full high-definition interactive walkthrough.</b>
+</p>
+
+</div>
+
+<details open>
+<summary><b>🎬 What's covered in this video demonstration:</b></summary>
+
+- **01. End-to-End System Architecture**: 6-stage telemetry pipeline from ESP32 edge nodes to FastAPI cloud backend.
+- **02. Multi-Hazard AI Engine**: Live spatial modeling for Wildfires, Flash Floods, and Toxic Industrial Emissions.
+- **03. Real-Time WebSocket Command Center**: Autonomous hazard stream with millisecond-latency UI updates.
+- **04. Situation Room (Incident Commander)**: Evacuation buffers, automated disaster playbooks, and SOP workflows.
+- **05. 4D Spatiotemporal Digital Twin**: Historical environmental replay with scrubbable timeline slider.
+- **06. SIH Scenario Testing Lab**: Injecting physical disaster scenarios through the production telemetry pipeline.
+
+</details>
 
 ---
 
