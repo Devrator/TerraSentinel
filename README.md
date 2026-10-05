@@ -18,9 +18,19 @@
   <b>A distributed, hardware-decoupled environmental intelligence platform combining low-cost edge sensors, real-time spatial AI risk modeling, spatiotemporal digital twins, and tactical incident response workflows.</b>
 </p>
 
-[Live Cloud API](https://terrasentinel-backend-svj3.onrender.com/docs) • [Architecture](#-end-to-end-architecture) • [21 Operational Views](#-platform-screens--command-center-views) • [IoT Firmware Specs](#-iot-edge-hardware-contract) • [Deployment](#-cloud-deployment-guide)
+[🎬 Watch Video Demo](https://youtu.be/J6Uy2Busc2Y?si=mIV-PQ-zOWnfKfyS) • [Live Cloud API](https://terrasentinel-backend-svj3.onrender.com/docs) • [Architecture](#-end-to-end-architecture) • [21 Operational Views](#-platform-screens--command-center-views) • [IoT Firmware Specs](#-iot-edge-hardware-contract) • [Deployment](#-cloud-deployment-guide)
 
 </div>
+
+---
+
+## 📺 Live Video Demonstration & Walkthrough
+
+[![TerraSentinel System Demo](https://img.youtube.com/vi/J6Uy2Busc2Y/maxresdefault.jpg)](https://youtu.be/J6Uy2Busc2Y?si=mIV-PQ-zOWnfKfyS)
+
+> 🔗 **Direct YouTube Link:** [https://youtu.be/J6Uy2Busc2Y?si=mIV-PQ-zOWnfKfyS](https://youtu.be/J6Uy2Busc2Y?si=mIV-PQ-zOWnfKfyS)
+>
+> 📽️ **Overview:** Complete video demonstration showcasing TerraSentinel's end-to-end architecture, real-time IoT edge telemetry ingestion, multi-hazard AI risk engine, interactive geospatial digital twin, situational incident room, and SIH hardware simulation lab.
 
 ---
 
